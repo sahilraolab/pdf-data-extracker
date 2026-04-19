@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDF Invoice Filter</title>
+  <style>
+    /* ── Reset & Base ──────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #0f1117;
+      --surface:    #1a1d27;
+      --surface2:   #22263a;
+      --border:     #2e3350;
+      --accent:     #6c63ff;
+      --accent-dim: #4c45b5;
+      --green:      #22c55e;
+      --red:        #ef4444;
+      --amber:      #f59e0b;
+      --text:       #e2e8f0;
+      --muted:      #8892b0;
+      --radius:     12px;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px;
+    }
+
+    /* ── Layout ────────────────────────────────────────────── */
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    header {
+      padding: 20px 32px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface);
+    }
+
+    header .logo {
+      width: 36px; height: 36px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+
+    header h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
+    header p  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    header .badge {
+      margin-left: auto;
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: rgba(108,99,255,.15);
+      color: var(--accent);
+      border: 1px solid rgba(108,99,255,.3);
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    main {
+      max-width: 900px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 36px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    footer {
+      padding: 16px 32px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ── Card ──────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    /* ── Drop Zone ─────────────────────────────────────────── */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 52px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+      position: relative;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.drag-over {
+      border-color: var(--accent);
+      background: rgba(108,99,255,.06);
+    }
+
+    .drop-zone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+
+    .drop-icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .drop-zone h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .drop-zone p {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .file-chosen {
+      margin-top: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: rgba(108,99,255,.12);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--accent);
+      display: none;
+    }
+
+    .file-chosen.visible { display: flex; }
+
+    /* ── Options ───────────────────────────────────────────── */
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 560px) { .options-grid { grid-template-columns: 1fr; } }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+
+    .toggle-row:hover { border-color: var(--accent); }
+
+    .toggle-row .label { font-size: 14px; font-weight: 500; }
+    .toggle-row .sublabel { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* Toggle switch */
+    .switch { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; inset: 0;
+      background: var(--border);
+      border-radius: 22px;
+      transition: background .2s;
+    }
+    .slider::before {
+      content: '';
+      position: absolute;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      top: 3px; left: 3px;
+      transition: transform .2s;
+    }
+    .switch input:checked + .slider { background: var(--accent); }
+    .switch input:checked + .slider::before { transform: translateX(18px); }
+
+    /* ── Submit button ─────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 13px 28px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: opacity .15s, transform .1s;
+    }
+    .btn:active { transform: scale(.98); }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      width: 100%;
+    }
+    .btn-primary:not(:disabled):hover { background: var(--accent-dim); }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+    }
+    .btn-outline:hover { background: rgba(108,99,255,.1); }
+
+    /* ── Progress bar ──────────────────────────────────────── */
+    .progress-wrap { display: none; margin-top: 12px; }
+    .progress-wrap.visible { display: block; }
+    .progress-track {
+      height: 4px;
+      background: var(--surface2);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 4px;
+      width: 0%;
+      transition: width .3s ease;
+      animation: pulse-bar 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse-bar {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .6; }
+    }
+    .progress-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+      text-align: center;
+    }
+
+    /* ── Stats row ─────────────────────────────────────────── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    @media (max-width: 480px) { .stats-row { grid-template-columns: 1fr 1fr; } }
+
+    .stat-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+      text-align: center;
+    }
+
+    .stat-card .stat-num {
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .stat-card .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+
+    .stat-card.green .stat-num { color: var(--green); }
+    .stat-card.red   .stat-num { color: var(--red); }
+    .stat-card.amber .stat-num { color: var(--amber); }
+
+    /* ── Results table ─────────────────────────────────────── */
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 6px;
+    }
+
+    .tab {
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      transition: all .15s;
+    }
+
+    .tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .page-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .page-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: border-color .15s;
+    }
+
+    .page-item:hover { border-color: #3e4460; }
+
+    .page-item.matched { border-left: 3px solid var(--green); }
+    .page-item.unmatched { border-left: 3px solid var(--border); }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      padding: 14px 18px;
+      cursor: pointer;
+      gap: 12px;
+      user-select: none;
+    }
+
+    .page-num {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .page-meta { flex: 1; min-width: 0; }
+    .page-meta .address {
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .page-meta .sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .page-badges { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+    .badge-pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .badge-green { background: rgba(34,197,94,.15);  color: var(--green); border: 1px solid rgba(34,197,94,.3); }
+    .badge-red   { background: rgba(239,68,68,.12);  color: var(--red);   border: 1px solid rgba(239,68,68,.25); }
+    .badge-amber { background: rgba(245,158,11,.12); color: var(--amber); border: 1px solid rgba(245,158,11,.3); }
+    .badge-gray  { background: rgba(136,146,176,.1); color: var(--muted); border: 1px solid var(--border); }
+
+    .chevron {
+      font-size: 12px;
+      color: var(--muted);
+      transition: transform .2s;
+      flex-shrink: 0;
+    }
+    .page-item.open .chevron { transform: rotate(180deg); }
+
+    .page-details {
+      display: none;
+      padding: 0 18px 18px;
+      border-top: 1px solid var(--border);
+    }
+    .page-item.open .page-details { display: block; }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    @media (max-width: 560px) { .detail-grid { grid-template-columns: 1fr; } }
+
+    .detail-block label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .detail-block pre {
+      font-size: 12px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: var(--text);
+      min-height: 40px;
+    }
+
+    .detail-block.full { grid-column: 1 / -1; }
+
+    /* ── Download banner ───────────────────────────────────── */
+    .download-banner {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: linear-gradient(135deg, rgba(108,99,255,.12), rgba(34,197,94,.08));
+      border: 1px solid rgba(108,99,255,.3);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      flex-wrap: wrap;
+    }
+
+    .download-banner .icon { font-size: 28px; }
+    .download-banner .text h3 { font-size: 15px; font-weight: 600; }
+    .download-banner .text p  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .download-banner .btn-outline { margin-left: auto; white-space: nowrap; }
+
+    /* ── Empty / error states ──────────────────────────────── */
+    .state-box {
+      text-align: center;
+      padding: 52px 24px;
+      color: var(--muted);
+    }
+    .state-box .icon { font-size: 40px; margin-bottom: 12px; display: block; }
+    .state-box h3 { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .state-box p  { font-size: 13px; }
+
+    .error-box {
+      background: rgba(239,68,68,.08);
+      border: 1px solid rgba(239,68,68,.25);
+      border-radius: 10px;
+      padding: 16px 20px;
+      font-size: 13px;
+      color: var(--red);
+      display: none;
+    }
+    .error-box.visible { display: block; }
+
+    /* ── Sections hidden until used ────────────────────────── */
+    #results-section, #download-section { display: none; }
+    #results-section.visible, #download-section.visible { display: block; }
+
+    /* ── Scrollbar ─────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── Header ── -->
+  <header>
+    <div class="logo">📄</div>
+    <div>
+      <h1>PDF Invoice Filter</h1>
+      <p>Extract Delhi-addressed invoices with qty &gt; 1</p>
+    </div>
+    <a href="/health" target="_blank" class="badge">● API Health</a>
+  </header>
+
+  <!-- ── Main ── -->
+  <main>
+
+    <!-- Upload card -->
+    <div class="card">
+      <div class="card-title">Upload PDF</div>
+
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="fileInput" accept="application/pdf" />
+        <span class="drop-icon">📂</span>
+        <h3>Drop your PDF here</h3>
+        <p>or click to browse &mdash; max 50 MB, PDF only</p>
+        <div class="file-chosen" id="fileChosen">
+          <span>📎</span>
+          <span id="fileChosenName"></span>
+        </div>
+      </div>
+
+      <div id="errorBox" class="error-box" style="margin-top:14px;"></div>
+    </div>
+
+    <!-- Options card -->
+    <div class="card">
+      <div class="card-title">Options</div>
+      <div class="options-grid">
+        <label class="toggle-row" for="togOnlyMatched">
+          <div>
+            <div class="label">Only Matched Pages</div>
+            <div class="sublabel">Hide non-matching pages from results</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="togOnlyMatched" />
+            <span class="slider"></span>
+          </label>
+        </label>
+
+        <label class="toggle-row" for="togGeneratePdf">
+          <div>
+            <div class="label">Generate Filtered PDF</div>
+            <div class="sublabel">Download a new PDF with matched pages only</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="togGeneratePdf" checked />
+            <span class="slider"></span>
+          </label>
+        </label>
+      </div>
+    </div>
+
+    <!-- Submit -->
+    <div>
+      <button class="btn btn-primary" id="submitBtn" disabled>
+        <span id="submitIcon">🔍</span>
+        <span id="submitLabel">Analyse PDF</span>
+      </button>
+      <div class="progress-wrap" id="progressWrap">
+        <div class="progress-track">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="progress-label" id="progressLabel">Uploading…</div>
+      </div>
+    </div>
+
+    <!-- Download banner -->
+    <div id="download-section">
+      <div class="download-banner">
+        <span class="icon">📥</span>
+        <div class="text">
+          <h3>Filtered PDF ready</h3>
+          <p id="downloadNote">Contains all matched pages</p>
+        </div>
+        <a class="btn btn-outline" id="downloadBtn" href="#" download>Download PDF</a>
+      </div>
+    </div>
+
+    <!-- Results section -->
+    <div id="results-section">
+      <div class="card">
+        <!-- Stats -->
+        <div class="stats-row" id="statsRow"></div>
+
+        <!-- Page list -->
+        <div style="margin-top:24px;">
+          <div class="results-header">
+            <div class="card-title" style="margin-bottom:0;">Pages</div>
+            <div class="filter-tabs" id="filterTabs">
+              <button class="tab active" data-filter="all">All</button>
+              <button class="tab" data-filter="matched">Matched</button>
+              <button class="tab" data-filter="unmatched">Unmatched</button>
+            </div>
+          </div>
+          <div class="page-list" id="pageList"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>PDF Invoice Filter &mdash; Node.js + Express + pdf-parse + pdf-lib</footer>
+</div>
+
+<script>
+  // ── State ──────────────────────────────────────────────────
+  let currentResults = [];
+  let currentFilter  = 'all';
+
+  // ── Elements ───────────────────────────────────────────────
+  const dropZone       = document.getElementById('dropZone');
+  const fileInput      = document.getElementById('fileInput');
+  const fileChosen     = document.getElementById('fileChosen');
+  const fileChosenName = document.getElementById('fileChosenName');
+  const errorBox       = document.getElementById('errorBox');
+  const submitBtn      = document.getElementById('submitBtn');
+  const submitLabel    = document.getElementById('submitLabel');
+  const submitIcon     = document.getElementById('submitIcon');
+  const progressWrap   = document.getElementById('progressWrap');
+  const progressBar    = document.getElementById('progressBar');
+  const progressLabel  = document.getElementById('progressLabel');
+  const statsRow       = document.getElementById('statsRow');
+  const pageList       = document.getElementById('pageList');
+  const filterTabs     = document.getElementById('filterTabs');
+  const resultsSection = document.getElementById('results-section');
+  const downloadSection= document.getElementById('download-section');
+  const downloadBtn    = document.getElementById('downloadBtn');
+  const downloadNote   = document.getElementById('downloadNote');
+  const togOnlyMatched = document.getElementById('togOnlyMatched');
+  const togGeneratePdf = document.getElementById('togGeneratePdf');
+
+  // ── File selection ─────────────────────────────────────────
+  fileInput.addEventListener('change', () => handleFileSelect(fileInput.files[0]));
+
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      fileInput.files = e.dataTransfer.files;
+      handleFileSelect(file);
+    }
+  });
+
+  function handleFileSelect(file) {
+    if (!file) return;
+    if (file.type !== 'application/pdf') {
+      showError('Only PDF files are accepted. Please select a valid PDF.');
+      fileChosenName.textContent = '';
+      fileChosen.classList.remove('visible');
+      submitBtn.disabled = true;
+      return;
+    }
+    hideError();
+    fileChosenName.textContent = `${file.name}  (${formatBytes(file.size)})`;
+    fileChosen.classList.add('visible');
+    submitBtn.disabled = false;
+  }
+
+  // ── Submit ─────────────────────────────────────────────────
+  submitBtn.addEventListener('click', async () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    setLoading(true);
+    hideError();
+    resultsSection.classList.remove('visible');
+    downloadSection.classList.remove('visible');
+
+    const onlyMatched  = togOnlyMatched.checked;
+    const generatePdf  = togGeneratePdf.checked;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      setProgress(10, 'Uploading PDF…');
+
+      const params = new URLSearchParams();
+      if (onlyMatched) params.set('onlyMatched', 'true');
+      if (generatePdf) params.set('generatePdf', 'true');
+
+      const response = await fetchWithProgress(
+        `/upload?${params.toString()}`,
+        { method: 'POST', body: formData },
+        (pct) => setProgress(pct, pct < 60 ? 'Uploading PDF…' : 'Analysing pages…')
+      );
+
+      setProgress(90, 'Building results…');
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || `Server error ${response.status}`);
+      }
+
+      setProgress(100, 'Done!');
+      await sleep(400);
+
+      renderResults(data);
+
+    } catch (err) {
+      showError(err.message || 'An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  });
+
+  // ── XHR with progress ──────────────────────────────────────
+  function fetchWithProgress(url, opts, onProgress) {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open(opts.method || 'GET', url);
+
+      xhr.upload.addEventListener('progress', e => {
+        if (e.lengthComputable) {
+          onProgress(Math.round((e.loaded / e.total) * 55));
+        }
+      });
+
+      xhr.addEventListener('load', () => {
+        onProgress(80);
+        resolve({
+          ok: xhr.status >= 200 && xhr.status < 300,
+          status: xhr.status,
+          json: () => Promise.resolve(JSON.parse(xhr.responseText)),
+        });
+      });
+
+      xhr.addEventListener('error', () => reject(new Error('Network error')));
+      xhr.send(opts.body);
+    });
+  }
+
+  // ── Render results ─────────────────────────────────────────
+  function renderResults(data) {
+    currentResults = data.results || [];
+
+    // Stats
+    const unmatched = data.totalPages - data.matchedPages;
+    statsRow.innerHTML = `
+      <div class="stat-card amber">
+        <div class="stat-num">${data.totalPages}</div>
+        <div class="stat-label">Total Pages</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-num">${data.matchedPages}</div>
+        <div class="stat-label">Matched</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-num">${unmatched}</div>
+        <div class="stat-label">Unmatched</div>
+      </div>
+    `;
+
+    resultsSection.classList.add('visible');
+
+    // Download banner
+    if (data.downloadUrl) {
+      downloadBtn.href = data.downloadUrl;
+      downloadNote.textContent = `Contains ${data.matchedPages} matched page${data.matchedPages !== 1 ? 's' : ''}`;
+      downloadSection.classList.add('visible');
+    }
+
+    // Reset tab
+    currentFilter = 'all';
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.filter === 'all'));
+
+    renderPageList();
+
+    resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function renderPageList() {
+    const filtered = currentResults.filter(r => {
+      if (currentFilter === 'matched')   return r.isMatch;
+      if (currentFilter === 'unmatched') return !r.isMatch;
+      return true;
+    });
+
+    if (filtered.length === 0) {
+      pageList.innerHTML = `
+        <div class="state-box">
+          <span class="icon">🔍</span>
+          <h3>No pages to show</h3>
+          <p>Try switching the filter above.</p>
+        </div>`;
+      return;
+    }
+
+    pageList.innerHTML = filtered.map(r => pageCard(r)).join('');
+
+    // Accordion
+    pageList.querySelectorAll('.page-header').forEach(hdr => {
+      hdr.addEventListener('click', () => {
+        hdr.closest('.page-item').classList.toggle('open');
+      });
+    });
+  }
+
+  function pageCard(r) {
+    const matchBadge = r.isMatch
+      ? `<span class="badge-pill badge-green">✓ Match</span>`
+      : `<span class="badge-pill badge-red">✗ No match</span>`;
+
+    const qtyBadge = r.qty > 1
+      ? `<span class="badge-pill badge-amber">Qty ${r.qty}</span>`
+      : `<span class="badge-pill badge-gray">Qty ${r.qty}</span>`;
+
+    const addressLine = firstLine(r.customerAddress || r.billTo || '—');
+
+    return `
+      <div class="page-item ${r.isMatch ? 'matched' : 'unmatched'}">
+        <div class="page-header">
+          <div class="page-num">${r.pageNumber}</div>
+          <div class="page-meta">
+            <div class="address">${esc(addressLine)}</div>
+            <div class="sub">Page ${r.pageNumber}</div>
+          </div>
+          <div class="page-badges">
+            ${qtyBadge}
+            ${matchBadge}
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="page-details">
+          <div class="detail-grid">
+            <div class="detail-block">
+              <label>Customer Address</label>
+              <pre>${esc(r.customerAddress || '(not found)')}</pre>
+            </div>
+            <div class="detail-block">
+              <label>Bill To / Ship To</label>
+              <pre>${esc(r.billTo || '(not found)')}</pre>
+            </div>
+            <div class="detail-block full">
+              <label>Qty extracted</label>
+              <pre>${r.qty}</pre>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // ── Filter tabs ────────────────────────────────────────────
+  filterTabs.addEventListener('click', e => {
+    const tab = e.target.closest('.tab');
+    if (!tab) return;
+    currentFilter = tab.dataset.filter;
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === tab));
+    renderPageList();
+  });
+
+  // ── Helpers ────────────────────────────────────────────────
+  function setLoading(on) {
+    submitBtn.disabled = on;
+    submitIcon.textContent  = on ? '⏳' : '🔍';
+    submitLabel.textContent = on ? 'Processing…' : 'Analyse PDF';
+    progressWrap.classList.toggle('visible', on);
+    if (!on) { progressBar.style.width = '0%'; }
+  }
+
+  function setProgress(pct, label) {
+    progressBar.style.width = pct + '%';
+    progressLabel.textContent = label;
+  }
+
+  function showError(msg) {
+    errorBox.textContent = '⚠ ' + msg;
+    errorBox.classList.add('visible');
+  }
+
+  function hideError() {
+    errorBox.classList.remove('visible');
+  }
+
+  function formatBytes(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(1) + ' MB';
+  }
+
+  function firstLine(str) {
+    return (str || '').split('\n')[0].trim() || '—';
+  }
+
+  function esc(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+</script>
+</body>
+</html>

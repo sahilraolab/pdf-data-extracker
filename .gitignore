@@ -1,0 +1,14 @@
+node_modules/
+uploads/
+output/
+logs/
+*.env
+.DS_Store
+.claude
+.idea/
+.vscode/
+*.log
+*.tmp
+dist/
+build/
+.sixth/
