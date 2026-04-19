@@ -808,12 +808,14 @@
   }
 
   function pageCard(r) {
-    const matchBadge = r.isMatch
-      ? `<span class="badge-pill badge-green">✓ Match</span>`
-      : `<span class="badge-pill badge-red">✗ No match</span>`;
+    // Delhi filter badge (primary match)
+    const delhiBadge = r.isDelhiMatch
+      ? `<span class="badge-pill badge-green">📍 Delhi</span>`
+      : `<span class="badge-pill badge-red">✗ No Delhi</span>`;
 
-    const qtyBadge = r.qty > 1
-      ? `<span class="badge-pill badge-amber">Qty ${r.qty}</span>`
+    // Qty filter badge (independent)
+    const qtyBadge = r.isQtyMatch
+      ? `<span class="badge-pill badge-amber">Qty ${r.qty} &gt; 1</span>`
       : `<span class="badge-pill badge-gray">Qty ${r.qty}</span>`;
 
     const addressLine = firstLine(r.customerAddress || r.billTo || '—');
@@ -827,8 +829,8 @@
             <div class="sub">Page ${r.pageNumber}</div>
           </div>
           <div class="page-badges">
+            ${delhiBadge}
             ${qtyBadge}
-            ${matchBadge}
           </div>
           <span class="chevron">▼</span>
         </div>
@@ -844,7 +846,7 @@
             </div>
             <div class="detail-block full">
               <label>Qty extracted</label>
-              <pre>${r.qty}</pre>
+              <pre>${r.qty}${r.isQtyMatch ? '  ✓ qty > 1' : ''}</pre>
             </div>
           </div>
         </div>

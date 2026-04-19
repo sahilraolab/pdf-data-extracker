@@ -45,15 +45,13 @@ function processPages(pageTexts, onlyMatched = false) {
       parsed = { customerAddress: '', billTo: '', productDetails: '', qty: 0 };
     }
 
-    const isMatch = filterPage(parsed);
+    const { isMatch, isDelhiMatch, isQtyMatch } = filterPage(parsed);
 
     if (isMatch) {
       matchedPageNumbers.push(pageNumber);
-      logger.info(`Page ${pageNumber}: MATCH (Delhi found, qty=${parsed.qty})`);
+      logger.info(`Page ${pageNumber}: MATCH (delhi=true, qty=${parsed.qty}, qtyMatch=${isQtyMatch})`);
     } else {
-      logger.debug(
-        `Page ${pageNumber}: NO MATCH (delhi=${/delhi/i.test(parsed.customerAddress + parsed.billTo)}, qty=${parsed.qty})`
-      );
+      logger.debug(`Page ${pageNumber}: NO MATCH (delhi=false, qty=${parsed.qty})`);
     }
 
     const record = {
@@ -61,6 +59,8 @@ function processPages(pageTexts, onlyMatched = false) {
       customerAddress: parsed.customerAddress,
       billTo: parsed.billTo,
       qty: parsed.qty,
+      isDelhiMatch,
+      isQtyMatch,
       isMatch,
     };
 
