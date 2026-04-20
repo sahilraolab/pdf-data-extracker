@@ -56,7 +56,7 @@ async function generateFilteredPdf(sourcePdfPath, pageNumbers) {
     newPdf.addPage(page);
   }
 
-  const outputBytes = await newPdf.save();
+  const outputBytes = await newPdf.save({ useObjectStreams: false });
   const filename = `filtered-${uuidv4()}.pdf`;
   const outputPath = path.join(OUTPUT_DIR, filename);
 
@@ -68,21 +68,24 @@ async function generateFilteredPdf(sourcePdfPath, pageNumbers) {
 }
 
 /**
- * Deletes a generated output file (cleanup after download).
- * Does not throw if the file is already gone.
- *
- * @param {string} filename
+ * Removes output files older than maxAgeMs (default 1 hour).
+ * Called on server start and can be called periodically.
  */
-function deleteOutputFile(filename) {
-  const filePath = path.join(OUTPUT_DIR, filename);
+function cleanupOldOutputFiles(maxAgeMs = 60 * 60 * 1000) {
   try {
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-      logger.info(`Deleted output file: ${filename}`);
+    const now = Date.now();
+    const files = fs.readdirSync(OUTPUT_DIR);
+    for (const file of files) {
+      const fp = path.join(OUTPUT_DIR, file);
+      const stat = fs.statSync(fp);
+      if (now - stat.mtimeMs > maxAgeMs) {
+        fs.unlinkSync(fp);
+        logger.info(`Auto-cleaned old output file: ${file}`);
+      }
     }
   } catch (err) {
-    logger.error(`Could not delete output file ${filename}: ${err.message}`);
+    logger.warn(`Output cleanup error: ${err.message}`);
   }
 }
 
-module.exports = { generateFilteredPdf, deleteOutputFile };
+module.exports = { generateFilteredPdf, cleanupOldOutputFiles };

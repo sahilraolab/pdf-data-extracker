@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PDF Invoice Filter</title>
   <style>
-    /* ── Reset & Base ──────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
@@ -18,35 +17,36 @@
       --green:      #22c55e;
       --red:        #ef4444;
       --amber:      #f59e0b;
+      --purple:     #a78bfa;
+      --cyan:       #22d3ee;
       --text:       #e2e8f0;
       --muted:      #8892b0;
       --radius:     12px;
     }
 
     html, body {
-      height: 100%;
+      min-height: 100%;
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       background: var(--bg);
       color: var(--text);
       font-size: 15px;
     }
 
-    /* ── Layout ────────────────────────────────────────────── */
     .app {
       min-height: 100vh;
       display: grid;
       grid-template-rows: auto 1fr auto;
     }
 
+    /* ── Header ── */
     header {
-      padding: 20px 32px;
+      padding: 18px 32px;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       gap: 12px;
       background: var(--surface);
     }
-
     header .logo {
       width: 36px; height: 36px;
       background: var(--accent);
@@ -54,11 +54,9 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 18px;
     }
-
-    header h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
-    header p  { font-size: 12px; color: var(--muted); margin-top: 2px; }
-
-    header .badge {
+    header h1  { font-size: 18px; font-weight: 600; letter-spacing: -.3px; }
+    header p   { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    header .hbadge {
       margin-left: auto;
       font-size: 11px;
       padding: 3px 10px;
@@ -66,18 +64,18 @@
       background: rgba(108,99,255,.15);
       color: var(--accent);
       border: 1px solid rgba(108,99,255,.3);
-      cursor: pointer;
       text-decoration: none;
     }
 
+    /* ── Main ── */
     main {
-      max-width: 900px;
+      max-width: 960px;
       width: 100%;
       margin: 0 auto;
       padding: 36px 24px;
       display: flex;
       flex-direction: column;
-      gap: 28px;
+      gap: 24px;
     }
 
     footer {
@@ -88,104 +86,103 @@
       color: var(--muted);
     }
 
-    /* ── Card ──────────────────────────────────────────────── */
+    /* ── Card ── */
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 28px;
+      padding: 24px 28px;
     }
 
-    .card-title {
-      font-size: 13px;
-      font-weight: 600;
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: .8px;
+      letter-spacing: .9px;
       color: var(--muted);
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
-    /* ── Drop Zone ─────────────────────────────────────────── */
+    /* ── Upload zone ── */
     .drop-zone {
       border: 2px dashed var(--border);
       border-radius: var(--radius);
-      padding: 52px 24px;
+      padding: 48px 24px;
       text-align: center;
       cursor: pointer;
       transition: border-color .2s, background .2s;
       position: relative;
     }
-
-    .drop-zone:hover,
-    .drop-zone.drag-over {
+    .drop-zone:hover, .drop-zone.drag-over {
       border-color: var(--accent);
       background: rgba(108,99,255,.06);
     }
-
     .drop-zone input[type="file"] {
-      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+      position: absolute; inset: 0;
+      opacity: 0; cursor: pointer;
+      width: 100%; height: 100%;
     }
-
-    .drop-icon {
-      font-size: 40px;
-      margin-bottom: 12px;
-      display: block;
-    }
-
-    .drop-zone h3 {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
-
-    .drop-zone p {
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    .file-chosen {
-      margin-top: 16px;
-      display: flex;
+    .drop-icon  { font-size: 38px; display: block; margin-bottom: 10px; }
+    .drop-zone h3 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+    .drop-zone p  { font-size: 13px; color: var(--muted); }
+    .file-chip {
+      display: none;
+      margin-top: 14px;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      padding: 10px 16px;
+      padding: 8px 16px;
       background: rgba(108,99,255,.12);
       border-radius: 8px;
       font-size: 13px;
       color: var(--accent);
-      display: none;
     }
+    .file-chip.visible { display: flex; }
 
-    .file-chosen.visible { display: flex; }
-
-    /* ── Options ───────────────────────────────────────────── */
-    .options-grid {
+    /* ── Filter cards grid ── */
+    .filters-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
     }
+    @media (max-width: 700px) { .filters-grid { grid-template-columns: 1fr; } }
 
-    @media (max-width: 560px) { .options-grid { grid-template-columns: 1fr; } }
-
-    .toggle-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    /* individual filter card */
+    .filter-card {
       background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px 18px;
-      cursor: pointer;
-      transition: border-color .15s;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      transition: border-color .2s;
     }
+    .filter-card.active-f1 { border-color: rgba(108,99,255,.55); }
+    .filter-card.active-f2 { border-color: rgba(245,158,11,.55); }
+    .filter-card.active-f3 { border-color: rgba(167,139,250,.55); }
 
-    .toggle-row:hover { border-color: var(--accent); }
+    .filter-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .filter-icon {
+      width: 34px; height: 34px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .f1-icon { background: rgba(108,99,255,.15); }
+    .f2-icon { background: rgba(245,158,11,.15); }
+    .f3-icon { background: rgba(167,139,250,.15); }
 
-    .toggle-row .label { font-size: 14px; font-weight: 500; }
-    .toggle-row .sublabel { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .filter-title  { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .filter-desc   { font-size: 12px; color: var(--muted); }
 
-    /* Toggle switch */
+    /* toggle */
     .switch { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
     .switch input { opacity: 0; width: 0; height: 0; }
     .slider {
@@ -193,6 +190,7 @@
       background: var(--border);
       border-radius: 22px;
       transition: background .2s;
+      cursor: pointer;
     }
     .slider::before {
       content: '';
@@ -206,139 +204,128 @@
     .switch input:checked + .slider { background: var(--accent); }
     .switch input:checked + .slider::before { transform: translateX(18px); }
 
-    /* ── Submit button ─────────────────────────────────────── */
-    .btn {
-      display: inline-flex;
+    /* keyword input */
+    .keyword-wrap { display: none; }
+    .keyword-wrap.visible { display: block; }
+    .keyword-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+      transition: border-color .15s;
+    }
+    .keyword-input:focus { border-color: var(--accent); }
+    .keyword-input::placeholder { color: var(--muted); }
+
+    /* ── Output options ── */
+    .output-row {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .opt-toggle {
+      display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 8px;
+      gap: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      cursor: pointer;
+      flex: 1;
+      min-width: 180px;
+      transition: border-color .15s;
+    }
+    .opt-toggle:hover { border-color: var(--accent); }
+    .opt-toggle .label   { font-size: 14px; font-weight: 500; }
+    .opt-toggle .sublabel { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* ── Button ── */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
       padding: 13px 28px;
       border-radius: 10px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
+      font-size: 15px; font-weight: 600;
+      cursor: pointer; border: none;
       transition: opacity .15s, transform .1s;
     }
     .btn:active { transform: scale(.98); }
-    .btn:disabled { opacity: .45; cursor: not-allowed; }
-
-    .btn-primary {
-      background: var(--accent);
-      color: #fff;
-      width: 100%;
-    }
+    .btn:disabled { opacity: .4; cursor: not-allowed; }
+    .btn-primary  { background: var(--accent); color: #fff; width: 100%; }
     .btn-primary:not(:disabled):hover { background: var(--accent-dim); }
-
-    .btn-outline {
-      background: transparent;
-      border: 1px solid var(--accent);
-      color: var(--accent);
-    }
+    .btn-outline  { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
     .btn-outline:hover { background: rgba(108,99,255,.1); }
 
-    /* ── Progress bar ──────────────────────────────────────── */
+    /* ── Progress ── */
     .progress-wrap { display: none; margin-top: 12px; }
     .progress-wrap.visible { display: block; }
-    .progress-track {
-      height: 4px;
-      background: var(--surface2);
-      border-radius: 4px;
-      overflow: hidden;
-    }
+    .progress-track { height: 4px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
     .progress-bar {
-      height: 100%;
-      background: var(--accent);
-      border-radius: 4px;
-      width: 0%;
-      transition: width .3s ease;
+      height: 100%; background: var(--accent); border-radius: 4px;
+      width: 0%; transition: width .3s ease;
       animation: pulse-bar 1.5s ease-in-out infinite;
     }
-    @keyframes pulse-bar {
-      0%, 100% { opacity: 1; }
-      50% { opacity: .6; }
-    }
-    .progress-label {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 6px;
-      text-align: center;
-    }
+    @keyframes pulse-bar { 0%,100%{opacity:1} 50%{opacity:.5} }
+    .progress-label { font-size: 12px; color: var(--muted); margin-top: 6px; text-align: center; }
 
-    /* ── Stats row ─────────────────────────────────────────── */
+    /* ── Error box ── */
+    .error-box {
+      background: rgba(239,68,68,.08);
+      border: 1px solid rgba(239,68,68,.25);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 13px; color: var(--red);
+      display: none; margin-top: 12px;
+    }
+    .error-box.visible { display: block; }
+
+    /* ── Stats row ── */
     .stats-row {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
     }
-
-    @media (max-width: 480px) { .stats-row { grid-template-columns: 1fr 1fr; } }
-
+    @media (max-width: 560px) { .stats-row { grid-template-columns: 1fr 1fr; } }
     .stat-card {
       background: var(--surface2);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 18px;
+      padding: 16px;
       text-align: center;
     }
+    .stat-num   { font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+    .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+    .s-total   .stat-num { color: var(--amber); }
+    .s-matched .stat-num { color: var(--green); }
+    .s-text    .stat-num { color: var(--accent); }
+    .s-qty     .stat-num { color: var(--amber); }
+    .s-exch    .stat-num { color: var(--purple); }
 
-    .stat-card .stat-num {
-      font-size: 32px;
-      font-weight: 700;
-      line-height: 1;
-      margin-bottom: 6px;
-    }
-
-    .stat-card .stat-label {
-      font-size: 12px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .5px;
-    }
-
-    .stat-card.green .stat-num { color: var(--green); }
-    .stat-card.red   .stat-num { color: var(--red); }
-    .stat-card.amber .stat-num { color: var(--amber); }
-
-    /* ── Results table ─────────────────────────────────────── */
+    /* ── Filter tabs ── */
     .results-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-bottom: 18px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 10px; margin-bottom: 16px;
     }
-
-    .filter-tabs {
-      display: flex;
-      gap: 6px;
-    }
-
+    .filter-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
     .tab {
-      padding: 5px 14px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--muted);
+      padding: 5px 13px; border-radius: 20px;
+      font-size: 12px; font-weight: 600;
+      cursor: pointer; border: 1px solid var(--border);
+      background: transparent; color: var(--muted);
       transition: all .15s;
     }
+    .tab.active-all  { background: var(--accent);  border-color: var(--accent);  color: #fff; }
+    .tab.active-text { background: var(--accent);  border-color: var(--accent);  color: #fff; }
+    .tab.active-qty  { background: var(--amber);   border-color: var(--amber);   color: #000; }
+    .tab.active-exch { background: var(--purple);  border-color: var(--purple);  color: #fff; }
 
-    .tab.active {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
-    }
-
-    .page-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
+    /* ── Page list ── */
+    .page-list { display: flex; flex-direction: column; gap: 10px; }
     .page-item {
       background: var(--surface2);
       border: 1px solid var(--border);
@@ -346,65 +333,38 @@
       overflow: hidden;
       transition: border-color .15s;
     }
-
     .page-item:hover { border-color: #3e4460; }
-
-    .page-item.matched { border-left: 3px solid var(--green); }
+    .page-item.matched   { border-left: 3px solid var(--green); }
     .page-item.unmatched { border-left: 3px solid var(--border); }
 
     .page-header {
-      display: flex;
-      align-items: center;
-      padding: 14px 18px;
-      cursor: pointer;
-      gap: 12px;
+      display: flex; align-items: center;
+      padding: 13px 18px; cursor: pointer; gap: 12px;
       user-select: none;
     }
-
     .page-num {
-      width: 32px; height: 32px;
-      border-radius: 8px;
-      background: var(--surface);
-      border: 1px solid var(--border);
+      width: 30px; height: 30px; border-radius: 7px;
+      background: var(--surface); border: 1px solid var(--border);
       display: flex; align-items: center; justify-content: center;
-      font-size: 13px;
-      font-weight: 700;
-      flex-shrink: 0;
+      font-size: 12px; font-weight: 700; flex-shrink: 0;
     }
-
     .page-meta { flex: 1; min-width: 0; }
-    .page-meta .address {
-      font-size: 13px;
-      font-weight: 500;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .page-meta .sub {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 2px;
-    }
-
-    .page-badges { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .page-meta .address { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .page-meta .sub     { font-size: 11px; color: var(--muted); margin-top: 1px; }
+    .page-badges { display: flex; align-items: center; gap: 6px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
 
     .badge-pill {
-      font-size: 11px;
-      font-weight: 600;
-      padding: 3px 10px;
-      border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+      padding: 3px 9px; border-radius: 20px;
+      white-space: nowrap;
     }
-    .badge-green { background: rgba(34,197,94,.15);  color: var(--green); border: 1px solid rgba(34,197,94,.3); }
-    .badge-red   { background: rgba(239,68,68,.12);  color: var(--red);   border: 1px solid rgba(239,68,68,.25); }
-    .badge-amber { background: rgba(245,158,11,.12); color: var(--amber); border: 1px solid rgba(245,158,11,.3); }
-    .badge-gray  { background: rgba(136,146,176,.1); color: var(--muted); border: 1px solid var(--border); }
+    .bp-green  { background: rgba(34,197,94,.14);  color: var(--green);  border: 1px solid rgba(34,197,94,.3); }
+    .bp-red    { background: rgba(239,68,68,.12);  color: var(--red);    border: 1px solid rgba(239,68,68,.25); }
+    .bp-amber  { background: rgba(245,158,11,.12); color: var(--amber);  border: 1px solid rgba(245,158,11,.3); }
+    .bp-purple { background: rgba(167,139,250,.12);color: var(--purple); border: 1px solid rgba(167,139,250,.3); }
+    .bp-gray   { background: rgba(136,146,176,.1); color: var(--muted);  border: 1px solid var(--border); }
 
-    .chevron {
-      font-size: 12px;
-      color: var(--muted);
-      transition: transform .2s;
-      flex-shrink: 0;
-    }
+    .chevron { font-size: 11px; color: var(--muted); transition: transform .2s; flex-shrink: 0; }
     .page-item.open .chevron { transform: rotate(180deg); }
 
     .page-details {
@@ -420,77 +380,44 @@
       gap: 12px;
       margin-top: 14px;
     }
-
     @media (max-width: 560px) { .detail-grid { grid-template-columns: 1fr; } }
-
     .detail-block label {
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .8px;
-      color: var(--muted);
-      display: block;
-      margin-bottom: 4px;
+      font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .8px;
+      color: var(--muted); display: block; margin-bottom: 4px;
     }
-
     .detail-block pre {
-      font-size: 12px;
-      font-family: 'SF Mono', 'Fira Code', monospace;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 10px 12px;
-      white-space: pre-wrap;
-      word-break: break-word;
-      color: var(--text);
-      min-height: 40px;
+      font-size: 12px; font-family: 'SF Mono','Fira Code',monospace;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 6px; padding: 10px 12px;
+      white-space: pre-wrap; word-break: break-word;
+      color: var(--text); min-height: 36px;
     }
-
     .detail-block.full { grid-column: 1 / -1; }
 
-    /* ── Download banner ───────────────────────────────────── */
+    /* ── Download banner ── */
     .download-banner {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      background: linear-gradient(135deg, rgba(108,99,255,.12), rgba(34,197,94,.08));
+      display: flex; align-items: center; gap: 16px;
+      background: linear-gradient(135deg,rgba(108,99,255,.12),rgba(34,197,94,.08));
       border: 1px solid rgba(108,99,255,.3);
       border-radius: var(--radius);
       padding: 20px 24px;
       flex-wrap: wrap;
     }
-
-    .download-banner .icon { font-size: 28px; }
-    .download-banner .text h3 { font-size: 15px; font-weight: 600; }
-    .download-banner .text p  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .download-banner .icon { font-size: 26px; }
+    .download-banner h3 { font-size: 15px; font-weight: 600; }
+    .download-banner p  { font-size: 12px; color: var(--muted); margin-top: 2px; }
     .download-banner .btn-outline { margin-left: auto; white-space: nowrap; }
 
-    /* ── Empty / error states ──────────────────────────────── */
-    .state-box {
-      text-align: center;
-      padding: 52px 24px;
-      color: var(--muted);
-    }
-    .state-box .icon { font-size: 40px; margin-bottom: 12px; display: block; }
-    .state-box h3 { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    /* ── Empty/hidden ── */
+    .state-box { text-align: center; padding: 48px 24px; color: var(--muted); }
+    .state-box .icon { font-size: 36px; display: block; margin-bottom: 10px; }
+    .state-box h3 { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
     .state-box p  { font-size: 13px; }
 
-    .error-box {
-      background: rgba(239,68,68,.08);
-      border: 1px solid rgba(239,68,68,.25);
-      border-radius: 10px;
-      padding: 16px 20px;
-      font-size: 13px;
-      color: var(--red);
-      display: none;
-    }
-    .error-box.visible { display: block; }
-
-    /* ── Sections hidden until used ────────────────────────── */
     #results-section, #download-section { display: none; }
     #results-section.visible, #download-section.visible { display: block; }
 
-    /* ── Scrollbar ─────────────────────────────────────────── */
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
@@ -499,61 +426,118 @@
 <body>
 <div class="app">
 
-  <!-- ── Header ── -->
+  <!-- Header -->
   <header>
     <div class="logo">📄</div>
     <div>
       <h1>PDF Invoice Filter</h1>
-      <p>Extract Delhi-addressed invoices with qty &gt; 1</p>
+      <p>Three independent filters — use any combination</p>
     </div>
-    <a href="/health" target="_blank" class="badge">● API Health</a>
+    <a href="/health" target="_blank" class="hbadge">● API Health</a>
   </header>
 
-  <!-- ── Main ── -->
   <main>
 
-    <!-- Upload card -->
+    <!-- Upload -->
     <div class="card">
-      <div class="card-title">Upload PDF</div>
-
+      <div class="section-label">Upload PDF</div>
       <div class="drop-zone" id="dropZone">
         <input type="file" id="fileInput" accept="application/pdf" />
         <span class="drop-icon">📂</span>
         <h3>Drop your PDF here</h3>
-        <p>or click to browse &mdash; max 50 MB, PDF only</p>
-        <div class="file-chosen" id="fileChosen">
-          <span>📎</span>
-          <span id="fileChosenName"></span>
+        <p>or click to browse · max 50 MB · PDF only</p>
+        <div class="file-chip" id="fileChip">
+          <span>📎</span><span id="fileChipName"></span>
         </div>
       </div>
-
-      <div id="errorBox" class="error-box" style="margin-top:14px;"></div>
+      <div class="error-box" id="errorBox"></div>
     </div>
 
-    <!-- Options card -->
+    <!-- Three independent filters -->
     <div class="card">
-      <div class="card-title">Options</div>
-      <div class="options-grid">
-        <label class="toggle-row" for="togOnlyMatched">
+      <div class="section-label">Filters — enable any combination</div>
+      <div class="filters-grid">
+
+        <!-- Filter 1: Keyword search -->
+        <div class="filter-card" id="fc1">
+          <div class="filter-header">
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <div class="filter-icon f1-icon">🔍</div>
+              <div>
+                <div class="filter-title">Keyword Search</div>
+                <div class="filter-desc">Match pages where address contains your text</div>
+              </div>
+            </div>
+            <label class="switch" title="Enable keyword filter">
+              <input type="checkbox" id="togText" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="keyword-wrap" id="keywordWrap">
+            <input
+              type="text"
+              id="filterTextInput"
+              class="keyword-input"
+              placeholder="e.g. Delhi, Mumbai, Pune…"
+              autocomplete="off"
+            />
+          </div>
+        </div>
+
+        <!-- Filter 2: Qty > 1 -->
+        <div class="filter-card" id="fc2">
+          <div class="filter-header">
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <div class="filter-icon f2-icon">📦</div>
+              <div>
+                <div class="filter-title">Qty &gt; 1</div>
+                <div class="filter-desc">Pages where extracted quantity is more than one</div>
+              </div>
+            </div>
+            <label class="switch" title="Enable qty filter">
+              <input type="checkbox" id="togQty" />
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Filter 3: Exchange heading -->
+        <div class="filter-card" id="fc3">
+          <div class="filter-header">
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <div class="filter-icon f3-icon">🔄</div>
+              <div>
+                <div class="filter-title">Exchange</div>
+                <div class="filter-desc">Pages containing the word "exchange"</div>
+              </div>
+            </div>
+            <label class="switch" title="Enable exchange filter">
+              <input type="checkbox" id="togExchange" />
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Output options -->
+    <div class="card">
+      <div class="section-label">Output Options</div>
+      <div class="output-row">
+        <label class="opt-toggle" for="togOnlyMatched">
+          <label class="switch"><input type="checkbox" id="togOnlyMatched" /><span class="slider"></span></label>
           <div>
             <div class="label">Only Matched Pages</div>
-            <div class="sublabel">Hide non-matching pages from results</div>
+            <div class="sublabel">Hide non-matching pages from results list</div>
           </div>
-          <label class="switch">
-            <input type="checkbox" id="togOnlyMatched" />
-            <span class="slider"></span>
-          </label>
         </label>
-
-        <label class="toggle-row" for="togGeneratePdf">
+        <label class="opt-toggle" for="togGeneratePdf">
+          <label class="switch"><input type="checkbox" id="togGeneratePdf" checked /><span class="slider"></span></label>
           <div>
             <div class="label">Generate Filtered PDF</div>
-            <div class="sublabel">Download a new PDF with matched pages only</div>
+            <div class="sublabel">Download a new PDF of matched pages</div>
           </div>
-          <label class="switch">
-            <input type="checkbox" id="togGeneratePdf" checked />
-            <span class="slider"></span>
-          </label>
         </label>
       </div>
     </div>
@@ -565,9 +549,7 @@
         <span id="submitLabel">Analyse PDF</span>
       </button>
       <div class="progress-wrap" id="progressWrap">
-        <div class="progress-track">
-          <div class="progress-bar" id="progressBar"></div>
-        </div>
+        <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
         <div class="progress-label" id="progressLabel">Uploading…</div>
       </div>
     </div>
@@ -576,247 +558,280 @@
     <div id="download-section">
       <div class="download-banner">
         <span class="icon">📥</span>
-        <div class="text">
+        <div>
           <h3>Filtered PDF ready</h3>
-          <p id="downloadNote">Contains all matched pages</p>
+          <p id="downloadNote">Contains matched pages</p>
         </div>
         <a class="btn btn-outline" id="downloadBtn" href="#" download>Download PDF</a>
       </div>
     </div>
 
-    <!-- Results section -->
+    <!-- Results -->
     <div id="results-section">
       <div class="card">
+
         <!-- Stats -->
         <div class="stats-row" id="statsRow"></div>
 
         <!-- Page list -->
-        <div style="margin-top:24px;">
-          <div class="results-header">
-            <div class="card-title" style="margin-bottom:0;">Pages</div>
-            <div class="filter-tabs" id="filterTabs">
-              <button class="tab active" data-filter="all">All</button>
-              <button class="tab" data-filter="matched">Matched</button>
-              <button class="tab" data-filter="unmatched">Unmatched</button>
-            </div>
+        <div class="results-header">
+          <div class="section-label" style="margin-bottom:0;">Pages</div>
+          <div class="filter-tabs" id="filterTabs">
+            <button class="tab active-all" data-filter="all">All</button>
+            <button class="tab" data-filter="matched">Matched</button>
+            <button class="tab" data-filter="text">Keyword</button>
+            <button class="tab" data-filter="qty">Qty &gt; 1</button>
+            <button class="tab" data-filter="exchange">Exchange</button>
           </div>
-          <div class="page-list" id="pageList"></div>
         </div>
+
+        <div class="page-list" id="pageList"></div>
       </div>
     </div>
 
   </main>
 
-  <footer>PDF Invoice Filter &mdash; Node.js + Express + pdf-parse + pdf-lib</footer>
+  <footer>PDF Invoice Filter · Node.js + Express + pdf-parse + pdf-lib</footer>
 </div>
 
 <script>
-  // ── State ──────────────────────────────────────────────────
-  let currentResults = [];
-  let currentFilter  = 'all';
+  // ── State ──
+  let allResults   = [];
+  let activeFilter = 'all';
+  let appliedFilters = { text: false, qty: false, exchange: false };
 
-  // ── Elements ───────────────────────────────────────────────
-  const dropZone       = document.getElementById('dropZone');
-  const fileInput      = document.getElementById('fileInput');
-  const fileChosen     = document.getElementById('fileChosen');
-  const fileChosenName = document.getElementById('fileChosenName');
-  const errorBox       = document.getElementById('errorBox');
-  const submitBtn      = document.getElementById('submitBtn');
-  const submitLabel    = document.getElementById('submitLabel');
-  const submitIcon     = document.getElementById('submitIcon');
-  const progressWrap   = document.getElementById('progressWrap');
-  const progressBar    = document.getElementById('progressBar');
-  const progressLabel  = document.getElementById('progressLabel');
-  const statsRow       = document.getElementById('statsRow');
-  const pageList       = document.getElementById('pageList');
-  const filterTabs     = document.getElementById('filterTabs');
-  const resultsSection = document.getElementById('results-section');
-  const downloadSection= document.getElementById('download-section');
-  const downloadBtn    = document.getElementById('downloadBtn');
-  const downloadNote   = document.getElementById('downloadNote');
-  const togOnlyMatched = document.getElementById('togOnlyMatched');
-  const togGeneratePdf = document.getElementById('togGeneratePdf');
+  // ── Elements ──
+  const dropZone        = document.getElementById('dropZone');
+  const fileInput       = document.getElementById('fileInput');
+  const fileChip        = document.getElementById('fileChip');
+  const fileChipName    = document.getElementById('fileChipName');
+  const errorBox        = document.getElementById('errorBox');
+  const submitBtn       = document.getElementById('submitBtn');
+  const submitIcon      = document.getElementById('submitIcon');
+  const submitLabel     = document.getElementById('submitLabel');
+  const progressWrap    = document.getElementById('progressWrap');
+  const progressBar     = document.getElementById('progressBar');
+  const progressLabel   = document.getElementById('progressLabel');
+  const statsRow        = document.getElementById('statsRow');
+  const pageList        = document.getElementById('pageList');
+  const filterTabs      = document.getElementById('filterTabs');
+  const resultsSection  = document.getElementById('results-section');
+  const downloadSection = document.getElementById('download-section');
+  const downloadBtn     = document.getElementById('downloadBtn');
+  const downloadNote    = document.getElementById('downloadNote');
 
-  // ── File selection ─────────────────────────────────────────
-  fileInput.addEventListener('change', () => handleFileSelect(fileInput.files[0]));
+  const togText         = document.getElementById('togText');
+  const filterTextInput = document.getElementById('filterTextInput');
+  const keywordWrap     = document.getElementById('keywordWrap');
+  const togQty          = document.getElementById('togQty');
+  const togExchange     = document.getElementById('togExchange');
+  const togOnlyMatched  = document.getElementById('togOnlyMatched');
+  const togGeneratePdf  = document.getElementById('togGeneratePdf');
 
-  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  const fc1 = document.getElementById('fc1');
+  const fc2 = document.getElementById('fc2');
+  const fc3 = document.getElementById('fc3');
+
+  // ── Filter card active state ──
+  togText.addEventListener('change', () => {
+    fc1.classList.toggle('active-f1', togText.checked);
+    keywordWrap.classList.toggle('visible', togText.checked);
+    if (togText.checked) filterTextInput.focus();
+  });
+  togQty.addEventListener('change',      () => fc2.classList.toggle('active-f2', togQty.checked));
+  togExchange.addEventListener('change', () => fc3.classList.toggle('active-f3', togExchange.checked));
+
+  // ── File selection ──
+  fileInput.addEventListener('change', () => handleFile(fileInput.files[0]));
+
+  dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
   dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
   dropZone.addEventListener('drop', e => {
-    e.preventDefault();
-    dropZone.classList.remove('drag-over');
-    const file = e.dataTransfer.files[0];
-    if (file) {
-      fileInput.files = e.dataTransfer.files;
-      handleFileSelect(file);
-    }
+    e.preventDefault(); dropZone.classList.remove('drag-over');
+    const f = e.dataTransfer.files[0];
+    if (f) { fileInput.files = e.dataTransfer.files; handleFile(f); }
   });
 
-  function handleFileSelect(file) {
+  function handleFile(file) {
     if (!file) return;
     if (file.type !== 'application/pdf') {
-      showError('Only PDF files are accepted. Please select a valid PDF.');
-      fileChosenName.textContent = '';
-      fileChosen.classList.remove('visible');
+      showError('Only PDF files are accepted.');
       submitBtn.disabled = true;
+      fileChip.classList.remove('visible');
       return;
     }
     hideError();
-    fileChosenName.textContent = `${file.name}  (${formatBytes(file.size)})`;
-    fileChosen.classList.add('visible');
+    fileChipName.textContent = `${file.name} (${fmtBytes(file.size)})`;
+    fileChip.classList.add('visible');
     submitBtn.disabled = false;
   }
 
-  // ── Submit ─────────────────────────────────────────────────
+  // ── Submit ──
   submitBtn.addEventListener('click', async () => {
     const file = fileInput.files[0];
     if (!file) return;
 
-    setLoading(true);
-    hideError();
+    const textEnabled     = togText.checked;
+    const filterText      = filterTextInput.value.trim();
+    const qtyFilter       = togQty.checked;
+    const exchangeFilter  = togExchange.checked;
+
+    if (textEnabled && !filterText) {
+      showError('Keyword filter is enabled but no keyword was entered.');
+      return;
+    }
+
+    if (!textEnabled && !qtyFilter && !exchangeFilter) {
+      showError('Please enable at least one filter before analysing.');
+      return;
+    }
+
+    setLoading(true); hideError();
     resultsSection.classList.remove('visible');
     downloadSection.classList.remove('visible');
 
-    const onlyMatched  = togOnlyMatched.checked;
-    const generatePdf  = togGeneratePdf.checked;
-
     const formData = new FormData();
     formData.append('file', file);
+    if (textEnabled)    formData.append('filterText',     filterText);
+    if (qtyFilter)      formData.append('qtyFilter',      'true');
+    if (exchangeFilter) formData.append('exchangeFilter', 'true');
+
+    const params = new URLSearchParams();
+    if (togOnlyMatched.checked) params.set('onlyMatched', 'true');
+    if (togGeneratePdf.checked) params.set('generatePdf', 'true');
 
     try {
       setProgress(10, 'Uploading PDF…');
-
-      const params = new URLSearchParams();
-      if (onlyMatched) params.set('onlyMatched', 'true');
-      if (generatePdf) params.set('generatePdf', 'true');
-
-      const response = await fetchWithProgress(
-        `/upload?${params.toString()}`,
-        { method: 'POST', body: formData },
-        (pct) => setProgress(pct, pct < 60 ? 'Uploading PDF…' : 'Analysing pages…')
+      const response = await xhrUpload(
+        `/upload?${params}`,
+        formData,
+        pct => setProgress(pct, pct < 60 ? 'Uploading PDF…' : 'Analysing pages…')
       );
-
-      setProgress(90, 'Building results…');
+      setProgress(92, 'Building results…');
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || `Server error ${response.status}`);
-      }
+      if (!response.ok) throw new Error(data.error || `Server error ${response.status}`);
 
       setProgress(100, 'Done!');
-      await sleep(400);
-
+      await sleep(350);
       renderResults(data);
-
     } catch (err) {
-      showError(err.message || 'An unexpected error occurred. Please try again.');
+      showError(err.message || 'Unexpected error. Please try again.');
     } finally {
       setLoading(false);
     }
   });
 
-  // ── XHR with progress ──────────────────────────────────────
-  function fetchWithProgress(url, opts, onProgress) {
+  // ── XHR with upload progress ──
+  function xhrUpload(url, body, onProgress) {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
-      xhr.open(opts.method || 'GET', url);
-
+      xhr.open('POST', url);
       xhr.upload.addEventListener('progress', e => {
-        if (e.lengthComputable) {
-          onProgress(Math.round((e.loaded / e.total) * 55));
-        }
+        if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 55));
       });
-
       xhr.addEventListener('load', () => {
         onProgress(80);
-        resolve({
-          ok: xhr.status >= 200 && xhr.status < 300,
-          status: xhr.status,
-          json: () => Promise.resolve(JSON.parse(xhr.responseText)),
-        });
+        resolve({ ok: xhr.status >= 200 && xhr.status < 300, status: xhr.status, json: () => Promise.resolve(JSON.parse(xhr.responseText)) });
       });
-
       xhr.addEventListener('error', () => reject(new Error('Network error')));
-      xhr.send(opts.body);
+      xhr.send(body);
     });
   }
 
-  // ── Render results ─────────────────────────────────────────
+  // ── Render ──
   function renderResults(data) {
-    currentResults = data.results || [];
+    allResults     = data.results || [];
+    appliedFilters = data.filtersApplied || { text: false, qty: false, exchange: false };
+    activeFilter   = 'all';
+
+    // Reset tab active states
+    document.querySelectorAll('.tab').forEach(t => t.className = 'tab');
+    document.querySelector('[data-filter="all"]').classList.add('active-all');
 
     // Stats
-    const unmatched = data.totalPages - data.matchedPages;
-    statsRow.innerHTML = `
-      <div class="stat-card amber">
+    const textCount  = allResults.filter(r => r.isTextMatch).length;
+    const qtyCount   = allResults.filter(r => r.isQtyMatch).length;
+    const exchCount  = allResults.filter(r => r.isExchangeMatch).length;
+
+    let statsHtml = `
+      <div class="stat-card s-total">
         <div class="stat-num">${data.totalPages}</div>
         <div class="stat-label">Total Pages</div>
       </div>
-      <div class="stat-card green">
+      <div class="stat-card s-matched">
         <div class="stat-num">${data.matchedPages}</div>
         <div class="stat-label">Matched</div>
-      </div>
-      <div class="stat-card red">
-        <div class="stat-num">${unmatched}</div>
-        <div class="stat-label">Unmatched</div>
-      </div>
-    `;
+      </div>`;
 
-    resultsSection.classList.add('visible');
+    if (appliedFilters.text)     statsHtml += `<div class="stat-card s-text"><div class="stat-num">${textCount}</div><div class="stat-label">Keyword</div></div>`;
+    if (appliedFilters.qty)      statsHtml += `<div class="stat-card s-qty"><div class="stat-num">${qtyCount}</div><div class="stat-label">Qty &gt; 1</div></div>`;
+    if (appliedFilters.exchange) statsHtml += `<div class="stat-card s-exch"><div class="stat-num">${exchCount}</div><div class="stat-label">Exchange</div></div>`;
 
-    // Download banner
+    statsRow.innerHTML = statsHtml;
+
+    // Download banner + auto-trigger browser download
     if (data.downloadUrl) {
       downloadBtn.href = data.downloadUrl;
-      downloadNote.textContent = `Contains ${data.matchedPages} matched page${data.matchedPages !== 1 ? 's' : ''}`;
+      downloadNote.textContent = `Contains ${data.matchedPages} matched page${data.matchedPages !== 1 ? 's' : ''} · re-downloadable for 1 hour`;
       downloadSection.classList.add('visible');
+      // Auto-trigger download so the file saves immediately without extra click
+      triggerDownload(data.downloadUrl);
     }
 
-    // Reset tab
-    currentFilter = 'all';
-    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.filter === 'all'));
-
-    renderPageList();
-
+    resultsSection.classList.add('visible');
+    renderList();
     resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  function renderPageList() {
-    const filtered = currentResults.filter(r => {
-      if (currentFilter === 'matched')   return r.isMatch;
-      if (currentFilter === 'unmatched') return !r.isMatch;
+  function triggerDownload(url) {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'filtered-invoices.pdf';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => document.body.removeChild(a), 500);
+  }
+
+  function renderList() {
+    const filtered = allResults.filter(r => {
+      if (activeFilter === 'matched')  return r.isMatch;
+      if (activeFilter === 'text')     return r.isTextMatch;
+      if (activeFilter === 'qty')      return r.isQtyMatch;
+      if (activeFilter === 'exchange') return r.isExchangeMatch;
       return true;
     });
 
     if (filtered.length === 0) {
-      pageList.innerHTML = `
-        <div class="state-box">
-          <span class="icon">🔍</span>
-          <h3>No pages to show</h3>
-          <p>Try switching the filter above.</p>
-        </div>`;
+      pageList.innerHTML = `<div class="state-box"><span class="icon">🔍</span><h3>No pages</h3><p>Try a different tab filter.</p></div>`;
       return;
     }
 
-    pageList.innerHTML = filtered.map(r => pageCard(r)).join('');
-
-    // Accordion
-    pageList.querySelectorAll('.page-header').forEach(hdr => {
-      hdr.addEventListener('click', () => {
-        hdr.closest('.page-item').classList.toggle('open');
-      });
-    });
+    pageList.innerHTML = filtered.map(pageCard).join('');
+    pageList.querySelectorAll('.page-header').forEach(h =>
+      h.addEventListener('click', () => h.closest('.page-item').classList.toggle('open'))
+    );
   }
 
   function pageCard(r) {
-    // Delhi filter badge (primary match)
-    const delhiBadge = r.isDelhiMatch
-      ? `<span class="badge-pill badge-green">📍 Delhi</span>`
-      : `<span class="badge-pill badge-red">✗ No Delhi</span>`;
+    const badges = [];
 
-    // Qty filter badge (independent)
-    const qtyBadge = r.isQtyMatch
-      ? `<span class="badge-pill badge-amber">Qty ${r.qty} &gt; 1</span>`
-      : `<span class="badge-pill badge-gray">Qty ${r.qty}</span>`;
+    if (appliedFilters.text) {
+      badges.push(r.isTextMatch
+        ? `<span class="badge-pill bp-green">🔍 Match</span>`
+        : `<span class="badge-pill bp-gray">🔍 —</span>`);
+    }
+    if (appliedFilters.qty) {
+      badges.push(r.isQtyMatch
+        ? `<span class="badge-pill bp-amber">📦 Qty ${r.qty}</span>`
+        : `<span class="badge-pill bp-gray">📦 Qty ${r.qty}</span>`);
+    }
+    if (appliedFilters.exchange) {
+      badges.push(r.isExchangeMatch
+        ? `<span class="badge-pill bp-purple">🔄 Exchange</span>`
+        : `<span class="badge-pill bp-gray">🔄 —</span>`);
+    }
 
     const addressLine = firstLine(r.customerAddress || r.billTo || '—');
 
@@ -828,10 +843,7 @@
             <div class="address">${esc(addressLine)}</div>
             <div class="sub">Page ${r.pageNumber}</div>
           </div>
-          <div class="page-badges">
-            ${delhiBadge}
-            ${qtyBadge}
-          </div>
+          <div class="page-badges">${badges.join('')}</div>
           <span class="chevron">▼</span>
         </div>
         <div class="page-details">
@@ -846,64 +858,42 @@
             </div>
             <div class="detail-block full">
               <label>Qty extracted</label>
-              <pre>${r.qty}${r.isQtyMatch ? '  ✓ qty > 1' : ''}</pre>
+              <pre>${r.qty}${r.isQtyMatch ? '  ✓ > 1' : ''}</pre>
             </div>
           </div>
         </div>
       </div>`;
   }
 
-  // ── Filter tabs ────────────────────────────────────────────
+  // ── Tab switching ──
   filterTabs.addEventListener('click', e => {
     const tab = e.target.closest('.tab');
     if (!tab) return;
-    currentFilter = tab.dataset.filter;
-    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === tab));
-    renderPageList();
+    activeFilter = tab.dataset.filter;
+    document.querySelectorAll('.tab').forEach(t => t.className = 'tab');
+    const cls = { all:'active-all', matched:'active-all', text:'active-text', qty:'active-qty', exchange:'active-exch' };
+    tab.classList.add(cls[activeFilter] || 'active-all');
+    renderList();
   });
 
-  // ── Helpers ────────────────────────────────────────────────
+  // ── Helpers ──
   function setLoading(on) {
     submitBtn.disabled = on;
     submitIcon.textContent  = on ? '⏳' : '🔍';
     submitLabel.textContent = on ? 'Processing…' : 'Analyse PDF';
     progressWrap.classList.toggle('visible', on);
-    if (!on) { progressBar.style.width = '0%'; }
+    if (!on) progressBar.style.width = '0%';
   }
-
   function setProgress(pct, label) {
     progressBar.style.width = pct + '%';
     progressLabel.textContent = label;
   }
-
-  function showError(msg) {
-    errorBox.textContent = '⚠ ' + msg;
-    errorBox.classList.add('visible');
-  }
-
-  function hideError() {
-    errorBox.classList.remove('visible');
-  }
-
-  function formatBytes(bytes) {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / 1048576).toFixed(1) + ' MB';
-  }
-
-  function firstLine(str) {
-    return (str || '').split('\n')[0].trim() || '—';
-  }
-
-  function esc(str) {
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
-  }
-
-  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+  function showError(msg) { errorBox.textContent = '⚠ ' + msg; errorBox.classList.add('visible'); }
+  function hideError()    { errorBox.classList.remove('visible'); }
+  function fmtBytes(b)    { return b < 1048576 ? (b/1024).toFixed(1)+' KB' : (b/1048576).toFixed(1)+' MB'; }
+  function firstLine(s)   { return (s||'').split('\n')[0].trim() || '—'; }
+  function esc(s)         { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function sleep(ms)      { return new Promise(r => setTimeout(r, ms)); }
 </script>
 </body>
 </html>

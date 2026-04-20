@@ -48,6 +48,7 @@ function parsePage(pageText, pageNumber) {
     billTo,
     productDetails,
     qty,
+    rawText: pageText,   // kept for full-page filters (e.g. exchange heading)
   };
 }
 

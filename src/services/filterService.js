@@ -1,31 +1,53 @@
 const { parsePage } = require('../utils/parsePage');
-const { filterPage } = require('../utils/filterPage');
+const { matchesText, matchesQty, matchesExchange } = require('../utils/filterPage');
 const logger = require('../utils/logger');
 
 /**
- * Processes an array of page texts: parses each, applies filter, builds result set.
+ * Processes all pages through three independent filters.
  *
- * @param {string[]} pageTexts - Array of raw page text strings
- * @param {boolean} onlyMatched - If true, results array contains only matched pages
+ * @param {string[]} pageTexts
+ * @param {object}  opts
+ * @param {string}  opts.filterText       - keyword to search in addresses (empty = filter disabled)
+ * @param {boolean} opts.qtyFilter        - enable qty > 1 filter
+ * @param {boolean} opts.exchangeFilter   - enable "exchange" heading filter
+ * @param {boolean} opts.onlyMatched      - omit non-matching pages from results array
+ *
  * @returns {{
  *   totalPages: number,
  *   matchedPages: number,
  *   matchedPageNumbers: number[],
+ *   filtersApplied: { text: boolean, qty: boolean, exchange: boolean },
  *   results: Array<{
  *     pageNumber: number,
  *     customerAddress: string,
  *     billTo: string,
  *     qty: number,
+ *     isTextMatch: boolean,
+ *     isQtyMatch: boolean,
+ *     isExchangeMatch: boolean,
  *     isMatch: boolean
  *   }>
  * }}
  */
-function processPages(pageTexts, onlyMatched = false) {
+function processPages(pageTexts, opts = {}) {
+  const {
+    filterText = '',
+    qtyFilter = false,
+    exchangeFilter = false,
+    onlyMatched = false,
+  } = opts;
+
+  const textEnabled     = Boolean(filterText && filterText.trim());
+  const qtyEnabled      = Boolean(qtyFilter);
+  const exchangeEnabled = Boolean(exchangeFilter);
+  const anyFilterOn     = textEnabled || qtyEnabled || exchangeEnabled;
+
   if (!Array.isArray(pageTexts) || pageTexts.length === 0) {
     return {
       totalPages: 0,
       matchedPages: 0,
       matchedPageNumbers: [],
+      filtersApplied: { text: textEnabled, qty: qtyEnabled, exchange: exchangeEnabled },
       results: [],
     };
   }
@@ -35,23 +57,33 @@ function processPages(pageTexts, onlyMatched = false) {
 
   for (let i = 0; i < pageTexts.length; i++) {
     const pageNumber = i + 1;
-    const pageText = pageTexts[i];
 
     let parsed;
     try {
-      parsed = parsePage(pageText, pageNumber);
+      parsed = parsePage(pageTexts[i], pageNumber);
     } catch (err) {
       logger.error(`Failed to parse page ${pageNumber}: ${err.message}`);
-      parsed = { customerAddress: '', billTo: '', productDetails: '', qty: 0 };
+      parsed = { customerAddress: '', billTo: '', productDetails: '', qty: 0, rawText: '' };
     }
 
-    const { isMatch, isDelhiMatch, isQtyMatch } = filterPage(parsed);
+    // Evaluate each filter independently
+    const isTextMatch     = textEnabled     ? matchesText(parsed, filterText) : false;
+    const isQtyMatch      = qtyEnabled      ? matchesQty(parsed)              : false;
+    const isExchangeMatch = exchangeEnabled ? matchesExchange(parsed)         : false;
+
+    // A page is a match if at least one enabled filter hits
+    // If no filters are on, nothing matches (return informational results only)
+    const isMatch = anyFilterOn && (isTextMatch || isQtyMatch || isExchangeMatch);
 
     if (isMatch) {
       matchedPageNumbers.push(pageNumber);
-      logger.info(`Page ${pageNumber}: MATCH (delhi=true, qty=${parsed.qty}, qtyMatch=${isQtyMatch})`);
+      logger.info(
+        `Page ${pageNumber}: MATCH — text=${isTextMatch}, qty=${isQtyMatch}, exchange=${isExchangeMatch}`
+      );
     } else {
-      logger.debug(`Page ${pageNumber}: NO MATCH (delhi=false, qty=${parsed.qty})`);
+      logger.debug(
+        `Page ${pageNumber}: no match — text=${isTextMatch}, qty=${isQtyMatch}, exchange=${isExchangeMatch}`
+      );
     }
 
     const record = {
@@ -59,8 +91,9 @@ function processPages(pageTexts, onlyMatched = false) {
       customerAddress: parsed.customerAddress,
       billTo: parsed.billTo,
       qty: parsed.qty,
-      isDelhiMatch,
+      isTextMatch,
       isQtyMatch,
+      isExchangeMatch,
       isMatch,
     };
 
@@ -73,6 +106,7 @@ function processPages(pageTexts, onlyMatched = false) {
     totalPages: pageTexts.length,
     matchedPages: matchedPageNumbers.length,
     matchedPageNumbers,
+    filtersApplied: { text: textEnabled, qty: qtyEnabled, exchange: exchangeEnabled },
     results,
   };
 }

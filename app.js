@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const upload = require('./src/middleware/upload');
 const { uploadAndProcess, downloadFilteredPdf } = require('./src/controllers/pdfController');
+const { cleanupOldOutputFiles } = require('./src/services/pdfGeneratorService');
 const logger = require('./src/utils/logger');
 
 // Ensure log directory exists before logger writes to it
@@ -75,6 +76,11 @@ app.listen(PORT, () => {
   logger.info(`PDF processing server running on port ${PORT}`);
   logger.info(`Health: http://localhost:${PORT}/health`);
   logger.info(`Upload: POST http://localhost:${PORT}/upload`);
+
+  // Clean up any output files left over from a previous run
+  cleanupOldOutputFiles();
+  // Also run cleanup every hour
+  setInterval(cleanupOldOutputFiles, 60 * 60 * 1000);
 });
 
 module.exports = app;

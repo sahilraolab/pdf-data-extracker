@@ -1,27 +1,46 @@
 /**
- * Evaluates two independent filter conditions for a parsed page.
- *
- * isDelhiMatch: customerAddress OR billTo contains "Delhi" (case-insensitive)
- * isQtyMatch:   extracted qty > 1
- *
- * These are intentionally separate — a page can satisfy one without the other.
- * isMatch (the primary match flag) is based on Delhi only.
- *
- * @param {{ customerAddress: string, billTo: string, qty: number }} parsedData
- * @returns {{ isMatch: boolean, isDelhiMatch: boolean, isQtyMatch: boolean }}
+ * Three independent, composable page-filter functions.
+ * Each takes parsedData and returns a boolean.
+ * They are never merged — callers decide which to enable and how to combine.
  */
-function filterPage({ customerAddress, billTo, qty }) {
-  const isDelhiMatch =
-    /delhi/i.test(customerAddress || '') ||
-    /delhi/i.test(billTo || '');
 
-  const isQtyMatch = typeof qty === 'number' && qty > 1;
-
-  return {
-    isMatch: isDelhiMatch,
-    isDelhiMatch,
-    isQtyMatch,
-  };
+/**
+ * Filter 1 — Keyword / text search
+ * Checks customerAddress and billTo for any user-supplied word or phrase.
+ *
+ * @param {{ customerAddress: string, billTo: string }} parsedData
+ * @param {string} searchText  — the keyword entered by the user
+ * @returns {boolean}
+ */
+function matchesText(parsedData, searchText) {
+  if (!searchText || !searchText.trim()) return false;
+  const regex = new RegExp(searchText.trim(), 'i');
+  return (
+    regex.test(parsedData.customerAddress || '') ||
+    regex.test(parsedData.billTo || '')
+  );
 }
 
-module.exports = { filterPage };
+/**
+ * Filter 2 — Qty > 1
+ * True when the extracted quantity from Product Details is greater than 1.
+ *
+ * @param {{ qty: number }} parsedData
+ * @returns {boolean}
+ */
+function matchesQty(parsedData) {
+  return typeof parsedData.qty === 'number' && parsedData.qty > 1;
+}
+/**
+ * Filter 3 — Exchange heading
+ * True when the word "exchange" appears anywhere on the page
+ * (covers headings like "Exchange Policy", "Exchange Order", etc.)
+ *
+ * @param {{ rawText: string }} parsedData
+ * @returns {boolean}
+ */
+function matchesExchange(parsedData) {
+  return /exchange/i.test(parsedData.rawText || '');
+}
+
+module.exports = { matchesText, matchesQty, matchesExchange };

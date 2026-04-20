@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { extractPages } = require('../services/pdfParserService');
 const { processPages } = require('../services/filterService');
-const { generateFilteredPdf, deleteOutputFile } = require('../services/pdfGeneratorService');
+const { generateFilteredPdf } = require('../services/pdfGeneratorService');
 const logger = require('../utils/logger');
 
 /**
@@ -23,10 +23,17 @@ async function uploadAndProcess(req, res) {
       return res.status(400).json({ error: 'No file uploaded. Please send a PDF as multipart/form-data with field name "file".' });
     }
 
-    const onlyMatched = req.query.onlyMatched === 'true';
-    const generatePdf = req.query.generatePdf === 'true';
+    const onlyMatched    = req.query.onlyMatched === 'true';
+    const generatePdf    = req.query.generatePdf === 'true';
 
-    logger.info(`Processing file: ${req.file.originalname} (${req.file.size} bytes)`);
+    // Three independent filters — all come from multipart form fields
+    const filterText     = (req.body.filterText     || '').trim();
+    const qtyFilter      = req.body.qtyFilter      === 'true';
+    const exchangeFilter = req.body.exchangeFilter === 'true';
+
+    logger.info(
+      `Processing: ${req.file.originalname} | filters — text="${filterText}" qty=${qtyFilter} exchange=${exchangeFilter}`
+    );
 
     // Step 1: Extract per-page text
     const pageTexts = await extractPages(uploadedFilePath);
@@ -35,15 +42,15 @@ async function uploadAndProcess(req, res) {
       return res.status(422).json({ error: 'Could not extract any text from the uploaded PDF.' });
     }
 
-    // Step 2: Parse and filter pages
-    const { totalPages, matchedPages, matchedPageNumbers, results } = processPages(pageTexts, onlyMatched);
+    // Step 2: Evaluate all three filters independently
+    const { totalPages, matchedPages, matchedPageNumbers, filtersApplied, results } =
+      processPages(pageTexts, { filterText, qtyFilter, exchangeFilter, onlyMatched });
 
-    // Step 3: Optionally generate filtered PDF
+    // Step 3: Optionally generate filtered PDF from matched pages
     let downloadUrl = null;
 
     if (generatePdf && matchedPageNumbers.length > 0) {
       const { filename } = await generateFilteredPdf(uploadedFilePath, matchedPageNumbers);
-      // Build absolute URL from request
       const baseUrl = `${req.protocol}://${req.get('host')}`;
       downloadUrl = `${baseUrl}/download/${filename}`;
     }
@@ -51,6 +58,7 @@ async function uploadAndProcess(req, res) {
     const response = {
       totalPages,
       matchedPages,
+      filtersApplied,
       results,
     };
 
@@ -59,7 +67,7 @@ async function uploadAndProcess(req, res) {
     }
 
     if (matchedPages === 0) {
-      response.message = 'No pages matched the filter criteria (Delhi address + qty > 1).';
+      response.message = 'No pages matched any of the enabled filters.';
     }
 
     return res.status(200).json(response);
@@ -84,12 +92,12 @@ async function uploadAndProcess(req, res) {
  * GET /download/:filename
  *
  * Serves a generated filtered PDF file for download.
- * Deletes the file after sending (one-time download).
+ * File persists for 1 hour (cleaned up by server startup job), so the
+ * user can re-download without re-uploading.
  */
 async function downloadFilteredPdf(req, res) {
   const { filename } = req.params;
 
-  // Sanitize: prevent path traversal
   const safeName = path.basename(filename);
   if (safeName !== filename || !filename.endsWith('.pdf')) {
     return res.status(400).json({ error: 'Invalid filename.' });
@@ -98,25 +106,20 @@ async function downloadFilteredPdf(req, res) {
   const filePath = path.join(__dirname, '../../output', safeName);
 
   if (!fs.existsSync(filePath)) {
-    return res.status(404).json({ error: 'File not found or already downloaded.' });
+    return res.status(404).json({ error: 'File not found. It may have expired (files are kept for 1 hour).' });
   }
 
   try {
+    const stat = fs.statSync(filePath);
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="${safeName}"`);
+    res.setHeader('Content-Disposition', `attachment; filename="filtered-invoices.pdf"`);
+    res.setHeader('Content-Length', stat.size);
 
     const readStream = fs.createReadStream(filePath);
     readStream.on('error', err => {
       logger.error(`Stream error for ${safeName}: ${err.message}`);
-      if (!res.headersSent) {
-        res.status(500).json({ error: 'Error streaming file.' });
-      }
+      if (!res.headersSent) res.status(500).json({ error: 'Error streaming file.' });
     });
-
-    readStream.on('close', () => {
-      deleteOutputFile(safeName);
-    });
-
     readStream.pipe(res);
   } catch (err) {
     logger.error(`Download error: ${err.message}`);

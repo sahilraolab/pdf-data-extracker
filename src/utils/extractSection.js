@@ -85,59 +85,45 @@ function escapeRegex(str) {
 function extractQty(productDetailsText) {
   if (!productDetailsText) return 0;
 
-  const lines = productDetailsText
-    .split('\n')
-    .map(l => l.trim())
-    .filter(l => l.length > 0);
-
-  // ── Pass 1: explicit "Qty: N" / "Quantity: N" label ────────────────────
-  const labelPattern = /(?:qty|quantity)\s*[:\-]\s*(\d+(?:\.\d+)?)/i;
-  for (const line of lines) {
-    const m = labelPattern.exec(line);
-    if (m) {
-      const val = parseFloat(m[1]);
-      if (!isNaN(val) && val > 0) return val;
-    }
+  // ── Strategy 1: explicit label anywhere in text ────────────────────────
+  // Matches "Qty: 3" / "QTY : 3" / "Quantity: 3"
+  const labelMatch = /\b(?:qty|quantity)\s*[:\-]\s*(\d+)/i.exec(productDetailsText);
+  if (labelMatch) {
+    const val = parseFloat(labelMatch[1]);
+    if (!isNaN(val)) return val;
   }
 
-  // ── Pass 2: column-header table  ───────────────────────────────────────
-  // Find a header line that contains the word "Qty" as a token.
-  // Then resolve which token-index that is and pull the value from the
-  // next non-empty data line at the same index.
-  for (let i = 0; i < lines.length - 1; i++) {
-    const headerParts = lines[i].split(/\s+/);
-    const qtyColIdx = headerParts.findIndex(p => /^qty$/i.test(p));
-    if (qtyColIdx === -1) continue;
+  // ── Strategy 2: keyword-forward scan ───────────────────────────────────
+  // Find the "Qty" keyword (column header or inline label without colon),
+  // then scan FORWARD in the remaining text for the first *standalone* integer:
+  //   - bounded by whitespace or line boundaries on BOTH sides
+  //   - 1–4 digits only (rules out order IDs, PIN codes which are 5+ digits)
+  //   - must NOT be immediately followed by a letter (rules out sizes like "28A", "32B")
+  //
+  // This handles both same-line tables AND cells-on-separate-lines rendering
+  // from pdf-parse, which differs between PDF structures.
+  const qtyKeyPos = productDetailsText.search(/\bQty\b/i);
+  if (qtyKeyPos !== -1) {
+    const afterKeyword = productDetailsText.slice(qtyKeyPos + 3);
+    // Walk token-by-token through the text after "Qty"
+    const tokenRegex = /\d+/g;
+    let tkMatch;
+    while ((tkMatch = tokenRegex.exec(afterKeyword)) !== null) {
+      const digits = tkMatch[0];
 
-    // Walk forward to find the first data row (skip blank / sub-header rows)
-    for (let j = i + 1; j < lines.length; j++) {
-      const dataParts = lines[j].split(/\s+/);
-      if (dataParts.length <= qtyColIdx) continue;
-      const val = parseFloat(dataParts[qtyColIdx]);
-      if (!isNaN(val) && val >= 0) return val;
-    }
-  }
+      // Skip order IDs / PIN codes (5+ digits)
+      if (digits.length > 4) continue;
 
-  // ── Pass 3: "Qty" keyword anywhere on the same line as a number ────────
-  // e.g. "Qty 2" without colon, or "2 Qty" (some label formats)
-  const loosePattern = /(?:qty|quantity)\D{0,5}(\d+)|(\d+)\D{0,5}(?:qty|quantity)/i;
-  for (const line of lines) {
-    const m = loosePattern.exec(line);
-    if (m) {
-      const val = parseFloat(m[1] || m[2]);
-      if (!isNaN(val) && val > 0) return val;
-    }
-  }
+      // Must be preceded by whitespace or start of string
+      const charBefore = afterKeyword[tkMatch.index - 1];
+      if (tkMatch.index > 0 && charBefore && !/\s/.test(charBefore)) continue;
 
-  // ── Pass 4: first short standalone integer on any product data line ────
-  // Ignores large numbers (PIN codes, order IDs) which are ≥ 5 digits.
-  for (const line of lines) {
-    // Skip pure header/label lines that have no digits at all
-    if (!/\d/.test(line)) continue;
-    const m = /(?:^|\s)(\d{1,4})(?:\s|$)/.exec(line);
-    if (m) {
-      const val = parseFloat(m[1]);
-      if (!isNaN(val) && val > 0) return val;
+      // Must be followed by whitespace or end of string
+      // (rules out "28A" sizes, "646_Brown" SKU codes, etc.)
+      const charAfter = afterKeyword[tkMatch.index + digits.length];
+      if (charAfter && !/\s/.test(charAfter)) continue;
+
+      return parseInt(digits, 10);
     }
   }
 
