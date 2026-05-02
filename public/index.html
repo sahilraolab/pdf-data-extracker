@@ -244,6 +244,57 @@
     .opt-toggle .label   { font-size: 14px; font-weight: 500; }
     .opt-toggle .sublabel { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
+    .download-buttons-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .download-mode-card {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 4px;
+      padding: 18px 16px;
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      cursor: pointer;
+      text-align: left;
+      transition: border-color .15s, background .15s;
+      font: inherit;
+      color: inherit;
+    }
+    .download-mode-card:hover {
+      border-color: var(--accent);
+      background: rgba(108,99,255,.06);
+    }
+    .download-mode-card:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+      background: var(--surface);
+      border-color: var(--border);
+    }
+    .download-mode-card .label {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+    .download-mode-card .sublabel {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .download-mode-card .count {
+      font-size: 12px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    @media (max-width: 700px) { .download-buttons-grid { grid-template-columns: 1fr; } }
+
     /* ── Button ── */
     .btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 8px;
@@ -521,24 +572,30 @@
       </div>
     </div>
 
-    <!-- Output options -->
-    <div class="card">
-      <div class="section-label">Output Options</div>
-      <div class="output-row">
-        <label class="opt-toggle" for="togOnlyMatched">
-          <label class="switch"><input type="checkbox" id="togOnlyMatched" /><span class="slider"></span></label>
-          <div>
-            <div class="label">Only Matched Pages</div>
-            <div class="sublabel">Hide non-matching pages from results list</div>
-          </div>
-        </label>
-        <label class="opt-toggle" for="togGeneratePdf">
-          <label class="switch"><input type="checkbox" id="togGeneratePdf" checked /><span class="slider"></span></label>
-          <div>
-            <div class="label">Generate Filtered PDF</div>
-            <div class="sublabel">Download a new PDF of matched pages</div>
-          </div>
-        </label>
+    <!-- Download options -->
+    <div class="card" id="downloadActionsCard" style="display:none;">
+      <div class="section-label">Download pages</div>
+      <div class="download-buttons-grid">
+        <button class="download-mode-card" id="downloadKeywordBtn" type="button">
+          <div class="label">Keyword matches</div>
+          <div class="sublabel">Download pages matching the keyword filter</div>
+          <div class="count" id="downloadKeywordCount"></div>
+        </button>
+        <button class="download-mode-card" id="downloadQtyBtn" type="button">
+          <div class="label">Qty &gt; 1 matches</div>
+          <div class="sublabel">Download pages where quantity is greater than one</div>
+          <div class="count" id="downloadQtyCount"></div>
+        </button>
+        <button class="download-mode-card" id="downloadExchangeBtn" type="button">
+          <div class="label">Exchange matches</div>
+          <div class="sublabel">Download pages containing exchange content</div>
+          <div class="count" id="downloadExchangeCount"></div>
+        </button>
+        <button class="download-mode-card" id="downloadUnmatchedBtn" type="button">
+          <div class="label">Non-matching pages</div>
+          <div class="sublabel">Download pages that do not match any filter</div>
+          <div class="count" id="downloadUnmatchedCount"></div>
+        </button>
       </div>
     </div>
 
@@ -625,8 +682,15 @@
   const keywordWrap     = document.getElementById('keywordWrap');
   const togQty          = document.getElementById('togQty');
   const togExchange     = document.getElementById('togExchange');
-  const togOnlyMatched  = document.getElementById('togOnlyMatched');
-  const togGeneratePdf  = document.getElementById('togGeneratePdf');
+  const downloadActionsCard = document.getElementById('downloadActionsCard');
+  const downloadKeywordBtn  = document.getElementById('downloadKeywordBtn');
+  const downloadQtyBtn      = document.getElementById('downloadQtyBtn');
+  const downloadExchangeBtn = document.getElementById('downloadExchangeBtn');
+  const downloadUnmatchedBtn = document.getElementById('downloadUnmatchedBtn');
+  const downloadKeywordCount = document.getElementById('downloadKeywordCount');
+  const downloadQtyCount     = document.getElementById('downloadQtyCount');
+  const downloadExchangeCount = document.getElementById('downloadExchangeCount');
+  const downloadUnmatchedCount = document.getElementById('downloadUnmatchedCount');
 
   const fc1 = document.getElementById('fc1');
   const fc2 = document.getElementById('fc2');
@@ -643,6 +707,13 @@
 
   // ── File selection ──
   fileInput.addEventListener('change', () => handleFile(fileInput.files[0]));
+
+  downloadKeywordBtn.addEventListener('click', () => handleDownload('keyword'));
+  downloadQtyBtn.addEventListener('click', () => handleDownload('qty'));
+  downloadExchangeBtn.addEventListener('click', () => handleDownload('exchange'));
+  downloadUnmatchedBtn.addEventListener('click', () => handleDownload('unmatched'));
+
+  downloadActionsCard.style.display = 'none';
 
   dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
   dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
@@ -697,8 +768,6 @@
     if (exchangeFilter) formData.append('exchangeFilter', 'true');
 
     const params = new URLSearchParams();
-    if (togOnlyMatched.checked) params.set('onlyMatched', 'true');
-    if (togGeneratePdf.checked) params.set('generatePdf', 'true');
 
     try {
       setProgress(10, 'Uploading PDF…');
@@ -721,6 +790,83 @@
       setLoading(false);
     }
   });
+
+  async function handleDownload(downloadMode) {
+    if (!downloadActionsCard || downloadActionsCard.style.display === 'none') {
+      showError('Please analyse the PDF first before downloading.');
+      return;
+    }
+
+    const file = fileInput.files[0];
+    if (!file) {
+      showError('Please choose a PDF file first.');
+      return;
+    }
+
+    const filterText = filterTextInput.value.trim();
+
+    if (downloadMode === 'keyword') {
+      if (!filterText) {
+        showError('Please enter a keyword before downloading keyword matches.');
+        return;
+      }
+      togText.checked = true;
+      fc1.classList.add('active-f1');
+      keywordWrap.classList.add('visible');
+      filterTextInput.focus();
+    }
+
+    if (downloadMode === 'qty') {
+      togQty.checked = true;
+      fc2.classList.add('active-f2');
+    }
+
+    if (downloadMode === 'exchange') {
+      togExchange.checked = true;
+      fc3.classList.add('active-f3');
+    }
+
+    setLoading(true);
+    hideError();
+    downloadSection.classList.remove('visible');
+
+    const formData = new FormData();
+    formData.append('file', file);
+    if (downloadMode === 'keyword' || togText.checked) {
+      if (filterText) formData.append('filterText', filterText);
+    }
+    if (downloadMode === 'qty' || togQty.checked) {
+      formData.append('qtyFilter', 'true');
+    }
+    if (downloadMode === 'exchange' || togExchange.checked) {
+      formData.append('exchangeFilter', 'true');
+    }
+
+    const params = new URLSearchParams();
+    params.set('generatePdf', 'true');
+    params.set('downloadMode', downloadMode);
+
+    try {
+      setProgress(10, 'Uploading PDF…');
+      const response = await xhrUpload(
+        `/upload?${params}`,
+        formData,
+        pct => setProgress(pct, pct < 60 ? 'Uploading PDF…' : 'Analysing pages…')
+      );
+
+      setProgress(92, 'Building results…');
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || `Server error ${response.status}`);
+
+      setProgress(100, 'Done!');
+      await sleep(350);
+      renderResults(data);
+    } catch (err) {
+      showError(err.message || 'Unexpected error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   // ── XHR with upload progress ──
   function xhrUpload(url, body, onProgress) {
@@ -770,13 +916,30 @@
 
     statsRow.innerHTML = statsHtml;
 
-    // Download banner + auto-trigger browser download
+    const unmatchedCount = allResults.filter(r => !r.isTextMatch && !r.isQtyMatch && !r.isExchangeMatch).length;
+    downloadKeywordCount.textContent = textCount ? `${textCount} page${textCount !== 1 ? 's' : ''}` : '0 pages';
+    downloadQtyCount.textContent = qtyCount ? `${qtyCount} page${qtyCount !== 1 ? 's' : ''}` : '0 pages';
+    downloadExchangeCount.textContent = exchCount ? `${exchCount} page${exchCount !== 1 ? 's' : ''}` : '0 pages';
+    downloadUnmatchedCount.textContent = unmatchedCount ? `${unmatchedCount} page${unmatchedCount !== 1 ? 's' : ''}` : '0 pages';
+
+    downloadKeywordBtn.disabled = textCount === 0;
+    downloadQtyBtn.disabled = qtyCount === 0;
+    downloadExchangeBtn.disabled = exchCount === 0;
+    downloadUnmatchedBtn.disabled = unmatchedCount === 0;
+    downloadActionsCard.style.display = 'block';
+
     if (data.downloadUrl) {
       downloadBtn.href = data.downloadUrl;
-      downloadNote.textContent = `Contains ${data.matchedPages} matched page${data.matchedPages !== 1 ? 's' : ''} · re-downloadable for 1 hour`;
+
+      const downloadCount = typeof data.downloadPageCount === 'number' ? data.downloadPageCount : data.matchedPages;
+      const modeLabel = data.downloadMode === 'keyword' ? 'Keyword' :
+                        data.downloadMode === 'qty' ? 'Qty > 1' :
+                        data.downloadMode === 'exchange' ? 'Exchange' :
+                        data.downloadMode === 'unmatched' ? 'Non-matching' :
+                        'Matched';
+
+      downloadNote.textContent = `Contains ${downloadCount} ${modeLabel} page${downloadCount !== 1 ? 's' : ''} · re-downloadable for 1 hour`;
       downloadSection.classList.add('visible');
-      // Auto-trigger download so the file saves immediately without extra click
-      triggerDownload(data.downloadUrl);
     }
 
     resultsSection.classList.add('visible');
@@ -784,15 +947,6 @@
     resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  function triggerDownload(url) {
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'filtered-invoices.pdf';
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => document.body.removeChild(a), 500);
-  }
 
   function renderList() {
     const filtered = allResults.filter(r => {

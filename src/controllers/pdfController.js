@@ -14,6 +14,8 @@ const logger = require('../utils/logger');
  * Query params:
  *   - onlyMatched=true   → results array contains only matched pages
  *   - generatePdf=true   → also produce a downloadable filtered PDF
+ *   - downloadMode=keyword|qty|exchange|unmatched
+ *       → selects which pages are included in the generated PDF
  */
 async function uploadAndProcess(req, res) {
   const uploadedFilePath = req.file ? req.file.path : null;
@@ -25,6 +27,7 @@ async function uploadAndProcess(req, res) {
 
     const onlyMatched    = req.query.onlyMatched === 'true';
     const generatePdf    = req.query.generatePdf === 'true';
+    const downloadMode   = req.query.downloadMode || null;
 
     // Three independent filters — all come from multipart form fields
     const filterText     = (req.body.filterText     || '').trim();
@@ -42,17 +45,54 @@ async function uploadAndProcess(req, res) {
       return res.status(422).json({ error: 'Could not extract any text from the uploaded PDF.' });
     }
 
-    // Step 2: Evaluate all three filters independently
-    const { totalPages, matchedPages, matchedPageNumbers, filtersApplied, results } =
-      processPages(pageTexts, { filterText, qtyFilter, exchangeFilter, onlyMatched });
+    // Step 2: Evaluate all three filters independently and collect download groups
+    const {
+      totalPages,
+      matchedPages,
+      matchedPageNumbers,
+      keywordPageNumbers,
+      qtyPageNumbers,
+      exchangePageNumbers,
+      unmatchedPageNumbers,
+      filtersApplied,
+      results,
+    } = processPages(pageTexts, { filterText, qtyFilter, exchangeFilter, onlyMatched, downloadMode });
 
-    // Step 3: Optionally generate filtered PDF from matched pages
+    const downloadBuckets = {
+      keyword: keywordPageNumbers,
+      qty: qtyPageNumbers,
+      exchange: exchangePageNumbers,
+      unmatched: unmatchedPageNumbers,
+    };
+
+    const fittedMode = downloadMode && Object.prototype.hasOwnProperty.call(downloadBuckets, downloadMode)
+      ? downloadMode
+      : null;
+
+    if (downloadMode && !fittedMode) {
+      return res.status(400).json({ error: 'Invalid downloadMode. Allowed values are keyword, qty, exchange, unmatched.' });
+    }
+
+    if (downloadMode === 'keyword' && !filterText) {
+      return res.status(400).json({ error: 'Keyword download requires a valid filterText value.' });
+    }
+
+    // Step 3: Optionally generate a download PDF based on the selected download mode
     let downloadUrl = null;
+    let downloadPageCount = 0;
 
-    if (generatePdf && matchedPageNumbers.length > 0) {
-      const { filename } = await generateFilteredPdf(uploadedFilePath, matchedPageNumbers);
-      const baseUrl = `${req.protocol}://${req.get('host')}`;
-      downloadUrl = `${baseUrl}/download/${filename}`;
+    if (generatePdf) {
+      const downloadPageNumbers = fittedMode
+        ? downloadBuckets[fittedMode]
+        : matchedPageNumbers;
+
+      downloadPageCount = downloadPageNumbers.length;
+
+      if (downloadPageNumbers.length > 0) {
+        const { filename } = await generateFilteredPdf(uploadedFilePath, downloadPageNumbers);
+        const baseUrl = `${req.protocol}://${req.get('host')}`;
+        downloadUrl = `${baseUrl}/download/${filename}`;
+      }
     }
 
     const response = {
@@ -60,6 +100,8 @@ async function uploadAndProcess(req, res) {
       matchedPages,
       filtersApplied,
       results,
+      downloadMode: fittedMode,
+      downloadPageCount,
     };
 
     if (downloadUrl) {

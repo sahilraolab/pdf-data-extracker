@@ -93,37 +93,50 @@ function extractQty(productDetailsText) {
     if (!isNaN(val)) return val;
   }
 
-  // ── Strategy 2: keyword-forward scan ───────────────────────────────────
+  // ── Strategy 2: structured table / header scan ─────────────────────────
+  // If the Product Details section includes a header row with Qty, attempt
+  // to parse the first data row immediately following it.
+  const lines = productDetailsText
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(line => line.length > 0);
+
+  const headerIndex = lines.findIndex(line => /Qty/i.test(line));
+  if (headerIndex !== -1 && headerIndex + 1 < lines.length) {
+    const dataLine = lines[headerIndex + 1];
+
+    // Common compact PDF extraction pattern: SKU + Size + Qty + Color + OrderNo
+    // can be rendered as e.g. "646_Brown&Grey32A1Brown27802964...".
+    const compactMatch = /\d{1,2}[A-Za-z]{1,2}(\d{1,2})(?!\d)/.exec(dataLine);
+    if (compactMatch) {
+      const val = parseInt(compactMatch[1], 10);
+      if (!isNaN(val)) return val;
+    }
+  }
+
+  // ── Strategy 3: keyword-forward scan ───────────────────────────────────
   // Find the "Qty" keyword (column header or inline label without colon),
-  // then scan FORWARD in the remaining text for the first *standalone* integer:
-  //   - bounded by whitespace or line boundaries on BOTH sides
-  //   - 1–4 digits only (rules out order IDs, PIN codes which are 5+ digits)
-  //   - must NOT be immediately followed by a letter (rules out sizes like "28A", "32B")
-  //
-  // This handles both same-line tables AND cells-on-separate-lines rendering
-  // from pdf-parse, which differs between PDF structures.
-  const qtyKeyPos = productDetailsText.search(/\bQty\b/i);
+  // then scan FORWARD in the remaining text for the first plausible integer.
+  const qtyKeyPos = productDetailsText.search(/Qty/i);
   if (qtyKeyPos !== -1) {
     const afterKeyword = productDetailsText.slice(qtyKeyPos + 3);
-    // Walk token-by-token through the text after "Qty"
-    const tokenRegex = /\d+/g;
+    const tokenRegex = /[0-9A-Za-z_]+/g;
     let tkMatch;
     while ((tkMatch = tokenRegex.exec(afterKeyword)) !== null) {
-      const digits = tkMatch[0];
+      const token = tkMatch[0];
 
-      // Skip order IDs / PIN codes (5+ digits)
-      if (digits.length > 4) continue;
+      // First try patterns like "32A1" or "28B2" where qty follows size.
+      const inlineQty = /\d{1,2}[A-Za-z]{1,2}(\d{1,2})(?!\d)/.exec(token);
+      if (inlineQty) {
+        const val = parseInt(inlineQty[1], 10);
+        if (!isNaN(val)) return val;
+      }
 
-      // Must be preceded by whitespace or start of string
-      const charBefore = afterKeyword[tkMatch.index - 1];
-      if (tkMatch.index > 0 && charBefore && !/\s/.test(charBefore)) continue;
-
-      // Must be followed by whitespace or end of string
-      // (rules out "28A" sizes, "646_Brown" SKU codes, etc.)
-      const charAfter = afterKeyword[tkMatch.index + digits.length];
-      if (charAfter && !/\s/.test(charAfter)) continue;
-
-      return parseInt(digits, 10);
+      // Then accept a standalone small number token.
+      const numericMatch = /^(\d{1,2})$/.exec(token);
+      if (numericMatch) {
+        return parseInt(numericMatch[1], 10);
+      }
     }
   }
 

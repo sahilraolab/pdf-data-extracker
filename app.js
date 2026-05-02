@@ -42,6 +42,8 @@ app.get('/health', (_req, res) => {
 // Query params:
 //   onlyMatched=true  → results contains only matched pages
 //   generatePdf=true  → also produce downloadable filtered PDF
+//   downloadMode=keyword|qty|exchange|unmatched
+//       → selects which pages are included in the generated PDF
 app.post('/upload', upload.single('file'), uploadAndProcess);
 
 // Download generated filtered PDF (one-time)

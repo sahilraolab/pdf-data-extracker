@@ -16,6 +16,10 @@ const logger = require('../utils/logger');
  *   totalPages: number,
  *   matchedPages: number,
  *   matchedPageNumbers: number[],
+ *   keywordPageNumbers: number[],
+ *   qtyPageNumbers: number[],
+ *   exchangePageNumbers: number[],
+ *   unmatchedPageNumbers: number[],
  *   filtersApplied: { text: boolean, qty: boolean, exchange: boolean },
  *   results: Array<{
  *     pageNumber: number,
@@ -35,6 +39,7 @@ function processPages(pageTexts, opts = {}) {
     qtyFilter = false,
     exchangeFilter = false,
     onlyMatched = false,
+    downloadMode = null,
   } = opts;
 
   const textEnabled     = Boolean(filterText && filterText.trim());
@@ -54,6 +59,10 @@ function processPages(pageTexts, opts = {}) {
 
   const results = [];
   const matchedPageNumbers = [];
+  const keywordPageNumbers = [];
+  const qtyPageNumbers = [];
+  const exchangePageNumbers = [];
+  const unmatchedPageNumbers = [];
 
   for (let i = 0; i < pageTexts.length; i++) {
     const pageNumber = i + 1;
@@ -67,9 +76,14 @@ function processPages(pageTexts, opts = {}) {
     }
 
     // Evaluate each filter independently
-    const isTextMatch     = textEnabled     ? matchesText(parsed, filterText) : false;
-    const isQtyMatch      = qtyEnabled      ? matchesQty(parsed)              : false;
-    const isExchangeMatch = exchangeEnabled ? matchesExchange(parsed)         : false;
+    const isTextMatch     = matchesText(parsed, filterText);
+    const isQtyMatch      = matchesQty(parsed);
+    const isExchangeMatch = matchesExchange(parsed);
+
+    if (isTextMatch) keywordPageNumbers.push(pageNumber);
+    if (isQtyMatch) qtyPageNumbers.push(pageNumber);
+    if (isExchangeMatch) exchangePageNumbers.push(pageNumber);
+    if (!isTextMatch && !isQtyMatch && !isExchangeMatch) unmatchedPageNumbers.push(pageNumber);
 
     // A page is a match if at least one enabled filter hits
     // If no filters are on, nothing matches (return informational results only)
@@ -106,6 +120,10 @@ function processPages(pageTexts, opts = {}) {
     totalPages: pageTexts.length,
     matchedPages: matchedPageNumbers.length,
     matchedPageNumbers,
+    keywordPageNumbers,
+    qtyPageNumbers,
+    exchangePageNumbers,
+    unmatchedPageNumbers,
     filtersApplied: { text: textEnabled, qty: qtyEnabled, exchange: exchangeEnabled },
     results,
   };
