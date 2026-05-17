@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const upload = require('./src/middleware/upload');
-const { uploadAndProcess, downloadFilteredPdf } = require('./src/controllers/pdfController');
+const { uploadAndProcess, downloadFilteredPdf, getCustomerHistoryRoute } = require('./src/controllers/pdfController');
 const { cleanupOldOutputFiles } = require('./src/services/pdfGeneratorService');
 const logger = require('./src/utils/logger');
 
@@ -48,6 +48,9 @@ app.post('/upload', upload.single('file'), uploadAndProcess);
 
 // Download generated filtered PDF (one-time)
 app.get('/download/:filename', downloadFilteredPdf);
+
+// Customer history dashboard data
+app.get('/customer-history', getCustomerHistoryRoute);
 
 // ─── Error Handlers ───────────────────────────────────────────────────────────
 

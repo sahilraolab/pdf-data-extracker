@@ -3,6 +3,7 @@ const path = require('path');
 const { extractPages } = require('../services/pdfParserService');
 const { processPages } = require('../services/filterService');
 const { generateFilteredPdf } = require('../services/pdfGeneratorService');
+const { annotateAndPersistHistory, getCustomerHistory } = require('../services/customerHistoryService');
 const logger = require('../utils/logger');
 
 /**
@@ -58,6 +59,8 @@ async function uploadAndProcess(req, res) {
       results,
     } = processPages(pageTexts, { filterText, qtyFilter, exchangeFilter, onlyMatched, downloadMode });
 
+    const customerHistory = annotateAndPersistHistory(results);
+
     const downloadBuckets = {
       keyword: keywordPageNumbers,
       qty: qtyPageNumbers,
@@ -102,6 +105,7 @@ async function uploadAndProcess(req, res) {
       results,
       downloadMode: fittedMode,
       downloadPageCount,
+      customerHistory,
     };
 
     if (downloadUrl) {
@@ -169,4 +173,14 @@ async function downloadFilteredPdf(req, res) {
   }
 }
 
-module.exports = { uploadAndProcess, downloadFilteredPdf };
+async function getCustomerHistoryRoute(_req, res) {
+  try {
+    const history = getCustomerHistory();
+    return res.status(200).json(history);
+  } catch (err) {
+    logger.error(`Customer history error: ${err.message}`, { stack: err.stack });
+    return res.status(500).json({ error: 'Unable to load customer history.' });
+  }
+}
+
+module.exports = { uploadAndProcess, downloadFilteredPdf, getCustomerHistoryRoute };

@@ -425,6 +425,122 @@
     }
     .page-item.open .page-details { display: block; }
 
+    .history-summary {
+      font-size: 13px;
+      color: var(--text);
+      margin-bottom: 14px;
+    }
+    .history-grid {
+      display: grid;
+      gap: 12px;
+    }
+    .history-item details {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .history-item summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px;
+      cursor: pointer;
+      list-style: none;
+      background: var(--surface);
+      color: var(--text);
+    }
+    .history-item summary::-webkit-details-marker {
+      display: none;
+    }
+    .history-item[open] summary {
+      background: rgba(108, 99, 255, .08);
+    }
+    .history-item .history-header {
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }
+    .history-item .name {
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .history-item .history-meta {
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .history-item .history-content {
+      padding: 16px;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .history-item .history-row {
+      display: grid;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .history-item .history-row .line {
+      font-size: 12px;
+      color: var(--muted);
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+
+    .history-item .chevron {
+      font-size: 12px;
+      transition: transform .2s ease;
+      color: var(--muted);
+    }
+    .history-item[open] .chevron {
+      transform: rotate(180deg);
+    }
+
+    #historyCard {
+      padding: 0;
+      overflow: hidden;
+    }
+    #historyCard summary.history-card-summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 18px 20px;
+      cursor: pointer;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      list-style: none;
+    }
+    #historyCard summary.history-card-summary .section-label {
+      margin-bottom: 4px;
+    }
+    #historyCard summary.history-card-summary .history-summary {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    #historyCard summary.history-card-summary::-webkit-details-marker {
+      display: none;
+    }
+    #historyCard[open] summary.history-card-summary {
+      background: rgba(108, 99, 255, .06);
+    }
+    #historyCard .history-grid {
+      padding: 16px 20px 20px;
+    }
+    #historyCard .chevron {
+      font-size: 12px;
+      transition: transform .2s ease;
+      color: var(--muted);
+    }
+    #historyCard[open] .chevron {
+      transform: rotate(180deg);
+    }
+
     .detail-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -572,6 +688,17 @@
       </div>
     </div>
 
+    <details class="card" id="historyCard">
+      <summary class="history-card-summary">
+        <div>
+          <div class="section-label">Known customer dashboard</div>
+          <div class="history-summary" id="historySummary">Loading saved customer records…</div>
+        </div>
+        <span class="chevron">▼</span>
+      </summary>
+      <div class="history-grid" id="historyList"></div>
+    </details>
+
     <!-- Download options -->
     <div class="card" id="downloadActionsCard" style="display:none;">
       <div class="section-label">Download pages</div>
@@ -691,6 +818,8 @@
   const downloadQtyCount     = document.getElementById('downloadQtyCount');
   const downloadExchangeCount = document.getElementById('downloadExchangeCount');
   const downloadUnmatchedCount = document.getElementById('downloadUnmatchedCount');
+  const historySummary = document.getElementById('historySummary');
+  const historyList = document.getElementById('historyList');
 
   const fc1 = document.getElementById('fc1');
   const fc2 = document.getElementById('fc2');
@@ -714,6 +843,7 @@
   downloadUnmatchedBtn.addEventListener('click', () => handleDownload('unmatched'));
 
   downloadActionsCard.style.display = 'none';
+  loadCustomerHistory();
 
   dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
   dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
@@ -891,6 +1021,10 @@
     appliedFilters = data.filtersApplied || { text: false, qty: false, exchange: false };
     activeFilter   = 'all';
 
+    if (data.customerHistory) {
+      renderHistory(data.customerHistory);
+    }
+
     // Reset tab active states
     document.querySelectorAll('.tab').forEach(t => t.className = 'tab');
     document.querySelector('[data-filter="all"]').classList.add('active-all');
@@ -987,6 +1121,16 @@
         : `<span class="badge-pill bp-gray">🔄 —</span>`);
     }
 
+    if (r.knownCustomer) {
+      badges.push(`<span class="badge-pill bp-green">👤 Known customer</span>`);
+    }
+    if (r.knownCustomerAddress) {
+      badges.push(`<span class="badge-pill bp-amber">🏠 Known address</span>`);
+    }
+    if (r.knownBillTo) {
+      badges.push(`<span class="badge-pill bp-purple">🚚 Known bill/ship</span>`);
+    }
+
     const addressLine = firstLine(r.customerAddress || r.billTo || '—');
 
     return `
@@ -1031,6 +1175,48 @@
   });
 
   // ── Helpers ──
+  function loadCustomerHistory() {
+    fetch('/customer-history')
+      .then(res => {
+        if (!res.ok) throw new Error('Unable to load customer history');
+        return res.json();
+      })
+      .then(data => renderHistory(data))
+      .catch(() => {
+        historySummary.textContent = 'No saved customer data yet.';
+        historyList.innerHTML = '';
+      });
+  }
+
+  function renderHistory(data) {
+    if (!data || !Array.isArray(data.customers) || data.customers.length === 0) {
+      historySummary.textContent = 'No saved customer data yet. Analyse a PDF to populate the dashboard.';
+      historyList.innerHTML = '';
+      return;
+    }
+
+    historySummary.textContent = `${data.totalCustomers} saved customer${data.totalCustomers !== 1 ? 's' : ''} in history.`;
+    historyList.innerHTML = data.customers.slice(0, 10).map(customer => `
+      <div class="history-item">
+        <details>
+          <summary>
+            <div class="history-header">
+              <div class="name">${esc(customer.customerName || 'Unknown')}</div>
+              <div class="history-meta">${esc(customer.customerAddress || customer.billTo || 'No address captured')}</div>
+            </div>
+            <span class="chevron">▼</span>
+          </summary>
+          <div class="history-content">
+            <div class="history-row">
+              <div class="line"><strong>Customer Address:</strong> ${esc(customer.customerAddress || 'Not yet captured')}</div>
+              <div class="line"><strong>Bill To / Ship To:</strong> ${esc(customer.billTo || 'Not yet captured')}</div>
+            </div>
+          </div>
+        </details>
+      </div>
+    `).join('');
+  }
+
   function setLoading(on) {
     submitBtn.disabled = on;
     submitIcon.textContent  = on ? '⏳' : '🔍';
