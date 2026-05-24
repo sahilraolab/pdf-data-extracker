@@ -191,4 +191,34 @@ function extractQty(productDetailsText) {
   return 0;
 }
 
-module.exports = { extractSection, extractQty };
+/**
+ * Extracts an order number from page text.
+ *
+ * Handles:
+ *  - "Order No: 401925123456"
+ *  - "Order ID : ABC-123"
+ *  - "Sub Order No. 401925789012"
+ *  - Bare 12-digit numbers starting with 4 (Meesho format)
+ *
+ * @param {string} text - Full page text
+ * @returns {string} Extracted order number, or empty string
+ */
+function extractOrderNo(text) {
+  if (!text || typeof text !== 'string') return '';
+
+  // Explicit label: Order No / Order ID / Order # / Order Number
+  const m1 = /\bOrder\s*(?:No\.?|ID|Number|#)\s*[:\-]?\s*([A-Z0-9][A-Z0-9\-\/]{4,19})/i.exec(text);
+  if (m1) return m1[1].trim();
+
+  // Sub Order label
+  const m2 = /\bSub[\s\-]*Order\s*(?:No\.?|ID|#)?\s*[:\-]?\s*([A-Z0-9][A-Z0-9\-\/]{4,19})/i.exec(text);
+  if (m2) return m2[1].trim();
+
+  // Meesho 12-digit order numbers (start with 4)
+  const m3 = /\b(4\d{11})\b/.exec(text);
+  if (m3) return m3[1];
+
+  return '';
+}
+
+module.exports = { extractSection, extractQty, extractOrderNo };

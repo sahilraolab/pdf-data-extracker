@@ -1,4 +1,4 @@
-const { extractSection, extractQty } = require('./extractSection');
+const { extractSection, extractQty, extractOrderNo } = require('./extractSection');
 
 /**
  * Parses a single page's raw text and extracts structured fields.
@@ -42,12 +42,14 @@ function parsePage(pageText, pageNumber) {
   );
 
   const qty = extractQty(productDetails);
+  const orderNo = extractOrderNo(pageText);
 
   return {
     customerAddress,
     billTo,
     productDetails,
     qty,
+    orderNo,
     rawText: pageText,   // kept for full-page filters (e.g. exchange heading)
   };
 }

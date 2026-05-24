@@ -2,22 +2,47 @@ const fs = require('fs');
 const path = require('path');
 const logger = require('../utils/logger');
 
-const historyDir = path.join(__dirname, '../../data');
+const historyDir  = path.join(__dirname, '../../data');
 const historyPath = path.join(historyDir, 'customer-history.json');
 
+// ─── File I/O ──────────────────────────────────────────────────────────────────
+
 function ensureHistoryFile() {
-  if (!fs.existsSync(historyDir)) {
-    fs.mkdirSync(historyDir, { recursive: true });
-  }
+  if (!fs.existsSync(historyDir)) fs.mkdirSync(historyDir, { recursive: true });
   if (!fs.existsSync(historyPath)) {
-    fs.writeFileSync(historyPath, JSON.stringify({ customers: {} }, null, 2), 'utf8');
+    fs.writeFileSync(historyPath, JSON.stringify({ customers: {}, orders: [] }, null, 2), 'utf8');
   }
 }
 
+function loadStore() {
+  try {
+    ensureHistoryFile();
+    const raw = fs.readFileSync(historyPath, 'utf8');
+    const data = raw ? JSON.parse(raw) : {};
+    return {
+      customers: data.customers || {},
+      orders:    Array.isArray(data.orders) ? data.orders : [],
+    };
+  } catch (err) {
+    logger.error(`Could not load customer history: ${err.message}`);
+    return { customers: {}, orders: [] };
+  }
+}
+
+function saveStore(store) {
+  try {
+    ensureHistoryFile();
+    fs.writeFileSync(historyPath, JSON.stringify(store, null, 2), 'utf8');
+  } catch (err) {
+    logger.error(`Could not save customer history: ${err.message}`);
+  }
+}
+
+// ─── Helpers ───────────────────────────────────────────────────────────────────
+
 function normalizeKey(value) {
   return String(value || '')
-    .trim()
-    .toLowerCase()
+    .trim().toLowerCase()
     .replace(/[\r\n]+/g, ' ')
     .replace(/[^a-z0-9 ]+/g, '')
     .replace(/\s+/g, ' ')
@@ -26,104 +51,177 @@ function normalizeKey(value) {
 
 function firstLine(value) {
   if (!value || typeof value !== 'string') return '';
-  return value.split(/\r?\n/).find(line => line.trim().length > 0) || value.trim();
-}
-
-function loadHistory() {
-  try {
-    ensureHistoryFile();
-    const raw = fs.readFileSync(historyPath, 'utf8');
-    const data = raw ? JSON.parse(raw) : { customers: {} };
-    return data.customers || {};
-  } catch (err) {
-    logger.error(`Could not load customer history: ${err.message}`);
-    return {};
-  }
-}
-
-function saveHistory(customers) {
-  try {
-    ensureHistoryFile();
-    fs.writeFileSync(historyPath, JSON.stringify({ customers }, null, 2), 'utf8');
-  } catch (err) {
-    logger.error(`Could not save customer history: ${err.message}`);
-  }
+  return value.split(/\r?\n/).find(l => l.trim().length > 0) || value.trim();
 }
 
 function deriveCustomerKey(page) {
-  const source = page.customerAddress || page.billTo || '';
-  if (!source.trim()) return '';
-  return normalizeKey(firstLine(source));
+  const src = page.customerAddress || page.billTo || '';
+  if (!src.trim()) return '';
+  return normalizeKey(firstLine(src));
 }
 
-function buildCustomerHistorySummary(customersMap) {
-  return {
-    totalCustomers: Object.keys(customersMap).length,
-    customers: Object.values(customersMap).sort((a, b) => a.customerName.localeCompare(b.customerName)),
-  };
-}
+// ─── Core: annotate results and persist ───────────────────────────────────────
 
 function annotateAndPersistHistory(results) {
-  const existingCustomers = loadHistory();
-  const updatedCustomers = { ...existingCustomers };
+  const store = loadStore();
+  const { customers, orders } = store;
+  const now = new Date().toISOString();
 
   for (const page of results) {
     const customerKey = deriveCustomerKey(page);
-    page.customerKey = customerKey;
-    page.knownCustomer = false;
+    page.customerKey         = customerKey;
+    page.knownCustomer        = false;
     page.knownCustomerAddress = false;
-    page.knownBillTo = false;
+    page.knownBillTo          = false;
 
-    if (!customerKey) {
-      continue;
-    }
+    if (!customerKey) continue;
 
-    const existing = existingCustomers[customerKey];
+    const existing = customers[customerKey];
     if (existing) {
-      page.knownCustomer = true;
-      page.knownCustomerAddress = Boolean(existing.customerAddress && existing.customerAddress.trim());
-      page.knownBillTo = Boolean(existing.billTo && existing.billTo.trim());
+      page.knownCustomer        = true;
+      page.knownCustomerAddress = Boolean(existing.customerAddress?.trim());
+      page.knownBillTo          = Boolean(existing.billTo?.trim());
     }
 
-    const hasAddress = Boolean(page.customerAddress && page.customerAddress.trim());
-    const hasBillTo = Boolean(page.billTo && page.billTo.trim());
+    const hasAddress = Boolean(page.customerAddress?.trim());
+    const hasBillTo  = Boolean(page.billTo?.trim());
     const customerName = firstLine(page.customerAddress || page.billTo || '');
 
     if (!existing && (hasAddress || hasBillTo)) {
-      updatedCustomers[customerKey] = {
+      customers[customerKey] = {
         customerKey,
         customerName,
         customerAddress: page.customerAddress || '',
         billTo: page.billTo || '',
-        firstSeenAt: new Date().toISOString(),
-        lastSeenAt: new Date().toISOString(),
+        firstSeenAt: now,
+        lastSeenAt:  now,
         sourceCount: 1,
+        orders: [],
       };
     } else if (existing) {
-      let updated = false;
-      if (!existing.customerAddress && hasAddress) {
-        existing.customerAddress = page.customerAddress;
-        updated = true;
-      }
-      if (!existing.billTo && hasBillTo) {
-        existing.billTo = page.billTo;
-        updated = true;
-      }
-      if (updated) {
-        existing.lastSeenAt = new Date().toISOString();
-      }
+      if (!existing.customerAddress && hasAddress) existing.customerAddress = page.customerAddress;
+      if (!existing.billTo && hasBillTo)           existing.billTo = page.billTo;
+      existing.lastSeenAt  = now;
       existing.sourceCount = (existing.sourceCount || 1) + 1;
-      updatedCustomers[customerKey] = existing;
+      if (!Array.isArray(existing.orders)) existing.orders = [];
+    }
+
+    // Record the individual order event
+    const orderEntry = {
+      orderNo:     page.orderNo || '',
+      qty:         page.qty || 0,
+      isExchange:  Boolean(page.isExchangeMatch),
+      processedAt: now,
+      pageNumber:  page.pageNumber,
+    };
+
+    const cust = customers[customerKey];
+    if (cust) {
+      // Avoid duplicate order numbers
+      const isDuplicate = page.orderNo &&
+        cust.orders.some(o => o.orderNo && o.orderNo === page.orderNo);
+      if (!isDuplicate) {
+        cust.orders.push(orderEntry);
+      }
+    }
+
+    // Also push to the flat orders log for daily-view queries
+    const isDuplicateFlat = page.orderNo &&
+      orders.some(o => o.orderNo === page.orderNo && o.customerKey === customerKey);
+    if (!isDuplicateFlat) {
+      orders.push({
+        orderNo:         page.orderNo || '',
+        customerKey,
+        customerName:    customers[customerKey]?.customerName || customerName,
+        customerAddress: page.customerAddress || '',
+        billTo:          page.billTo || '',
+        qty:             page.qty || 0,
+        isExchange:      Boolean(page.isExchangeMatch),
+        isRepeat:        Boolean(existing),
+        processedAt:     now,
+        pageNumber:      page.pageNumber,
+      });
     }
   }
 
-  saveHistory(updatedCustomers);
-  return buildCustomerHistorySummary(updatedCustomers);
-}
-
-function getCustomerHistory() {
-  const customers = loadHistory();
+  saveStore({ customers, orders });
   return buildCustomerHistorySummary(customers);
 }
 
-module.exports = { annotateAndPersistHistory, getCustomerHistory };
+// ─── Query helpers ─────────────────────────────────────────────────────────────
+
+function buildCustomerHistorySummary(customersMap) {
+  const list = Object.values(customersMap).map(c => ({
+    ...c,
+    isRepeat: Array.isArray(c.orders) && c.orders.length > 1,
+  }));
+  list.sort((a, b) => a.customerName.localeCompare(b.customerName));
+  return {
+    totalCustomers: list.length,
+    customers: list,
+  };
+}
+
+function getCustomerHistory() {
+  const { customers } = loadStore();
+  return buildCustomerHistorySummary(customers);
+}
+
+function getOrdersByDate(date) {
+  const { orders } = loadStore();
+  if (!date) return orders.slice().sort((a, b) => new Date(b.processedAt) - new Date(a.processedAt));
+  return orders
+    .filter(o => o.processedAt && o.processedAt.startsWith(date))
+    .sort((a, b) => new Date(b.processedAt) - new Date(a.processedAt));
+}
+
+function getAllOrders() {
+  const { orders } = loadStore();
+  return orders.slice().sort((a, b) => new Date(b.processedAt) - new Date(a.processedAt));
+}
+
+// ─── Scan / claim event integration ───────────────────────────────────────────
+
+function lookupOrder(orderNo) {
+  if (!orderNo) return null;
+  const store = loadStore();
+  const order = store.orders.find(o => o.orderNo === String(orderNo));
+  if (!order) return null;
+  return { ...order, customer: store.customers[order.customerKey] || null };
+}
+
+function recordScanEvent(orderNo, eventData) {
+  if (!orderNo) return false;
+  const store = loadStore();
+  const order = store.orders.find(o => o.orderNo === String(orderNo));
+  if (!order) return false;
+
+  if (!Array.isArray(order.scanEvents)) order.scanEvents = [];
+
+  const existing = order.scanEvents.find(e => e.awb === eventData.awb);
+  if (existing) {
+    Object.assign(existing, eventData, { updatedAt: new Date().toISOString() });
+  } else {
+    order.scanEvents.push({ ...eventData, createdAt: new Date().toISOString() });
+  }
+
+  // Mirror onto the customer's per-order record
+  const cust = store.customers[order.customerKey];
+  if (cust && Array.isArray(cust.orders)) {
+    const custOrder = cust.orders.find(o => o.orderNo === String(orderNo));
+    if (custOrder) {
+      if (!Array.isArray(custOrder.scanEvents)) custOrder.scanEvents = [];
+      const cExisting = custOrder.scanEvents.find(e => e.awb === eventData.awb);
+      if (cExisting) {
+        Object.assign(cExisting, eventData, { updatedAt: new Date().toISOString() });
+      } else {
+        custOrder.scanEvents.push({ ...eventData, createdAt: new Date().toISOString() });
+      }
+    }
+  }
+
+  saveStore(store);
+  return true;
+}
+
+module.exports = { annotateAndPersistHistory, getCustomerHistory, getOrdersByDate, getAllOrders, lookupOrder, recordScanEvent };

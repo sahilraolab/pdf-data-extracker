@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDF Suite — Pricing Plans</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:        #1e40af;
+      --primary-dark:   #1e3a8a;
+      --primary-light:  #eff6ff;
+      --primary-border: #bfdbfe;
+      --bg:             #f1f5f9;
+      --surface:        #ffffff;
+      --border:         #e2e8f0;
+      --text:           #0f172a;
+      --text-2:         #475569;
+      --muted:          #94a3b8;
+      --green:          #059669;
+      --green-light:    #ecfdf5;
+      --amber:          #d97706;
+      --radius:         10px;
+      --shadow:         0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+      --shadow-md:      0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -1px rgba(0,0,0,.06);
+      --shadow-lg:      0 10px 25px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05);
+    }
+
+    html, body {
+      min-height: 100%;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.5;
+    }
+
+    /* ── Navigation ── */
+    nav { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow); }
+    .nav-inner { max-width: 1100px; margin: 0 auto; padding: 0 24px; height: 60px; display: flex; align-items: center; gap: 24px; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-weight: 700; font-size: 17px; }
+    .logo-icon { width: 34px; height: 34px; background: var(--primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 17px; }
+    .nav-links { display: flex; gap: 2px; list-style: none; }
+    .nav-links a { padding: 6px 13px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500; color: var(--text-2); transition: all .15s; }
+    .nav-links a:hover { background: var(--bg); color: var(--text); }
+    .nav-links a.active { color: var(--primary); background: var(--primary-light); }
+    .nav-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+    .nbtn { padding: 7px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; border: none; transition: all .15s; font-family: inherit; }
+    .nbtn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-2); }
+    .nbtn-outline:hover { border-color: var(--primary); color: var(--primary); }
+    .nbtn-primary { background: var(--primary); color: #fff; }
+    .nbtn-primary:hover { background: var(--primary-dark); }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      padding: 64px 24px 48px;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    .hero-badge {
+      display: inline-block;
+      padding: 4px 14px;
+      background: var(--primary-light);
+      border: 1px solid var(--primary-border);
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 18px;
+    }
+    .hero h1 { font-size: 38px; font-weight: 800; line-height: 1.2; color: var(--text); margin-bottom: 14px; letter-spacing: -.5px; }
+    .hero p  { font-size: 17px; color: var(--text-2); line-height: 1.6; }
+
+    /* ── Billing toggle ── */
+    .billing-toggle {
+      display: flex; align-items: center; justify-content: center;
+      gap: 12px; margin: 0 auto 44px;
+    }
+    .billing-toggle span { font-size: 14px; font-weight: 500; color: var(--text-2); }
+    .billing-toggle .active-label { color: var(--text); font-weight: 600; }
+    .toggle-pill {
+      position: relative; width: 52px; height: 28px;
+      background: var(--border); border-radius: 28px; cursor: pointer;
+      transition: background .2s;
+    }
+    .toggle-pill.on { background: var(--primary); }
+    .toggle-pill::before {
+      content: ''; position: absolute;
+      width: 22px; height: 22px; border-radius: 50%; background: #fff;
+      top: 3px; left: 3px; transition: transform .2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    }
+    .toggle-pill.on::before { transform: translateX(24px); }
+    .save-chip {
+      font-size: 11px; font-weight: 700; padding: 2px 8px;
+      background: #dcfce7; color: var(--green);
+      border: 1px solid #86efac; border-radius: 20px;
+    }
+
+    /* ── Plans grid ── */
+    .plans-section { max-width: 1040px; margin: 0 auto; padding: 0 20px 60px; }
+    .plans-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 840px) { .plans-grid { grid-template-columns: 1fr; max-width: 440px; margin: 0 auto; } }
+
+    .plan-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      box-shadow: var(--shadow);
+      position: relative;
+      transition: box-shadow .2s, transform .2s;
+    }
+    .plan-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .plan-card.featured {
+      border-color: var(--primary);
+      box-shadow: var(--shadow-lg), 0 0 0 1px var(--primary);
+      transform: scale(1.02);
+    }
+    .plan-card.featured:hover { transform: scale(1.02) translateY(-2px); }
+
+    .popular-badge {
+      position: absolute;
+      top: -12px; left: 50%; transform: translateX(-50%);
+      background: var(--primary);
+      color: #fff;
+      font-size: 11px; font-weight: 700;
+      padding: 3px 14px; border-radius: 20px;
+      letter-spacing: .5px; text-transform: uppercase;
+    }
+
+    .plan-name  { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); margin-bottom: 6px; }
+    .plan-price { display: flex; align-items: flex-end; gap: 4px; margin: 10px 0 4px; }
+    .price-amount { font-size: 38px; font-weight: 800; color: var(--text); line-height: 1; }
+    .price-currency { font-size: 20px; font-weight: 600; color: var(--text-2); margin-bottom: 6px; }
+    .price-per  { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+    .plan-annual-note { font-size: 12px; color: var(--green); font-weight: 500; margin-bottom: 14px; min-height: 18px; }
+    .plan-desc  { font-size: 13px; color: var(--text-2); margin-bottom: 22px; line-height: 1.5; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+
+    .plan-cta {
+      display: block; width: 100%; padding: 12px;
+      border-radius: 8px; text-align: center;
+      font-size: 14px; font-weight: 700; font-family: inherit;
+      cursor: pointer; border: none; transition: all .15s;
+      text-decoration: none; margin-bottom: 22px;
+    }
+    .cta-outline { background: transparent; border: 2px solid var(--border); color: var(--text-2); }
+    .cta-outline:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+    .cta-primary { background: var(--primary); color: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.1); }
+    .cta-primary:hover { background: var(--primary-dark); }
+    .cta-dark { background: var(--text); color: #fff; }
+    .cta-dark:hover { background: #1e293b; }
+
+    .features-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .7px; color: var(--muted); margin-bottom: 12px; }
+    .feature-list { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+    .feature-list li { display: flex; align-items: flex-start; gap: 9px; font-size: 13px; color: var(--text-2); }
+    .feature-list li .fi { flex-shrink: 0; margin-top: 1px; font-size: 13px; }
+    .fi-yes  { color: var(--green); }
+    .fi-no   { color: var(--muted); }
+    .fi-star { color: var(--amber); }
+
+    /* ── Comparison table ── */
+    .comparison-section {
+      max-width: 1040px; margin: 0 auto; padding: 0 20px 64px;
+    }
+    .comparison-section h2 {
+      font-size: 22px; font-weight: 700; text-align: center; margin-bottom: 28px;
+    }
+    .compare-table {
+      width: 100%; border-collapse: collapse;
+      background: var(--surface); border-radius: var(--radius);
+      overflow: hidden; box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+    .compare-table thead th {
+      padding: 14px 20px; text-align: center;
+      background: var(--bg); font-size: 13px; font-weight: 700;
+      border-bottom: 2px solid var(--border); color: var(--text);
+    }
+    .compare-table thead th:first-child { text-align: left; }
+    .compare-table thead th.featured-col { background: var(--primary-light); color: var(--primary); }
+    .compare-table tbody td {
+      padding: 12px 20px; text-align: center;
+      font-size: 13px; color: var(--text-2);
+      border-bottom: 1px solid var(--border);
+    }
+    .compare-table tbody td:first-child { text-align: left; color: var(--text); font-weight: 500; }
+    .compare-table tbody td.featured-col { background: rgba(239,246,255,.4); }
+    .compare-table tbody tr:last-child td { border-bottom: none; }
+    .compare-table tbody tr:hover td { background: var(--bg); }
+    .compare-table tbody tr:hover td.featured-col { background: rgba(239,246,255,.7); }
+    .check { color: var(--green); font-size: 15px; }
+    .cross { color: var(--muted); font-size: 15px; }
+    @media (max-width: 680px) { .compare-table { font-size: 12px; } .compare-table td, .compare-table th { padding: 10px 12px; } }
+
+    /* ── FAQ ── */
+    .faq-section { max-width: 680px; margin: 0 auto; padding: 0 20px 72px; }
+    .faq-section h2 { font-size: 22px; font-weight: 700; text-align: center; margin-bottom: 28px; }
+    .faq-item { border-bottom: 1px solid var(--border); }
+    .faq-item summary {
+      padding: 16px 4px; cursor: pointer; list-style: none;
+      font-weight: 600; font-size: 15px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .faq-item summary::-webkit-details-marker { display: none; }
+    .faq-item[open] summary { color: var(--primary); }
+    .faq-chevron { font-size: 12px; color: var(--muted); transition: transform .2s; flex-shrink: 0; }
+    .faq-item[open] .faq-chevron { transform: rotate(180deg); }
+    .faq-body { padding: 0 4px 16px; font-size: 14px; color: var(--text-2); line-height: 1.7; }
+
+    /* ── CTA banner ── */
+    .cta-banner {
+      max-width: 1040px; margin: 0 auto 64px; padding: 0 20px;
+    }
+    .cta-inner {
+      background: linear-gradient(135deg, var(--primary) 0%, #1d4ed8 100%);
+      border-radius: 14px;
+      padding: 48px 40px;
+      text-align: center;
+      color: #fff;
+    }
+    .cta-inner h2 { font-size: 26px; font-weight: 800; margin-bottom: 10px; }
+    .cta-inner p  { font-size: 16px; opacity: .85; margin-bottom: 28px; }
+    .cta-inner a {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #fff; color: var(--primary);
+      padding: 13px 32px; border-radius: 8px;
+      font-size: 15px; font-weight: 700;
+      text-decoration: none; transition: all .15s;
+    }
+    .cta-inner a:hover { background: var(--primary-light); }
+
+    /* ── Footer ── */
+    footer { background: var(--surface); border-top: 1px solid var(--border); padding: 18px 24px; text-align: center; font-size: 13px; color: var(--muted); }
+    footer a { color: var(--primary); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav>
+    <div class="nav-inner">
+      <a href="/" class="nav-logo">
+        <div class="logo-icon">📄</div>
+        PDF Suite
+      </a>
+      <ul class="nav-links">
+        <li><a href="/">Tool</a></li>
+        <li><a href="/plans" class="active">Plans</a></li>
+        <li><a href="/admin">Admin</a></li>
+      </ul>
+      <div class="nav-right">
+        <a href="/" class="nbtn nbtn-outline">Open Tool</a>
+        <a href="#plans" class="nbtn nbtn-primary">Get Started</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <div class="hero">
+    <span class="hero-badge">Transparent Pricing</span>
+    <h1>Simple plans for every seller</h1>
+    <p>From individual Meesho sellers to large fulfilment teams — pick the plan that matches your volume.</p>
+  </div>
+
+  <!-- Billing toggle -->
+  <div class="billing-toggle">
+    <span id="monthlyLabel" class="active-label">Monthly</span>
+    <div class="toggle-pill" id="billingToggle" role="button" tabindex="0"></div>
+    <span id="yearlyLabel">Yearly</span>
+    <span class="save-chip">Save 20%</span>
+  </div>
+
+  <!-- Plans -->
+  <div class="plans-section" id="plans">
+    <div class="plans-grid">
+
+      <!-- Starter / Free -->
+      <div class="plan-card">
+        <div class="plan-name">Starter</div>
+        <div class="plan-price">
+          <span class="price-currency">₹</span>
+          <span class="price-amount">0</span>
+        </div>
+        <div class="price-per">per month &nbsp;·&nbsp; always free</div>
+        <div class="plan-annual-note"></div>
+        <div class="plan-desc">Perfect for trying out the tool and occasional use.</div>
+        <a href="/" class="plan-cta cta-outline">Get Started Free</a>
+        <div class="features-label">What's included</div>
+        <ul class="feature-list">
+          <li><span class="fi fi-yes">✓</span> 5 uploads per day</li>
+          <li><span class="fi fi-yes">✓</span> Up to 50 pages per PDF</li>
+          <li><span class="fi fi-yes">✓</span> Keyword filter</li>
+          <li><span class="fi fi-yes">✓</span> Qty &gt; 1 filter</li>
+          <li><span class="fi fi-no">✗</span> Exchange filter</li>
+          <li><span class="fi fi-no">✗</span> Customer history</li>
+          <li><span class="fi fi-no">✗</span> Bulk download</li>
+          <li><span class="fi fi-no">✗</span> API access</li>
+        </ul>
+      </div>
+
+      <!-- Professional (featured) -->
+      <div class="plan-card featured">
+        <div class="popular-badge">Most Popular</div>
+        <div class="plan-name">Professional</div>
+        <div class="plan-price">
+          <span class="price-currency">₹</span>
+          <span class="price-amount" id="proPrice">999</span>
+        </div>
+        <div class="price-per">per month</div>
+        <div class="plan-annual-note" id="proAnnualNote"></div>
+        <div class="plan-desc">For power users processing high volumes of daily invoices.</div>
+        <a href="#" class="plan-cta cta-primary" onclick="return false;">Start Free Trial →</a>
+        <div class="features-label">Everything in Starter, plus</div>
+        <ul class="feature-list">
+          <li><span class="fi fi-yes">✓</span> Unlimited uploads per day</li>
+          <li><span class="fi fi-yes">✓</span> Up to 500 pages per PDF</li>
+          <li><span class="fi fi-yes">✓</span> All 3 filters (incl. Exchange)</li>
+          <li><span class="fi fi-yes">✓</span> Customer history dashboard</li>
+          <li><span class="fi fi-yes">✓</span> CSV data export</li>
+          <li><span class="fi fi-yes">✓</span> Filtered PDF download</li>
+          <li><span class="fi fi-no">✗</span> API access</li>
+          <li><span class="fi fi-no">✗</span> Team members</li>
+        </ul>
+      </div>
+
+      <!-- Business -->
+      <div class="plan-card">
+        <div class="plan-name">Business</div>
+        <div class="plan-price">
+          <span class="price-currency">₹</span>
+          <span class="price-amount" id="bizPrice">2999</span>
+        </div>
+        <div class="price-per">per month</div>
+        <div class="plan-annual-note" id="bizAnnualNote"></div>
+        <div class="plan-desc">For teams and high-volume fulfilment operations.</div>
+        <a href="#" class="plan-cta cta-dark" onclick="return false;">Contact Sales →</a>
+        <div class="features-label">Everything in Professional, plus</div>
+        <ul class="feature-list">
+          <li><span class="fi fi-yes">✓</span> Unlimited pages per PDF</li>
+          <li><span class="fi fi-star">★</span> REST API access</li>
+          <li><span class="fi fi-star">★</span> 5 team members</li>
+          <li><span class="fi fi-star">★</span> Priority email support</li>
+          <li><span class="fi fi-star">★</span> Advanced analytics</li>
+          <li><span class="fi fi-star">★</span> Dedicated account manager</li>
+          <li><span class="fi fi-star">★</span> Custom integrations</li>
+          <li><span class="fi fi-star">★</span> SLA guarantee</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Comparison table -->
+  <div class="comparison-section">
+    <h2>Full Feature Comparison</h2>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Starter</th>
+          <th class="featured-col">Professional</th>
+          <th>Business</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Price (monthly)</td>
+          <td>Free</td>
+          <td class="featured-col">₹999/mo</td>
+          <td>₹2,999/mo</td>
+        </tr>
+        <tr>
+          <td>Uploads per day</td>
+          <td>5</td>
+          <td class="featured-col">Unlimited</td>
+          <td>Unlimited</td>
+        </tr>
+        <tr>
+          <td>Max pages per PDF</td>
+          <td>50</td>
+          <td class="featured-col">500</td>
+          <td>Unlimited</td>
+        </tr>
+        <tr>
+          <td>Keyword filter</td>
+          <td><span class="check">✓</span></td>
+          <td class="featured-col"><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Qty &gt; 1 filter</td>
+          <td><span class="check">✓</span></td>
+          <td class="featured-col"><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Exchange filter</td>
+          <td><span class="cross">—</span></td>
+          <td class="featured-col"><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Filtered PDF download</td>
+          <td><span class="cross">—</span></td>
+          <td class="featured-col"><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Customer history</td>
+          <td><span class="cross">—</span></td>
+          <td class="featured-col"><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>CSV data export</td>
+          <td><span class="cross">—</span></td>
+          <td class="featured-col"><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>API access</td>
+          <td><span class="cross">—</span></td>
+          <td class="featured-col"><span class="cross">—</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Team members</td>
+          <td>1</td>
+          <td class="featured-col">1</td>
+          <td>Up to 5</td>
+        </tr>
+        <tr>
+          <td>Priority support</td>
+          <td><span class="cross">—</span></td>
+          <td class="featured-col"><span class="cross">—</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>SLA guarantee</td>
+          <td><span class="cross">—</span></td>
+          <td class="featured-col"><span class="cross">—</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FAQ -->
+  <div class="faq-section">
+    <h2>Frequently Asked Questions</h2>
+
+    <details class="faq-item">
+      <summary>Can I change my plan later? <span class="faq-chevron">▼</span></summary>
+      <div class="faq-body">Yes. You can upgrade or downgrade at any time. Upgrades take effect immediately; downgrades apply at the start of your next billing cycle.</div>
+    </details>
+
+    <details class="faq-item">
+      <summary>Is there a free trial for paid plans? <span class="faq-chevron">▼</span></summary>
+      <div class="faq-body">The Professional plan comes with a 7-day free trial. No credit card required to start. Business plans can be evaluated via a demo — contact us to schedule one.</div>
+    </details>
+
+    <details class="faq-item">
+      <summary>What payment methods are accepted? <span class="faq-chevron">▼</span></summary>
+      <div class="faq-body">We accept UPI, net banking, debit/credit cards (Visa, Mastercard, RuPay), and Paytm. All payments are processed securely via Razorpay.</div>
+    </details>
+
+    <details class="faq-item">
+      <summary>What happens if I exceed the page limit? <span class="faq-chevron">▼</span></summary>
+      <div class="faq-body">If your PDF exceeds the page limit for your plan, you'll be prompted to upgrade. Pages beyond the limit won't be processed on the Starter plan.</div>
+    </details>
+
+    <details class="faq-item">
+      <summary>Can I get a refund? <span class="faq-chevron">▼</span></summary>
+      <div class="faq-body">We offer a 7-day money-back guarantee for all paid plans. If you're not satisfied, contact support within 7 days of your purchase for a full refund.</div>
+    </details>
+
+    <details class="faq-item">
+      <summary>Is my data safe? <span class="faq-chevron">▼</span></summary>
+      <div class="faq-body">Uploaded PDFs are processed in memory and deleted immediately after analysis. Generated filtered PDFs are stored for 1 hour for re-download, then permanently deleted. We do not store your invoice data.</div>
+    </details>
+  </div>
+
+  <!-- CTA Banner -->
+  <div class="cta-banner">
+    <div class="cta-inner">
+      <h2>Ready to streamline your invoice workflow?</h2>
+      <p>Join sellers already saving hours every day with PDF Suite.</p>
+      <a href="/">Start for Free — No Credit Card Required</a>
+    </div>
+  </div>
+
+  <footer>
+    PDF Suite &nbsp;·&nbsp;
+    <a href="/">Tool</a> &nbsp;·&nbsp;
+    <a href="/plans">Plans</a> &nbsp;·&nbsp;
+    <a href="/admin">Admin</a>
+  </footer>
+
+  <script>
+    const billingToggle  = document.getElementById('billingToggle');
+    const monthlyLabel   = document.getElementById('monthlyLabel');
+    const yearlyLabel    = document.getElementById('yearlyLabel');
+    const proPrice       = document.getElementById('proPrice');
+    const bizPrice       = document.getElementById('bizPrice');
+    const proAnnualNote  = document.getElementById('proAnnualNote');
+    const bizAnnualNote  = document.getElementById('bizAnnualNote');
+
+    let yearly = false;
+
+    billingToggle.addEventListener('click', toggleBilling);
+    billingToggle.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') toggleBilling(); });
+
+    function toggleBilling() {
+      yearly = !yearly;
+      billingToggle.classList.toggle('on', yearly);
+      monthlyLabel.classList.toggle('active-label', !yearly);
+      yearlyLabel.classList.toggle('active-label', yearly);
+
+      if (yearly) {
+        proPrice.textContent     = '799';
+        bizPrice.textContent     = '2,399';
+        proAnnualNote.textContent = '₹9,588 billed annually (save ₹2,400)';
+        bizAnnualNote.textContent = '₹28,788 billed annually (save ₹7,200)';
+      } else {
+        proPrice.textContent     = '999';
+        bizPrice.textContent     = '2,999';
+        proAnnualNote.textContent = '';
+        bizAnnualNote.textContent = '';
+      }
+    }
+  </script>
+</body>
+</html>

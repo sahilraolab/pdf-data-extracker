@@ -105,6 +105,7 @@ function processPages(pageTexts, opts = {}) {
       customerAddress: parsed.customerAddress,
       billTo: parsed.billTo,
       qty: parsed.qty,
+      orderNo: parsed.orderNo || '',
       isTextMatch,
       isQtyMatch,
       isExchangeMatch,

@@ -3,25 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PDF Invoice Filter</title>
+  <title>PDF Suite — Invoice Filter</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:         #0f1117;
-      --surface:    #1a1d27;
-      --surface2:   #22263a;
-      --border:     #2e3350;
-      --accent:     #6c63ff;
-      --accent-dim: #4c45b5;
-      --green:      #22c55e;
-      --red:        #ef4444;
-      --amber:      #f59e0b;
-      --purple:     #a78bfa;
-      --cyan:       #22d3ee;
-      --text:       #e2e8f0;
-      --muted:      #8892b0;
-      --radius:     12px;
+      --primary:        #1e40af;
+      --primary-dark:   #1e3a8a;
+      --primary-light:  #eff6ff;
+      --primary-border: #bfdbfe;
+      --bg:             #f1f5f9;
+      --surface:        #ffffff;
+      --border:         #e2e8f0;
+      --text:           #0f172a;
+      --text-2:         #475569;
+      --muted:          #94a3b8;
+      --green:          #059669;
+      --green-light:    #ecfdf5;
+      --green-border:   #6ee7b7;
+      --red:            #dc2626;
+      --red-light:      #fef2f2;
+      --amber:          #d97706;
+      --amber-light:    #fffbeb;
+      --purple:         #7c3aed;
+      --purple-light:   #f5f3ff;
+      --radius:         8px;
+      --shadow:         0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+      --shadow-md:      0 4px 6px -1px rgba(0,0,0,.08), 0 2px 4px -1px rgba(0,0,0,.05);
     }
 
     html, body {
@@ -30,560 +38,389 @@
       background: var(--bg);
       color: var(--text);
       font-size: 15px;
+      line-height: 1.5;
     }
 
-    .app {
-      min-height: 100vh;
-      display: grid;
-      grid-template-rows: auto 1fr auto;
-    }
-
-    /* ── Header ── */
-    header {
-      padding: 18px 32px;
+    /* ── Navigation ─────────────────────────────── */
+    nav {
+      background: var(--surface);
       border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: var(--shadow);
+    }
+    .nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 60px;
       display: flex;
       align-items: center;
-      gap: 12px;
-      background: var(--surface);
-    }
-    header .logo {
-      width: 36px; height: 36px;
-      background: var(--accent);
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px;
-    }
-    header h1  { font-size: 18px; font-weight: 600; letter-spacing: -.3px; }
-    header p   { font-size: 12px; color: var(--muted); margin-top: 2px; }
-    header .hbadge {
-      margin-left: auto;
-      font-size: 11px;
-      padding: 3px 10px;
-      border-radius: 20px;
-      background: rgba(108,99,255,.15);
-      color: var(--accent);
-      border: 1px solid rgba(108,99,255,.3);
-      text-decoration: none;
-    }
-
-    /* ── Main ── */
-    main {
-      max-width: 960px;
-      width: 100%;
-      margin: 0 auto;
-      padding: 36px 24px;
-      display: flex;
-      flex-direction: column;
       gap: 24px;
     }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: var(--text);
+      font-weight: 700; font-size: 17px;
+    }
+    .logo-icon {
+      width: 34px; height: 34px;
+      background: var(--primary);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 17px;
+    }
+    .nav-links { display: flex; gap: 2px; list-style: none; }
+    .nav-links a {
+      padding: 6px 13px; border-radius: 6px;
+      text-decoration: none; font-size: 14px; font-weight: 500;
+      color: var(--text-2); transition: all .15s;
+    }
+    .nav-links a:hover { background: var(--bg); color: var(--text); }
+    .nav-links a.active { color: var(--primary); background: var(--primary-light); }
+    .nav-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+    .nbtn {
+      padding: 7px 16px; border-radius: 6px;
+      font-size: 13px; font-weight: 600;
+      cursor: pointer; text-decoration: none; border: none;
+      transition: all .15s; font-family: inherit;
+    }
+    .nbtn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-2); }
+    .nbtn-outline:hover { border-color: var(--primary); color: var(--primary); }
+    .nbtn-primary { background: var(--primary); color: #fff; }
+    .nbtn-primary:hover { background: var(--primary-dark); }
 
-    footer {
-      padding: 16px 32px;
-      border-top: 1px solid var(--border);
-      text-align: center;
-      font-size: 12px;
-      color: var(--muted);
+    /* ── Layout ─────────────────────────────────── */
+    .page { min-height: 100vh; display: flex; flex-direction: column; }
+    main {
+      flex: 1; max-width: 960px; width: 100%;
+      margin: 0 auto; padding: 28px 20px;
+      display: flex; flex-direction: column; gap: 18px;
     }
 
-    /* ── Card ── */
+    /* ── Page header ─────────────────────────────── */
+    .page-header {
+      display: flex; align-items: flex-start;
+      justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    }
+    .page-header h1 { font-size: 21px; font-weight: 700; }
+    .page-header p  { font-size: 13px; color: var(--text-2); margin-top: 3px; }
+
+    /* ── Card ────────────────────────────────────── */
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 24px 28px;
+      box-shadow: var(--shadow);
+      padding: 22px 24px;
     }
 
     .section-label {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .9px;
-      color: var(--muted);
-      margin-bottom: 16px;
+      font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .8px;
+      color: var(--muted); margin-bottom: 14px;
+    }
+    .section-hint {
+      font-size: 13px; color: var(--text-2); margin-bottom: 14px;
     }
 
-    /* ── Upload zone ── */
+    /* ── Upload zone ─────────────────────────────── */
     .drop-zone {
       border: 2px dashed var(--border);
       border-radius: var(--radius);
-      padding: 48px 24px;
-      text-align: center;
-      cursor: pointer;
+      padding: 44px 24px; text-align: center;
+      cursor: pointer; position: relative;
       transition: border-color .2s, background .2s;
-      position: relative;
+      background: var(--bg);
     }
     .drop-zone:hover, .drop-zone.drag-over {
-      border-color: var(--accent);
-      background: rgba(108,99,255,.06);
+      border-color: var(--primary); background: var(--primary-light);
     }
     .drop-zone input[type="file"] {
-      position: absolute; inset: 0;
-      opacity: 0; cursor: pointer;
-      width: 100%; height: 100%;
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
     }
     .drop-icon  { font-size: 38px; display: block; margin-bottom: 10px; }
-    .drop-zone h3 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
-    .drop-zone p  { font-size: 13px; color: var(--muted); }
+    .drop-zone h3 { font-size: 16px; font-weight: 600; margin-bottom: 5px; }
+    .drop-zone p  { font-size: 13px; color: var(--text-2); }
     .file-chip {
-      display: none;
-      margin-top: 14px;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 8px 16px;
-      background: rgba(108,99,255,.12);
-      border-radius: 8px;
-      font-size: 13px;
-      color: var(--accent);
+      display: none; margin-top: 14px;
+      align-items: center; justify-content: center; gap: 8px;
+      padding: 9px 16px;
+      background: var(--primary-light); border: 1px solid var(--primary-border);
+      border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--primary);
     }
     .file-chip.visible { display: flex; }
 
-    /* ── Filter cards grid ── */
+    /* ── Filters grid ────────────────────────────── */
     .filters-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 12px;
     }
-    @media (max-width: 700px) { .filters-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 680px) { .filters-grid { grid-template-columns: 1fr; } }
 
-    /* individual filter card */
     .filter-card {
-      background: var(--surface2);
-      border: 2px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      transition: border-color .2s;
+      background: var(--bg); border: 2px solid var(--border);
+      border-radius: var(--radius); padding: 16px;
+      display: flex; flex-direction: column; gap: 10px;
+      transition: border-color .2s, background .2s;
     }
-    .filter-card.active-f1 { border-color: rgba(108,99,255,.55); }
-    .filter-card.active-f2 { border-color: rgba(245,158,11,.55); }
-    .filter-card.active-f3 { border-color: rgba(167,139,250,.55); }
+    .filter-card.active-f1 { border-color: var(--primary); background: var(--primary-light); }
+    .filter-card.active-f2 { border-color: var(--amber);   background: var(--amber-light); }
+    .filter-card.active-f3 { border-color: var(--purple);  background: var(--purple-light); }
 
     .filter-header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 10px;
+      display: flex; align-items: flex-start;
+      justify-content: space-between; gap: 10px;
     }
     .filter-icon {
-      width: 34px; height: 34px;
-      border-radius: 8px;
+      width: 32px; height: 32px; border-radius: 8px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
-      flex-shrink: 0;
+      font-size: 15px; flex-shrink: 0;
     }
-    .f1-icon { background: rgba(108,99,255,.15); }
-    .f2-icon { background: rgba(245,158,11,.15); }
-    .f3-icon { background: rgba(167,139,250,.15); }
+    .f1-icon { background: #dbeafe; }
+    .f2-icon { background: #fef3c7; }
+    .f3-icon { background: #ede9fe; }
+    .filter-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .filter-desc  { font-size: 12px; color: var(--text-2); }
 
-    .filter-title  { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
-    .filter-desc   { font-size: 12px; color: var(--muted); }
-
-    /* toggle */
+    /* toggle switch */
     .switch { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
     .switch input { opacity: 0; width: 0; height: 0; }
     .slider {
-      position: absolute; inset: 0;
-      background: var(--border);
-      border-radius: 22px;
-      transition: background .2s;
-      cursor: pointer;
+      position: absolute; inset: 0; background: var(--border);
+      border-radius: 22px; transition: background .2s; cursor: pointer;
     }
     .slider::before {
-      content: '';
-      position: absolute;
-      width: 16px; height: 16px;
-      border-radius: 50%;
-      background: #fff;
-      top: 3px; left: 3px;
-      transition: transform .2s;
+      content: ''; position: absolute;
+      width: 16px; height: 16px; border-radius: 50%; background: #fff;
+      top: 3px; left: 3px; transition: transform .2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,.2);
     }
-    .switch input:checked + .slider { background: var(--accent); }
+    .switch input:checked + .slider { background: var(--primary); }
     .switch input:checked + .slider::before { transform: translateX(18px); }
 
-    /* keyword input */
     .keyword-wrap { display: none; }
     .keyword-wrap.visible { display: block; }
     .keyword-input {
-      width: 100%;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 9px 12px;
-      font-size: 13px;
-      color: var(--text);
-      outline: none;
-      transition: border-color .15s;
+      width: 100%; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 6px;
+      padding: 8px 12px; font-size: 13px; font-family: inherit;
+      color: var(--text); outline: none; transition: border-color .15s, box-shadow .15s;
     }
-    .keyword-input:focus { border-color: var(--accent); }
+    .keyword-input:focus {
+      border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30,64,175,.1);
+    }
     .keyword-input::placeholder { color: var(--muted); }
 
-    /* ── Output options ── */
-    .output-row {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-    .opt-toggle {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px 16px;
-      cursor: pointer;
-      flex: 1;
-      min-width: 180px;
-      transition: border-color .15s;
-    }
-    .opt-toggle:hover { border-color: var(--accent); }
-    .opt-toggle .label   { font-size: 14px; font-weight: 500; }
-    .opt-toggle .sublabel { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
+    /* ── Download mode cards ─────────────────────── */
     .download-buttons-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-      margin-top: 16px;
+      display: grid; grid-template-columns: repeat(2,1fr); gap: 10px;
     }
+    @media (max-width: 680px) { .download-buttons-grid { grid-template-columns: 1fr; } }
+
     .download-mode-card {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      justify-content: center;
-      gap: 4px;
-      padding: 18px 16px;
-      width: 100%;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      cursor: pointer;
-      text-align: left;
-      transition: border-color .15s, background .15s;
-      font: inherit;
-      color: inherit;
+      display: flex; flex-direction: column; gap: 3px;
+      padding: 15px; background: var(--bg);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      cursor: pointer; text-align: left;
+      transition: border-color .15s, box-shadow .15s;
+      font: inherit; color: var(--text);
     }
-    .download-mode-card:hover {
-      border-color: var(--accent);
-      background: rgba(108,99,255,.06);
+    .download-mode-card:hover:not(:disabled) {
+      border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30,64,175,.08);
     }
-    .download-mode-card:disabled {
-      opacity: .5;
-      cursor: not-allowed;
-      background: var(--surface);
-      border-color: var(--border);
-    }
-    .download-mode-card .label {
-      font-size: 14px;
-      font-weight: 700;
-      margin-bottom: 2px;
-    }
-    .download-mode-card .sublabel {
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
-    .download-mode-card .count {
-      font-size: 12px;
-      color: var(--accent);
-      font-weight: 600;
-    }
+    .download-mode-card:disabled { opacity: .45; cursor: not-allowed; }
+    .download-mode-card .label   { font-size: 14px; font-weight: 600; }
+    .download-mode-card .sublabel { font-size: 12px; color: var(--text-2); }
+    .download-mode-card .count   { font-size: 12px; color: var(--primary); font-weight: 600; margin-top: 4px; }
 
-    @media (max-width: 700px) { .download-buttons-grid { grid-template-columns: 1fr; } }
-
-    /* ── Button ── */
+    /* ── Buttons ─────────────────────────────────── */
     .btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-      padding: 13px 28px;
-      border-radius: 10px;
-      font-size: 15px; font-weight: 600;
-      cursor: pointer; border: none;
-      transition: opacity .15s, transform .1s;
+      padding: 12px 28px; border-radius: 8px;
+      font-size: 15px; font-weight: 600; font-family: inherit;
+      cursor: pointer; border: none; transition: all .15s;
     }
-    .btn:active { transform: scale(.98); }
-    .btn:disabled { opacity: .4; cursor: not-allowed; }
-    .btn-primary  { background: var(--accent); color: #fff; width: 100%; }
-    .btn-primary:not(:disabled):hover { background: var(--accent-dim); }
-    .btn-outline  { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
-    .btn-outline:hover { background: rgba(108,99,255,.1); }
+    .btn:active { transform: scale(.99); }
+    .btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+    .btn-primary  { background: var(--primary); color: #fff; width: 100%; box-shadow: 0 1px 2px rgba(0,0,0,.1); }
+    .btn-primary:not(:disabled):hover { background: var(--primary-dark); }
+    .btn-outline  { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
+    .btn-outline:hover { background: var(--primary-light); }
 
-    /* ── Progress ── */
+    /* ── Progress ────────────────────────────────── */
     .progress-wrap { display: none; margin-top: 12px; }
     .progress-wrap.visible { display: block; }
-    .progress-track { height: 4px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
-    .progress-bar {
-      height: 100%; background: var(--accent); border-radius: 4px;
-      width: 0%; transition: width .3s ease;
-      animation: pulse-bar 1.5s ease-in-out infinite;
-    }
-    @keyframes pulse-bar { 0%,100%{opacity:1} 50%{opacity:.5} }
-    .progress-label { font-size: 12px; color: var(--muted); margin-top: 6px; text-align: center; }
+    .progress-track { height: 5px; background: var(--border); border-radius: 4px; overflow: hidden; }
+    .progress-bar   { height: 100%; background: var(--primary); border-radius: 4px; width: 0%; transition: width .3s ease; }
+    .progress-label { font-size: 12px; color: var(--text-2); margin-top: 7px; text-align: center; }
 
-    /* ── Error box ── */
+    /* ── Error ───────────────────────────────────── */
     .error-box {
-      background: rgba(239,68,68,.08);
-      border: 1px solid rgba(239,68,68,.25);
-      border-radius: 10px;
-      padding: 14px 18px;
-      font-size: 13px; color: var(--red);
-      display: none; margin-top: 12px;
+      background: var(--red-light); border: 1px solid #fecaca;
+      border-radius: 8px; padding: 11px 15px;
+      font-size: 13px; color: var(--red); display: none; margin-top: 12px;
     }
     .error-box.visible { display: block; }
 
-    /* ── Stats row ── */
+    /* ── Stats row ───────────────────────────────── */
     .stats-row {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      margin-bottom: 24px;
+      display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 18px;
     }
     @media (max-width: 560px) { .stats-row { grid-template-columns: 1fr 1fr; } }
     .stat-card {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 16px;
-      text-align: center;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 14px; text-align: center; box-shadow: var(--shadow);
     }
-    .stat-num   { font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+    .stat-num   { font-size: 26px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
     .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
-    .s-total   .stat-num { color: var(--amber); }
+    .s-total   .stat-num { color: var(--text); }
     .s-matched .stat-num { color: var(--green); }
-    .s-text    .stat-num { color: var(--accent); }
+    .s-text    .stat-num { color: var(--primary); }
     .s-qty     .stat-num { color: var(--amber); }
     .s-exch    .stat-num { color: var(--purple); }
 
-    /* ── Filter tabs ── */
+    /* ── Filter tabs ─────────────────────────────── */
     .results-header {
       display: flex; align-items: center; justify-content: space-between;
-      flex-wrap: wrap; gap: 10px; margin-bottom: 16px;
+      flex-wrap: wrap; gap: 10px; margin-bottom: 13px;
     }
     .filter-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
     .tab {
       padding: 5px 13px; border-radius: 20px;
-      font-size: 12px; font-weight: 600;
+      font-size: 13px; font-weight: 500;
       cursor: pointer; border: 1px solid var(--border);
-      background: transparent; color: var(--muted);
-      transition: all .15s;
+      background: var(--surface); color: var(--text-2);
+      transition: all .15s; font-family: inherit;
     }
-    .tab.active-all  { background: var(--accent);  border-color: var(--accent);  color: #fff; }
-    .tab.active-text { background: var(--accent);  border-color: var(--accent);  color: #fff; }
-    .tab.active-qty  { background: var(--amber);   border-color: var(--amber);   color: #000; }
+    .tab.active-all  { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .tab.active-text { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .tab.active-qty  { background: var(--amber);   border-color: var(--amber);   color: #fff; }
     .tab.active-exch { background: var(--purple);  border-color: var(--purple);  color: #fff; }
 
-    /* ── Page list ── */
-    .page-list { display: flex; flex-direction: column; gap: 10px; }
+    /* ── Page list ───────────────────────────────── */
+    .page-list { display: flex; flex-direction: column; gap: 8px; }
     .page-item {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      overflow: hidden;
-      transition: border-color .15s;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden;
+      box-shadow: var(--shadow); transition: border-color .15s;
     }
-    .page-item:hover { border-color: #3e4460; }
+    .page-item:hover { border-color: #cbd5e1; }
     .page-item.matched   { border-left: 3px solid var(--green); }
-    .page-item.unmatched { border-left: 3px solid var(--border); }
+    .page-item.unmatched { border-left: 3px solid #e2e8f0; }
 
     .page-header {
       display: flex; align-items: center;
-      padding: 13px 18px; cursor: pointer; gap: 12px;
-      user-select: none;
+      padding: 11px 15px; cursor: pointer; gap: 11px; user-select: none;
     }
     .page-num {
-      width: 30px; height: 30px; border-radius: 7px;
-      background: var(--surface); border: 1px solid var(--border);
+      width: 28px; height: 28px; border-radius: 6px;
+      background: var(--bg); border: 1px solid var(--border);
       display: flex; align-items: center; justify-content: center;
-      font-size: 12px; font-weight: 700; flex-shrink: 0;
+      font-size: 12px; font-weight: 700; flex-shrink: 0; color: var(--text-2);
     }
     .page-meta { flex: 1; min-width: 0; }
-    .page-meta .address { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .page-meta .sub     { font-size: 11px; color: var(--muted); margin-top: 1px; }
-    .page-badges { display: flex; align-items: center; gap: 6px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
-
+    .page-meta .address {
+      font-size: 13px; font-weight: 500;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .page-meta .sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+    .page-badges {
+      display: flex; align-items: center; gap: 5px;
+      flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end;
+    }
     .badge-pill {
       font-size: 11px; font-weight: 600;
-      padding: 3px 9px; border-radius: 20px;
-      white-space: nowrap;
+      padding: 3px 8px; border-radius: 20px; white-space: nowrap;
     }
-    .bp-green  { background: rgba(34,197,94,.14);  color: var(--green);  border: 1px solid rgba(34,197,94,.3); }
-    .bp-red    { background: rgba(239,68,68,.12);  color: var(--red);    border: 1px solid rgba(239,68,68,.25); }
-    .bp-amber  { background: rgba(245,158,11,.12); color: var(--amber);  border: 1px solid rgba(245,158,11,.3); }
-    .bp-purple { background: rgba(167,139,250,.12);color: var(--purple); border: 1px solid rgba(167,139,250,.3); }
-    .bp-gray   { background: rgba(136,146,176,.1); color: var(--muted);  border: 1px solid var(--border); }
+    .bp-green  { background: var(--green-light);  color: var(--green);  border: 1px solid var(--green-border); }
+    .bp-red    { background: var(--red-light);    color: var(--red);    border: 1px solid #fecaca; }
+    .bp-amber  { background: var(--amber-light);  color: var(--amber);  border: 1px solid #fde68a; }
+    .bp-purple { background: var(--purple-light); color: var(--purple); border: 1px solid #ddd6fe; }
+    .bp-gray   { background: var(--bg);           color: var(--muted);  border: 1px solid var(--border); }
 
     .chevron { font-size: 11px; color: var(--muted); transition: transform .2s; flex-shrink: 0; }
     .page-item.open .chevron { transform: rotate(180deg); }
 
     .page-details {
-      display: none;
-      padding: 0 18px 18px;
-      border-top: 1px solid var(--border);
+      display: none; padding: 0 15px 15px; border-top: 1px solid var(--border);
     }
     .page-item.open .page-details { display: block; }
 
-    .history-summary {
-      font-size: 13px;
-      color: var(--text);
-      margin-bottom: 14px;
-    }
-    .history-grid {
-      display: grid;
-      gap: 12px;
-    }
-    .history-item details {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      overflow: hidden;
-    }
-    .history-item summary {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 16px;
-      cursor: pointer;
-      list-style: none;
-      background: var(--surface);
-      color: var(--text);
-    }
-    .history-item summary::-webkit-details-marker {
-      display: none;
-    }
-    .history-item[open] summary {
-      background: rgba(108, 99, 255, .08);
-    }
-    .history-item .history-header {
-      display: grid;
-      gap: 4px;
-      min-width: 0;
-    }
-    .history-item .name {
-      font-size: 14px;
-      font-weight: 700;
-      line-height: 1.2;
-    }
-    .history-item .history-meta {
-      font-size: 12px;
-      color: var(--muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .history-item .history-content {
-      padding: 16px;
-      border-top: 1px solid var(--border);
-      background: var(--surface);
-    }
-    .history-item .history-row {
-      display: grid;
-      gap: 8px;
-      margin-top: 8px;
-    }
-    .history-item .history-row .line {
-      font-size: 12px;
-      color: var(--muted);
-      white-space: pre-wrap;
-      line-height: 1.5;
-    }
-
-    .history-item .chevron {
-      font-size: 12px;
-      transition: transform .2s ease;
-      color: var(--muted);
-    }
-    .history-item[open] .chevron {
-      transform: rotate(180deg);
-    }
-
-    #historyCard {
-      padding: 0;
-      overflow: hidden;
-    }
-    #historyCard summary.history-card-summary {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 18px 20px;
-      cursor: pointer;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      list-style: none;
-    }
-    #historyCard summary.history-card-summary .section-label {
-      margin-bottom: 4px;
-    }
-    #historyCard summary.history-card-summary .history-summary {
-      margin: 0;
-      color: var(--muted);
-      font-size: 12px;
-    }
-    #historyCard summary.history-card-summary::-webkit-details-marker {
-      display: none;
-    }
-    #historyCard[open] summary.history-card-summary {
-      background: rgba(108, 99, 255, .06);
-    }
-    #historyCard .history-grid {
-      padding: 16px 20px 20px;
-    }
-    #historyCard .chevron {
-      font-size: 12px;
-      transition: transform .2s ease;
-      color: var(--muted);
-    }
-    #historyCard[open] .chevron {
-      transform: rotate(180deg);
-    }
-
     .detail-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 14px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px;
     }
     @media (max-width: 560px) { .detail-grid { grid-template-columns: 1fr; } }
     .detail-block label {
       font-size: 10px; font-weight: 700;
       text-transform: uppercase; letter-spacing: .8px;
-      color: var(--muted); display: block; margin-bottom: 4px;
+      color: var(--muted); display: block; margin-bottom: 3px;
     }
     .detail-block pre {
-      font-size: 12px; font-family: 'SF Mono','Fira Code',monospace;
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 6px; padding: 10px 12px;
+      font-size: 12px; font-family: 'Cascadia Code','SF Mono','Fira Code',monospace;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 6px; padding: 9px 11px;
       white-space: pre-wrap; word-break: break-word;
-      color: var(--text); min-height: 36px;
+      color: var(--text); min-height: 34px;
     }
-    .detail-block.full { grid-column: 1 / -1; }
+    .detail-block.full { grid-column: 1/-1; }
 
-    /* ── Download banner ── */
+    /* ── Download banner ─────────────────────────── */
     .download-banner {
-      display: flex; align-items: center; gap: 16px;
-      background: linear-gradient(135deg,rgba(108,99,255,.12),rgba(34,197,94,.08));
-      border: 1px solid rgba(108,99,255,.3);
-      border-radius: var(--radius);
-      padding: 20px 24px;
-      flex-wrap: wrap;
+      display: flex; align-items: center; gap: 14px;
+      background: var(--primary-light); border: 1px solid var(--primary-border);
+      border-radius: var(--radius); padding: 18px 22px; flex-wrap: wrap;
     }
-    .download-banner .icon { font-size: 26px; }
+    .download-banner .icon { font-size: 22px; }
     .download-banner h3 { font-size: 15px; font-weight: 600; }
-    .download-banner p  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .download-banner p  { font-size: 12px; color: var(--text-2); margin-top: 2px; }
     .download-banner .btn-outline { margin-left: auto; white-space: nowrap; }
 
-    /* ── Empty/hidden ── */
-    .state-box { text-align: center; padding: 48px 24px; color: var(--muted); }
-    .state-box .icon { font-size: 36px; display: block; margin-bottom: 10px; }
-    .state-box h3 { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    /* ── Customer history ────────────────────────── */
+    #historyCard { padding: 0; overflow: hidden; }
+    #historyCard summary.history-card-summary {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 16px 20px; cursor: pointer;
+      background: var(--surface); border-bottom: 1px solid var(--border); list-style: none;
+    }
+    #historyCard summary.history-card-summary .section-label { margin-bottom: 4px; }
+    #historyCard summary.history-card-summary .history-summary { margin: 0; color: var(--text-2); font-size: 12px; }
+    #historyCard summary.history-card-summary::-webkit-details-marker { display: none; }
+    #historyCard[open] summary.history-card-summary { background: var(--primary-light); }
+    #historyCard .history-grid { padding: 14px 18px 18px; display: flex; flex-direction: column; gap: 8px; }
+    #historyCard .chevron { font-size: 12px; transition: transform .2s; color: var(--muted); }
+    #historyCard[open] .chevron { transform: rotate(180deg); }
+
+    .history-item details { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .history-item summary {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; padding: 13px 15px; cursor: pointer; list-style: none; color: var(--text);
+    }
+    .history-item summary::-webkit-details-marker { display: none; }
+    .history-item[open] summary { background: var(--primary-light); }
+    .history-item .history-header { display: grid; gap: 2px; min-width: 0; }
+    .history-item .name { font-size: 14px; font-weight: 600; }
+    .history-item .history-meta { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .history-item .history-content { padding: 13px 15px; border-top: 1px solid var(--border); }
+    .history-item .history-row { display: grid; gap: 7px; }
+    .history-item .history-row .line { font-size: 12px; color: var(--text-2); line-height: 1.6; }
+    .history-item .chevron { font-size: 12px; transition: transform .2s; color: var(--muted); }
+    .history-item[open] .chevron { transform: rotate(180deg); }
+
+    /* ── State boxes ─────────────────────────────── */
+    .state-box { text-align: center; padding: 44px 24px; color: var(--muted); }
+    .state-box .icon { font-size: 34px; display: block; margin-bottom: 10px; }
+    .state-box h3 { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
     .state-box p  { font-size: 13px; }
 
     #results-section, #download-section { display: none; }
     #results-section.visible, #download-section.visible { display: block; }
+
+    /* ── Footer ──────────────────────────────────── */
+    footer {
+      background: var(--surface); border-top: 1px solid var(--border);
+      padding: 18px 24px; text-align: center; font-size: 13px; color: var(--muted);
+    }
+    footer a { color: var(--primary); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
 
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
@@ -591,28 +428,46 @@
   </style>
 </head>
 <body>
-<div class="app">
+<div class="page">
 
-  <!-- Header -->
-  <header>
-    <div class="logo">📄</div>
-    <div>
-      <h1>PDF Invoice Filter</h1>
-      <p>Three independent filters — use any combination</p>
+  <!-- Navigation -->
+  <nav>
+    <div class="nav-inner">
+      <a href="/" class="nav-logo">
+        <div class="logo-icon">📄</div>
+        PDF Suite
+      </a>
+      <ul class="nav-links">
+        <li><a href="/" class="active">Tool</a></li>
+        <li><a href="/dashboard">Dashboard</a></li>
+        <li><a href="/plans">Plans</a></li>
+        <li><a href="/admin">Admin</a></li>
+      </ul>
+      <div class="nav-right">
+        <a href="/health" target="_blank" class="nbtn nbtn-outline">● API Status</a>
+        <a href="/plans" class="nbtn nbtn-primary">View Plans</a>
+      </div>
     </div>
-    <a href="/health" target="_blank" class="hbadge">● API Health</a>
-  </header>
+  </nav>
 
   <main>
 
-    <!-- Upload -->
+    <!-- Page header -->
+    <div class="page-header">
+      <div>
+        <h1>PDF Invoice Filter</h1>
+        <p>Upload your invoice PDF and apply filters to extract exactly the pages you need.</p>
+      </div>
+    </div>
+
+    <!-- Step 1 — Upload -->
     <div class="card">
-      <div class="section-label">Upload PDF</div>
+      <div class="section-label">Step 1 — Upload PDF</div>
       <div class="drop-zone" id="dropZone">
         <input type="file" id="fileInput" accept="application/pdf" />
         <span class="drop-icon">📂</span>
         <h3>Drop your PDF here</h3>
-        <p>or click to browse · max 50 MB · PDF only</p>
+        <p>or click to browse &nbsp;·&nbsp; max 50 MB &nbsp;·&nbsp; PDF only</p>
         <div class="file-chip" id="fileChip">
           <span>📎</span><span id="fileChipName"></span>
         </div>
@@ -620,19 +475,19 @@
       <div class="error-box" id="errorBox"></div>
     </div>
 
-    <!-- Three independent filters -->
+    <!-- Step 2 — Filters -->
     <div class="card">
-      <div class="section-label">Filters — enable any combination</div>
+      <div class="section-label">Step 2 — Configure Filters</div>
+      <p class="section-hint">Enable any combination. Pages matching at least one active filter are marked as matched.</p>
       <div class="filters-grid">
 
-        <!-- Filter 1: Keyword search -->
         <div class="filter-card" id="fc1">
           <div class="filter-header">
             <div style="display:flex;gap:10px;align-items:flex-start;">
               <div class="filter-icon f1-icon">🔍</div>
               <div>
                 <div class="filter-title">Keyword Search</div>
-                <div class="filter-desc">Match pages where address contains your text</div>
+                <div class="filter-desc">Match pages whose address contains your keyword</div>
               </div>
             </div>
             <label class="switch" title="Enable keyword filter">
@@ -641,24 +496,18 @@
             </label>
           </div>
           <div class="keyword-wrap" id="keywordWrap">
-            <input
-              type="text"
-              id="filterTextInput"
-              class="keyword-input"
-              placeholder="e.g. Delhi, Mumbai, Pune…"
-              autocomplete="off"
-            />
+            <input type="text" id="filterTextInput" class="keyword-input"
+              placeholder="e.g. Delhi, Mumbai, Pune…" autocomplete="off" />
           </div>
         </div>
 
-        <!-- Filter 2: Qty > 1 -->
         <div class="filter-card" id="fc2">
           <div class="filter-header">
             <div style="display:flex;gap:10px;align-items:flex-start;">
               <div class="filter-icon f2-icon">📦</div>
               <div>
                 <div class="filter-title">Qty &gt; 1</div>
-                <div class="filter-desc">Pages where extracted quantity is more than one</div>
+                <div class="filter-desc">Pages where extracted quantity exceeds one</div>
               </div>
             </div>
             <label class="switch" title="Enable qty filter">
@@ -668,14 +517,13 @@
           </div>
         </div>
 
-        <!-- Filter 3: Exchange heading -->
         <div class="filter-card" id="fc3">
           <div class="filter-header">
             <div style="display:flex;gap:10px;align-items:flex-start;">
               <div class="filter-icon f3-icon">🔄</div>
               <div>
                 <div class="filter-title">Exchange</div>
-                <div class="filter-desc">Pages containing the word "exchange"</div>
+                <div class="filter-desc">Pages containing the "exchange" keyword</div>
               </div>
             </div>
             <label class="switch" title="Enable exchange filter">
@@ -688,10 +536,11 @@
       </div>
     </div>
 
+    <!-- Customer history -->
     <details class="card" id="historyCard">
       <summary class="history-card-summary">
         <div>
-          <div class="section-label">Known customer dashboard</div>
+          <div class="section-label">Known Customer Dashboard</div>
           <div class="history-summary" id="historySummary">Loading saved customer records…</div>
         </div>
         <span class="chevron">▼</span>
@@ -699,34 +548,35 @@
       <div class="history-grid" id="historyList"></div>
     </details>
 
-    <!-- Download options -->
+    <!-- Step 3 — Download (shown after analysis) -->
     <div class="card" id="downloadActionsCard" style="display:none;">
-      <div class="section-label">Download pages</div>
+      <div class="section-label">Step 3 — Download Filtered Pages</div>
+      <p class="section-hint">Choose which group of pages to export as a new PDF.</p>
       <div class="download-buttons-grid">
         <button class="download-mode-card" id="downloadKeywordBtn" type="button">
-          <div class="label">Keyword matches</div>
-          <div class="sublabel">Download pages matching the keyword filter</div>
+          <div class="label">🔍 Keyword Matches</div>
+          <div class="sublabel">Pages matching the keyword filter</div>
           <div class="count" id="downloadKeywordCount"></div>
         </button>
         <button class="download-mode-card" id="downloadQtyBtn" type="button">
-          <div class="label">Qty &gt; 1 matches</div>
-          <div class="sublabel">Download pages where quantity is greater than one</div>
+          <div class="label">📦 Qty &gt; 1 Matches</div>
+          <div class="sublabel">Pages where quantity is greater than one</div>
           <div class="count" id="downloadQtyCount"></div>
         </button>
         <button class="download-mode-card" id="downloadExchangeBtn" type="button">
-          <div class="label">Exchange matches</div>
-          <div class="sublabel">Download pages containing exchange content</div>
+          <div class="label">🔄 Exchange Matches</div>
+          <div class="sublabel">Pages containing exchange content</div>
           <div class="count" id="downloadExchangeCount"></div>
         </button>
         <button class="download-mode-card" id="downloadUnmatchedBtn" type="button">
-          <div class="label">Non-matching pages</div>
-          <div class="sublabel">Download pages that do not match any filter</div>
+          <div class="label">📄 Non-matching Pages</div>
+          <div class="sublabel">Pages that did not match any active filter</div>
           <div class="count" id="downloadUnmatchedCount"></div>
         </button>
       </div>
     </div>
 
-    <!-- Submit -->
+    <!-- Analyse button -->
     <div>
       <button class="btn btn-primary" id="submitBtn" disabled>
         <span id="submitIcon">🔍</span>
@@ -743,7 +593,7 @@
       <div class="download-banner">
         <span class="icon">📥</span>
         <div>
-          <h3>Filtered PDF ready</h3>
+          <h3>Filtered PDF Ready</h3>
           <p id="downloadNote">Contains matched pages</p>
         </div>
         <a class="btn btn-outline" id="downloadBtn" href="#" download>Download PDF</a>
@@ -753,13 +603,9 @@
     <!-- Results -->
     <div id="results-section">
       <div class="card">
-
-        <!-- Stats -->
         <div class="stats-row" id="statsRow"></div>
-
-        <!-- Page list -->
         <div class="results-header">
-          <div class="section-label" style="margin-bottom:0;">Pages</div>
+          <div class="section-label" style="margin-bottom:0;">Page Results</div>
           <div class="filter-tabs" id="filterTabs">
             <button class="tab active-all" data-filter="all">All</button>
             <button class="tab" data-filter="matched">Matched</button>
@@ -768,23 +614,29 @@
             <button class="tab" data-filter="exchange">Exchange</button>
           </div>
         </div>
-
         <div class="page-list" id="pageList"></div>
       </div>
     </div>
 
   </main>
 
-  <footer>PDF Invoice Filter · Node.js + Express + pdf-parse + pdf-lib</footer>
+  <footer>
+    PDF Suite &nbsp;·&nbsp;
+    <a href="/plans">Pricing Plans</a> &nbsp;·&nbsp;
+    <a href="/admin">Admin Dashboard</a> &nbsp;·&nbsp;
+    Built with Node.js + Express
+  </footer>
 </div>
 
 <script>
-  // ── State ──
-  let allResults   = [];
-  let activeFilter = 'all';
+  // ── State ───────────────────────────────────────────────────────────────────
+  let allResults     = [];
+  let activeFilter   = 'all';
   let appliedFilters = { text: false, qty: false, exchange: false };
+  let uploadId       = null;   // cached file ID returned by /upload
+  let downloadBuckets = { keyword: [], qty: [], exchange: [], unmatched: [] };
 
-  // ── Elements ──
+  // ── Elements ─────────────────────────────────────────────────────────────────
   const dropZone        = document.getElementById('dropZone');
   const fileInput       = document.getElementById('fileInput');
   const fileChip        = document.getElementById('fileChip');
@@ -803,29 +655,27 @@
   const downloadSection = document.getElementById('download-section');
   const downloadBtn     = document.getElementById('downloadBtn');
   const downloadNote    = document.getElementById('downloadNote');
-
   const togText         = document.getElementById('togText');
   const filterTextInput = document.getElementById('filterTextInput');
   const keywordWrap     = document.getElementById('keywordWrap');
   const togQty          = document.getElementById('togQty');
   const togExchange     = document.getElementById('togExchange');
-  const downloadActionsCard = document.getElementById('downloadActionsCard');
-  const downloadKeywordBtn  = document.getElementById('downloadKeywordBtn');
-  const downloadQtyBtn      = document.getElementById('downloadQtyBtn');
-  const downloadExchangeBtn = document.getElementById('downloadExchangeBtn');
+  const downloadActionsCard  = document.getElementById('downloadActionsCard');
+  const downloadKeywordBtn   = document.getElementById('downloadKeywordBtn');
+  const downloadQtyBtn       = document.getElementById('downloadQtyBtn');
+  const downloadExchangeBtn  = document.getElementById('downloadExchangeBtn');
   const downloadUnmatchedBtn = document.getElementById('downloadUnmatchedBtn');
-  const downloadKeywordCount = document.getElementById('downloadKeywordCount');
-  const downloadQtyCount     = document.getElementById('downloadQtyCount');
+  const downloadKeywordCount  = document.getElementById('downloadKeywordCount');
+  const downloadQtyCount      = document.getElementById('downloadQtyCount');
   const downloadExchangeCount = document.getElementById('downloadExchangeCount');
-  const downloadUnmatchedCount = document.getElementById('downloadUnmatchedCount');
+  const downloadUnmatchedCount= document.getElementById('downloadUnmatchedCount');
   const historySummary = document.getElementById('historySummary');
-  const historyList = document.getElementById('historyList');
-
+  const historyList    = document.getElementById('historyList');
   const fc1 = document.getElementById('fc1');
   const fc2 = document.getElementById('fc2');
   const fc3 = document.getElementById('fc3');
 
-  // ── Filter card active state ──
+  // ── Filter card toggles ───────────────────────────────────────────────────────
   togText.addEventListener('change', () => {
     fc1.classList.toggle('active-f1', togText.checked);
     keywordWrap.classList.toggle('visible', togText.checked);
@@ -834,17 +684,19 @@
   togQty.addEventListener('change',      () => fc2.classList.toggle('active-f2', togQty.checked));
   togExchange.addEventListener('change', () => fc3.classList.toggle('active-f3', togExchange.checked));
 
-  // ── File selection ──
+  // ── File selection ────────────────────────────────────────────────────────────
   fileInput.addEventListener('change', () => handleFile(fileInput.files[0]));
 
-  downloadKeywordBtn.addEventListener('click', () => handleDownload('keyword'));
-  downloadQtyBtn.addEventListener('click', () => handleDownload('qty'));
-  downloadExchangeBtn.addEventListener('click', () => handleDownload('exchange'));
-  downloadUnmatchedBtn.addEventListener('click', () => handleDownload('unmatched'));
+  // ── Download buttons → single-click generate & download ──────────────────────
+  downloadKeywordBtn.addEventListener('click',   () => generateAndDownload('keyword'));
+  downloadQtyBtn.addEventListener('click',       () => generateAndDownload('qty'));
+  downloadExchangeBtn.addEventListener('click',  () => generateAndDownload('exchange'));
+  downloadUnmatchedBtn.addEventListener('click', () => generateAndDownload('unmatched'));
 
   downloadActionsCard.style.display = 'none';
   loadCustomerHistory();
 
+  // ── Drag-and-drop ─────────────────────────────────────────────────────────────
   dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
   dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
   dropZone.addEventListener('drop', e => {
@@ -867,21 +719,20 @@
     submitBtn.disabled = false;
   }
 
-  // ── Submit ──
+  // ── Analyse ───────────────────────────────────────────────────────────────────
   submitBtn.addEventListener('click', async () => {
     const file = fileInput.files[0];
     if (!file) return;
 
-    const textEnabled     = togText.checked;
-    const filterText      = filterTextInput.value.trim();
-    const qtyFilter       = togQty.checked;
-    const exchangeFilter  = togExchange.checked;
+    const textEnabled    = togText.checked;
+    const filterText     = filterTextInput.value.trim();
+    const qtyFilter      = togQty.checked;
+    const exchangeFilter = togExchange.checked;
 
     if (textEnabled && !filterText) {
       showError('Keyword filter is enabled but no keyword was entered.');
       return;
     }
-
     if (!textEnabled && !qtyFilter && !exchangeFilter) {
       showError('Please enable at least one filter before analysing.');
       return;
@@ -897,20 +748,14 @@
     if (qtyFilter)      formData.append('qtyFilter',      'true');
     if (exchangeFilter) formData.append('exchangeFilter', 'true');
 
-    const params = new URLSearchParams();
-
     try {
       setProgress(10, 'Uploading PDF…');
-      const response = await xhrUpload(
-        `/upload?${params}`,
-        formData,
+      const response = await xhrUpload('/upload', formData,
         pct => setProgress(pct, pct < 60 ? 'Uploading PDF…' : 'Analysing pages…')
       );
       setProgress(92, 'Building results…');
       const data = await response.json();
-
       if (!response.ok) throw new Error(data.error || `Server error ${response.status}`);
-
       setProgress(100, 'Done!');
       await sleep(350);
       renderResults(data);
@@ -921,84 +766,51 @@
     }
   });
 
-  async function handleDownload(downloadMode) {
-    if (!downloadActionsCard || downloadActionsCard.style.display === 'none') {
-      showError('Please analyse the PDF first before downloading.');
-      return;
-    }
+  // ── Generate & download — single click, no re-upload ─────────────────────────
+  const MODE_LABELS = { keyword: 'Keyword', qty: 'Qty > 1', exchange: 'Exchange', unmatched: 'Non-matching' };
+  const BTN_MAP = {
+    keyword: downloadKeywordBtn, qty: downloadQtyBtn,
+    exchange: downloadExchangeBtn, unmatched: downloadUnmatchedBtn,
+  };
 
-    const file = fileInput.files[0];
-    if (!file) {
-      showError('Please choose a PDF file first.');
-      return;
-    }
+  async function generateAndDownload(mode) {
+    const pageNumbers = downloadBuckets[mode] || [];
+    if (pageNumbers.length === 0) { showError('No pages in this category.'); return; }
+    if (!uploadId) { showError('Session expired — please re-upload and analyse the PDF again.'); return; }
 
-    const filterText = filterTextInput.value.trim();
-
-    if (downloadMode === 'keyword') {
-      if (!filterText) {
-        showError('Please enter a keyword before downloading keyword matches.');
-        return;
-      }
-      togText.checked = true;
-      fc1.classList.add('active-f1');
-      keywordWrap.classList.add('visible');
-      filterTextInput.focus();
-    }
-
-    if (downloadMode === 'qty') {
-      togQty.checked = true;
-      fc2.classList.add('active-f2');
-    }
-
-    if (downloadMode === 'exchange') {
-      togExchange.checked = true;
-      fc3.classList.add('active-f3');
-    }
-
-    setLoading(true);
-    hideError();
-    downloadSection.classList.remove('visible');
-
-    const formData = new FormData();
-    formData.append('file', file);
-    if (downloadMode === 'keyword' || togText.checked) {
-      if (filterText) formData.append('filterText', filterText);
-    }
-    if (downloadMode === 'qty' || togQty.checked) {
-      formData.append('qtyFilter', 'true');
-    }
-    if (downloadMode === 'exchange' || togExchange.checked) {
-      formData.append('exchangeFilter', 'true');
-    }
-
-    const params = new URLSearchParams();
-    params.set('generatePdf', 'true');
-    params.set('downloadMode', downloadMode);
+    const btn      = BTN_MAP[mode];
+    const origHTML = btn.innerHTML;
+    btn.disabled   = true;
+    btn.innerHTML  = `<div class="label">⏳ Generating…</div><div class="sublabel">Please wait</div>`;
 
     try {
-      setProgress(10, 'Uploading PDF…');
-      const response = await xhrUpload(
-        `/upload?${params}`,
-        formData,
-        pct => setProgress(pct, pct < 60 ? 'Uploading PDF…' : 'Analysing pages…')
-      );
+      const resp = await fetch('/generate-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uploadId, mode, pageNumbers }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || 'Failed to generate PDF');
 
-      setProgress(92, 'Building results…');
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || `Server error ${response.status}`);
+      // Update banner
+      downloadBtn.href = data.downloadUrl;
+      downloadNote.textContent = `${data.pageCount} ${MODE_LABELS[mode]} page${data.pageCount !== 1 ? 's' : ''} · re-downloadable for 1 hour`;
+      downloadSection.classList.add('visible');
+      downloadSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-      setProgress(100, 'Done!');
-      await sleep(350);
-      renderResults(data);
+      // Trigger download automatically
+      const a = document.createElement('a');
+      a.href = data.downloadUrl; a.download = ''; a.style.display = 'none';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
     } catch (err) {
-      showError(err.message || 'Unexpected error. Please try again.');
+      showError(err.message || 'Could not generate PDF. Please try again.');
     } finally {
-      setLoading(false);
+      btn.disabled  = false;
+      btn.innerHTML = origHTML;
     }
   }
 
-  // ── XHR with upload progress ──
+  // ── XHR upload with progress ──────────────────────────────────────────────────
   function xhrUpload(url, body, onProgress) {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
@@ -1015,72 +827,49 @@
     });
   }
 
-  // ── Render ──
+  // ── Render results ────────────────────────────────────────────────────────────
   function renderResults(data) {
     allResults     = data.results || [];
     appliedFilters = data.filtersApplied || { text: false, qty: false, exchange: false };
     activeFilter   = 'all';
 
-    if (data.customerHistory) {
-      renderHistory(data.customerHistory);
-    }
+    // Store for single-click download
+    uploadId        = data.uploadId || null;
+    downloadBuckets = data.downloadBuckets || { keyword: [], qty: [], exchange: [], unmatched: [] };
 
-    // Reset tab active states
+    if (data.customerHistory) renderHistory(data.customerHistory);
+
     document.querySelectorAll('.tab').forEach(t => t.className = 'tab');
     document.querySelector('[data-filter="all"]').classList.add('active-all');
 
-    // Stats
-    const textCount  = allResults.filter(r => r.isTextMatch).length;
-    const qtyCount   = allResults.filter(r => r.isQtyMatch).length;
-    const exchCount  = allResults.filter(r => r.isExchangeMatch).length;
+    const textCount  = (downloadBuckets.keyword  || []).length;
+    const qtyCount   = (downloadBuckets.qty      || []).length;
+    const exchCount  = (downloadBuckets.exchange  || []).length;
+    const unmCount   = (downloadBuckets.unmatched || []).length;
 
     let statsHtml = `
-      <div class="stat-card s-total">
-        <div class="stat-num">${data.totalPages}</div>
-        <div class="stat-label">Total Pages</div>
-      </div>
-      <div class="stat-card s-matched">
-        <div class="stat-num">${data.matchedPages}</div>
-        <div class="stat-label">Matched</div>
-      </div>`;
-
+      <div class="stat-card s-total"><div class="stat-num">${data.totalPages}</div><div class="stat-label">Total Pages</div></div>
+      <div class="stat-card s-matched"><div class="stat-num">${data.matchedPages}</div><div class="stat-label">Matched</div></div>`;
     if (appliedFilters.text)     statsHtml += `<div class="stat-card s-text"><div class="stat-num">${textCount}</div><div class="stat-label">Keyword</div></div>`;
     if (appliedFilters.qty)      statsHtml += `<div class="stat-card s-qty"><div class="stat-num">${qtyCount}</div><div class="stat-label">Qty &gt; 1</div></div>`;
     if (appliedFilters.exchange) statsHtml += `<div class="stat-card s-exch"><div class="stat-num">${exchCount}</div><div class="stat-label">Exchange</div></div>`;
-
     statsRow.innerHTML = statsHtml;
 
-    const unmatchedCount = allResults.filter(r => !r.isTextMatch && !r.isQtyMatch && !r.isExchangeMatch).length;
-    downloadKeywordCount.textContent = textCount ? `${textCount} page${textCount !== 1 ? 's' : ''}` : '0 pages';
-    downloadQtyCount.textContent = qtyCount ? `${qtyCount} page${qtyCount !== 1 ? 's' : ''}` : '0 pages';
-    downloadExchangeCount.textContent = exchCount ? `${exchCount} page${exchCount !== 1 ? 's' : ''}` : '0 pages';
-    downloadUnmatchedCount.textContent = unmatchedCount ? `${unmatchedCount} page${unmatchedCount !== 1 ? 's' : ''}` : '0 pages';
+    downloadKeywordCount.textContent  = `${textCount} page${textCount !== 1 ? 's' : ''}`;
+    downloadQtyCount.textContent      = `${qtyCount} page${qtyCount !== 1 ? 's' : ''}`;
+    downloadExchangeCount.textContent = `${exchCount} page${exchCount !== 1 ? 's' : ''}`;
+    downloadUnmatchedCount.textContent= `${unmCount} page${unmCount !== 1 ? 's' : ''}`;
 
-    downloadKeywordBtn.disabled = textCount === 0;
-    downloadQtyBtn.disabled = qtyCount === 0;
-    downloadExchangeBtn.disabled = exchCount === 0;
-    downloadUnmatchedBtn.disabled = unmatchedCount === 0;
+    downloadKeywordBtn.disabled   = textCount === 0;
+    downloadQtyBtn.disabled       = qtyCount === 0;
+    downloadExchangeBtn.disabled  = exchCount === 0;
+    downloadUnmatchedBtn.disabled = unmCount === 0;
     downloadActionsCard.style.display = 'block';
-
-    if (data.downloadUrl) {
-      downloadBtn.href = data.downloadUrl;
-
-      const downloadCount = typeof data.downloadPageCount === 'number' ? data.downloadPageCount : data.matchedPages;
-      const modeLabel = data.downloadMode === 'keyword' ? 'Keyword' :
-                        data.downloadMode === 'qty' ? 'Qty > 1' :
-                        data.downloadMode === 'exchange' ? 'Exchange' :
-                        data.downloadMode === 'unmatched' ? 'Non-matching' :
-                        'Matched';
-
-      downloadNote.textContent = `Contains ${downloadCount} ${modeLabel} page${downloadCount !== 1 ? 's' : ''} · re-downloadable for 1 hour`;
-      downloadSection.classList.add('visible');
-    }
 
     resultsSection.classList.add('visible');
     renderList();
     resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
-
 
   function renderList() {
     const filtered = allResults.filter(r => {
@@ -1095,7 +884,6 @@
       pageList.innerHTML = `<div class="state-box"><span class="icon">🔍</span><h3>No pages</h3><p>Try a different tab filter.</p></div>`;
       return;
     }
-
     pageList.innerHTML = filtered.map(pageCard).join('');
     pageList.querySelectorAll('.page-header').forEach(h =>
       h.addEventListener('click', () => h.closest('.page-item').classList.toggle('open'))
@@ -1104,7 +892,6 @@
 
   function pageCard(r) {
     const badges = [];
-
     if (appliedFilters.text) {
       badges.push(r.isTextMatch
         ? `<span class="badge-pill bp-green">🔍 Match</span>`
@@ -1120,28 +907,21 @@
         ? `<span class="badge-pill bp-purple">🔄 Exchange</span>`
         : `<span class="badge-pill bp-gray">🔄 —</span>`);
     }
-
-    if (r.knownCustomer) {
-      badges.push(`<span class="badge-pill bp-green">👤 Known customer</span>`);
-    }
-    if (r.knownCustomerAddress) {
-      badges.push(`<span class="badge-pill bp-amber">🏠 Known address</span>`);
-    }
-    if (r.knownBillTo) {
-      badges.push(`<span class="badge-pill bp-purple">🚚 Known bill/ship</span>`);
-    }
+    if (r.knownCustomer)        badges.push(`<span class="badge-pill bp-green">👤 Known</span>`);
+    if (r.knownCustomerAddress) badges.push(`<span class="badge-pill bp-amber">🏠 Address</span>`);
+    if (r.knownBillTo)          badges.push(`<span class="badge-pill bp-purple">🚚 Bill/Ship</span>`);
 
     const addressLine = firstLine(r.customerAddress || r.billTo || '—');
-
+    const orderLabel  = r.orderNo ? `<span class="badge-pill bp-gray">📋 ${esc(r.orderNo)}</span>` : '';
     return `
       <div class="page-item ${r.isMatch ? 'matched' : 'unmatched'}">
         <div class="page-header">
           <div class="page-num">${r.pageNumber}</div>
           <div class="page-meta">
             <div class="address">${esc(addressLine)}</div>
-            <div class="sub">Page ${r.pageNumber}</div>
+            <div class="sub">Page ${r.pageNumber}${r.orderNo ? ' · Order ' + esc(r.orderNo) : ''}</div>
           </div>
-          <div class="page-badges">${badges.join('')}</div>
+          <div class="page-badges">${orderLabel}${badges.join('')}</div>
           <span class="chevron">▼</span>
         </div>
         <div class="page-details">
@@ -1154,7 +934,11 @@
               <label>Bill To / Ship To</label>
               <pre>${esc(r.billTo || '(not found)')}</pre>
             </div>
-            <div class="detail-block full">
+            <div class="detail-block">
+              <label>Order Number</label>
+              <pre>${esc(r.orderNo || '(not found)')}</pre>
+            </div>
+            <div class="detail-block">
               <label>Qty extracted</label>
               <pre>${r.qty}${r.isQtyMatch ? '  ✓ > 1' : ''}</pre>
             </div>
@@ -1163,7 +947,6 @@
       </div>`;
   }
 
-  // ── Tab switching ──
   filterTabs.addEventListener('click', e => {
     const tab = e.target.closest('.tab');
     if (!tab) return;
@@ -1174,47 +957,43 @@
     renderList();
   });
 
-  // ── Helpers ──
   function loadCustomerHistory() {
     fetch('/customer-history')
-      .then(res => {
-        if (!res.ok) throw new Error('Unable to load customer history');
-        return res.json();
-      })
+      .then(res => { if (!res.ok) throw new Error(); return res.json(); })
       .then(data => renderHistory(data))
-      .catch(() => {
-        historySummary.textContent = 'No saved customer data yet.';
-        historyList.innerHTML = '';
-      });
+      .catch(() => { historySummary.textContent = 'No saved customer data yet.'; historyList.innerHTML = ''; });
   }
 
   function renderHistory(data) {
     if (!data || !Array.isArray(data.customers) || data.customers.length === 0) {
-      historySummary.textContent = 'No saved customer data yet. Analyse a PDF to populate the dashboard.';
+      historySummary.textContent = 'No saved customer data yet. Analyse a PDF to populate this dashboard.';
       historyList.innerHTML = '';
       return;
     }
-
-    historySummary.textContent = `${data.totalCustomers} saved customer${data.totalCustomers !== 1 ? 's' : ''} in history.`;
-    historyList.innerHTML = data.customers.slice(0, 10).map(customer => `
+    historySummary.textContent = `${data.totalCustomers} customer${data.totalCustomers !== 1 ? 's' : ''} on record.`;
+    historyList.innerHTML = data.customers.slice(0, 10).map(c => {
+      const orderCount = Array.isArray(c.orders) ? c.orders.length : 0;
+      const repeatTag  = c.isRepeat ? `<span style="font-size:11px;font-weight:600;padding:2px 7px;border-radius:12px;background:#fef3c7;color:#d97706;border:1px solid #fde68a;">Repeat</span>` : '';
+      return `
       <div class="history-item">
         <details>
           <summary>
             <div class="history-header">
-              <div class="name">${esc(customer.customerName || 'Unknown')}</div>
-              <div class="history-meta">${esc(customer.customerAddress || customer.billTo || 'No address captured')}</div>
+              <div class="name">${esc(c.customerName || 'Unknown')} ${repeatTag}</div>
+              <div class="history-meta">${esc(c.customerAddress || c.billTo || 'No address')} · ${orderCount} order${orderCount !== 1 ? 's' : ''}</div>
             </div>
             <span class="chevron">▼</span>
           </summary>
           <div class="history-content">
             <div class="history-row">
-              <div class="line"><strong>Customer Address:</strong> ${esc(customer.customerAddress || 'Not yet captured')}</div>
-              <div class="line"><strong>Bill To / Ship To:</strong> ${esc(customer.billTo || 'Not yet captured')}</div>
+              <div class="line"><strong>Address:</strong> ${esc(c.customerAddress || 'Not captured')}</div>
+              <div class="line"><strong>Bill To:</strong> ${esc(c.billTo || 'Not captured')}</div>
+              ${orderCount > 0 ? `<div class="line"><strong>Orders:</strong> ${c.orders.map(o => esc(o.orderNo || '—')).join(', ')}</div>` : ''}
             </div>
           </div>
         </details>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
   }
 
   function setLoading(on) {
@@ -1224,10 +1003,7 @@
     progressWrap.classList.toggle('visible', on);
     if (!on) progressBar.style.width = '0%';
   }
-  function setProgress(pct, label) {
-    progressBar.style.width = pct + '%';
-    progressLabel.textContent = label;
-  }
+  function setProgress(pct, label) { progressBar.style.width = pct + '%'; progressLabel.textContent = label; }
   function showError(msg) { errorBox.textContent = '⚠ ' + msg; errorBox.classList.add('visible'); }
   function hideError()    { errorBox.classList.remove('visible'); }
   function fmtBytes(b)    { return b < 1048576 ? (b/1024).toFixed(1)+' KB' : (b/1048576).toFixed(1)+' MB'; }
