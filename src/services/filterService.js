@@ -102,10 +102,13 @@ function processPages(pageTexts, opts = {}) {
 
     const record = {
       pageNumber,
-      customerAddress: parsed.customerAddress,
-      billTo: parsed.billTo,
-      qty: parsed.qty,
-      orderNo: parsed.orderNo || '',
+      customerAddress:  parsed.customerAddress,
+      billTo:           parsed.billTo,
+      qty:              parsed.qty,
+      orderNo:          parsed.orderNo          || '',
+      awb:              parsed.awb              || '',
+      sku:              parsed.sku              || '',
+      deliveryPartner:  parsed.deliveryPartner  || '',
       isTextMatch,
       isQtyMatch,
       isExchangeMatch,

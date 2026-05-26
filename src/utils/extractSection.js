@@ -221,4 +221,90 @@ function extractOrderNo(text) {
   return '';
 }
 
-module.exports = { extractSection, extractQty, extractOrderNo };
+// ── Delivery partner names to detect ──────────────────────────────────────────
+const KNOWN_PARTNERS = [
+  'Shadowfax', 'Delhivery', 'Valmo', 'Ekart', 'Ecom Express', 'EcomExpress',
+  'Xpressbees', 'Blue Dart', 'BlueDart', 'DTDC', 'Aramex', 'FedEx', 'Borzo',
+  'Dunzo', 'Porter', 'Shiprocket', 'iThink', 'Maruti', 'Meesho Logistics',
+];
+
+/**
+ * Extracts the delivery partner / courier name from page text.
+ * Returns the matched partner name (canonical form) or empty string.
+ *
+ * @param {string} text - Full page text
+ * @returns {string}
+ */
+function extractDeliveryPartner(text) {
+  if (!text || typeof text !== 'string') return '';
+  for (const partner of KNOWN_PARTNERS) {
+    if (new RegExp(partner.replace(/\s+/g, '\\s*'), 'i').test(text)) {
+      return partner;
+    }
+  }
+  return '';
+}
+
+/**
+ * Extracts the AWB / tracking number from page text.
+ * Tries labeled extraction first, then known carrier patterns.
+ *
+ * @param {string} text - Full page text
+ * @returns {string}
+ */
+function extractAWB(text) {
+  if (!text || typeof text !== 'string') return '';
+
+  // Labeled: "AWB No:", "AWB:", "AWB Number", "Tracking No:", "Track No."
+  const labeled = /\b(?:AWB|Tracking|Track)\s*(?:No\.?|Number|ID|#)?\s*[:\-]?\s*([A-Z0-9][A-Z0-9\-]{7,24})/i.exec(text);
+  if (labeled) return labeled[1].trim();
+
+  // Shadowfax pattern: SF + digits + FPL (e.g. SF3423634993FPL)
+  const sf = /\b(SF[0-9A-Z]{8,18}FPL)\b/i.exec(text);
+  if (sf) return sf[1].trim();
+
+  // Common alphanumeric tracking: 2-4 uppercase letters + 8-16 digits + optional 0-3 letters
+  const generic = /\b([A-Z]{2,4}[0-9]{8,16}[A-Z]{0,3})\b/.exec(text);
+  if (generic) return generic[1].trim();
+
+  return '';
+}
+
+/**
+ * Extracts SKU / product variant from the product details section.
+ * Handles: explicit "SKU:" label, table header "SKU" column, or first short code.
+ *
+ * @param {string} productDetailsText - Product details section text
+ * @param {string} fullPageText - Full page text fallback
+ * @returns {string}
+ */
+function extractSKU(productDetailsText, fullPageText) {
+  const src = productDetailsText || fullPageText || '';
+  if (!src) return '';
+
+  // Explicit label: "SKU: 646 black brown" or "SKU 646BLK"
+  const labelMatch = /\bSKU\s*[:\-]?\s*([A-Z0-9][^\n,;|]{1,40})/i.exec(src);
+  if (labelMatch) {
+    return labelMatch[1].trim().slice(0, 50);
+  }
+
+  // Table header: "SKU" on a header row, value on next data row at same column position
+  const lines = src.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const hIdx  = lines.findIndex(l => /\bSKU\b/i.test(l));
+  if (hIdx !== -1 && hIdx + 1 < lines.length) {
+    const headerTokens = lines[hIdx].split(/\s+/);
+    const dataTokens   = lines[hIdx + 1].split(/\s+/);
+    const col = headerTokens.findIndex(t => /^SKU$/i.test(t));
+    if (col !== -1 && col < dataTokens.length) {
+      return dataTokens[col].trim();
+    }
+    // If data row exists, return first non-trivial token as likely SKU code
+    if (dataTokens.length > 0 && dataTokens[0].length >= 2) {
+      return dataTokens[0].trim().slice(0, 50);
+    }
+  }
+
+  return '';
+}
+
+module.exports = { extractSection, extractQty, extractOrderNo, extractAWB, extractSKU, extractDeliveryPartner };

@@ -27,6 +27,8 @@
       --amber-light:    #fffbeb;
       --purple:         #7c3aed;
       --purple-light:   #f5f3ff;
+      --teal:           #0e7490;
+      --teal-light:     #ecfeff;
       --radius:         8px;
       --shadow:         0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
       --shadow-md:      0 4px 6px -1px rgba(0,0,0,.08), 0 2px 4px -1px rgba(0,0,0,.05);
@@ -41,7 +43,6 @@
       line-height: 1.5;
     }
 
-    /* ── Navigation ─────────────────────────────── */
     nav {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
@@ -89,7 +90,6 @@
     .nbtn-primary { background: var(--primary); color: #fff; }
     .nbtn-primary:hover { background: var(--primary-dark); }
 
-    /* ── Layout ─────────────────────────────────── */
     .page { min-height: 100vh; display: flex; flex-direction: column; }
     main {
       flex: 1; max-width: 960px; width: 100%;
@@ -97,7 +97,6 @@
       display: flex; flex-direction: column; gap: 18px;
     }
 
-    /* ── Page header ─────────────────────────────── */
     .page-header {
       display: flex; align-items: flex-start;
       justify-content: space-between; gap: 16px; flex-wrap: wrap;
@@ -105,7 +104,6 @@
     .page-header h1 { font-size: 21px; font-weight: 700; }
     .page-header p  { font-size: 13px; color: var(--text-2); margin-top: 3px; }
 
-    /* ── Card ────────────────────────────────────── */
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -123,7 +121,6 @@
       font-size: 13px; color: var(--text-2); margin-bottom: 14px;
     }
 
-    /* ── Upload zone ─────────────────────────────── */
     .drop-zone {
       border: 2px dashed var(--border);
       border-radius: var(--radius);
@@ -150,7 +147,6 @@
     }
     .file-chip.visible { display: flex; }
 
-    /* ── Filters grid ────────────────────────────── */
     .filters-grid {
       display: grid; grid-template-columns: repeat(3,1fr); gap: 12px;
     }
@@ -181,7 +177,6 @@
     .filter-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
     .filter-desc  { font-size: 12px; color: var(--text-2); }
 
-    /* toggle switch */
     .switch { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
     .switch input { opacity: 0; width: 0; height: 0; }
     .slider {
@@ -210,7 +205,6 @@
     }
     .keyword-input::placeholder { color: var(--muted); }
 
-    /* ── Download mode cards ─────────────────────── */
     .download-buttons-grid {
       display: grid; grid-template-columns: repeat(2,1fr); gap: 10px;
     }
@@ -232,7 +226,6 @@
     .download-mode-card .sublabel { font-size: 12px; color: var(--text-2); }
     .download-mode-card .count   { font-size: 12px; color: var(--primary); font-weight: 600; margin-top: 4px; }
 
-    /* ── Buttons ─────────────────────────────────── */
     .btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 8px;
       padding: 12px 28px; border-radius: 8px;
@@ -246,14 +239,12 @@
     .btn-outline  { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
     .btn-outline:hover { background: var(--primary-light); }
 
-    /* ── Progress ────────────────────────────────── */
     .progress-wrap { display: none; margin-top: 12px; }
     .progress-wrap.visible { display: block; }
     .progress-track { height: 5px; background: var(--border); border-radius: 4px; overflow: hidden; }
     .progress-bar   { height: 100%; background: var(--primary); border-radius: 4px; width: 0%; transition: width .3s ease; }
     .progress-label { font-size: 12px; color: var(--text-2); margin-top: 7px; text-align: center; }
 
-    /* ── Error ───────────────────────────────────── */
     .error-box {
       background: var(--red-light); border: 1px solid #fecaca;
       border-radius: 8px; padding: 11px 15px;
@@ -261,7 +252,6 @@
     }
     .error-box.visible { display: block; }
 
-    /* ── Stats row ───────────────────────────────── */
     .stats-row {
       display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 18px;
     }
@@ -274,14 +264,14 @@
     .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
     .s-total   .stat-num { color: var(--text); }
     .s-matched .stat-num { color: var(--green); }
+    .s-unmatched .stat-num { color: var(--red); }
     .s-text    .stat-num { color: var(--primary); }
     .s-qty     .stat-num { color: var(--amber); }
     .s-exch    .stat-num { color: var(--purple); }
 
-    /* ── Filter tabs ─────────────────────────────── */
     .results-header {
       display: flex; align-items: center; justify-content: space-between;
-      flex-wrap: wrap; gap: 10px; margin-bottom: 13px;
+      flex-wrap: wrap; gap: 10px; margin-bottom: 8px;
     }
     .filter-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
     .tab {
@@ -295,8 +285,30 @@
     .tab.active-text { background: var(--primary); border-color: var(--primary); color: #fff; }
     .tab.active-qty  { background: var(--amber);   border-color: var(--amber);   color: #fff; }
     .tab.active-exch { background: var(--purple);  border-color: var(--purple);  color: #fff; }
+    .tab.active-unmatched { background: var(--red); border-color: var(--red); color: #fff; }
 
-    /* ── Page list ───────────────────────────────── */
+    /* Delivery partner filter buttons */
+    .partner-filter-wrap { margin-bottom: 12px; }
+    .partner-filter-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin-bottom: 7px; }
+    .partner-filter-row { display: flex; flex-wrap: wrap; gap: 7px; }
+    .partner-btn {
+      padding: 4px 12px; border-radius: 20px;
+      font-size: 12px; font-weight: 600;
+      cursor: pointer; border: 1px solid var(--border);
+      background: var(--surface); color: var(--text-2);
+      transition: all .15s; font-family: inherit;
+    }
+    .partner-btn.active { background: var(--teal); border-color: var(--teal); color: #fff; }
+    .partner-btn:hover:not(.active) { border-color: var(--teal); color: var(--teal); }
+
+    /* Unmatched pages notice */
+    .unmatched-notice {
+      background: var(--red-light); border: 1px solid #fecaca;
+      border-radius: 6px; padding: 9px 13px;
+      font-size: 12px; color: var(--red); margin-bottom: 10px;
+    }
+    .unmatched-notice strong { font-weight: 700; }
+
     .page-list { display: flex; flex-direction: column; gap: 8px; }
     .page-item {
       background: var(--surface); border: 1px solid var(--border);
@@ -335,6 +347,7 @@
     .bp-red    { background: var(--red-light);    color: var(--red);    border: 1px solid #fecaca; }
     .bp-amber  { background: var(--amber-light);  color: var(--amber);  border: 1px solid #fde68a; }
     .bp-purple { background: var(--purple-light); color: var(--purple); border: 1px solid #ddd6fe; }
+    .bp-teal   { background: var(--teal-light);   color: var(--teal);   border: 1px solid #a5f3fc; }
     .bp-gray   { background: var(--bg);           color: var(--muted);  border: 1px solid var(--border); }
 
     .chevron { font-size: 11px; color: var(--muted); transition: transform .2s; flex-shrink: 0; }
@@ -363,7 +376,6 @@
     }
     .detail-block.full { grid-column: 1/-1; }
 
-    /* ── Download banner ─────────────────────────── */
     .download-banner {
       display: flex; align-items: center; gap: 14px;
       background: var(--primary-light); border: 1px solid var(--primary-border);
@@ -374,38 +386,6 @@
     .download-banner p  { font-size: 12px; color: var(--text-2); margin-top: 2px; }
     .download-banner .btn-outline { margin-left: auto; white-space: nowrap; }
 
-    /* ── Customer history ────────────────────────── */
-    #historyCard { padding: 0; overflow: hidden; }
-    #historyCard summary.history-card-summary {
-      display: flex; align-items: center; justify-content: space-between; gap: 12px;
-      padding: 16px 20px; cursor: pointer;
-      background: var(--surface); border-bottom: 1px solid var(--border); list-style: none;
-    }
-    #historyCard summary.history-card-summary .section-label { margin-bottom: 4px; }
-    #historyCard summary.history-card-summary .history-summary { margin: 0; color: var(--text-2); font-size: 12px; }
-    #historyCard summary.history-card-summary::-webkit-details-marker { display: none; }
-    #historyCard[open] summary.history-card-summary { background: var(--primary-light); }
-    #historyCard .history-grid { padding: 14px 18px 18px; display: flex; flex-direction: column; gap: 8px; }
-    #historyCard .chevron { font-size: 12px; transition: transform .2s; color: var(--muted); }
-    #historyCard[open] .chevron { transform: rotate(180deg); }
-
-    .history-item details { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-    .history-item summary {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 12px; padding: 13px 15px; cursor: pointer; list-style: none; color: var(--text);
-    }
-    .history-item summary::-webkit-details-marker { display: none; }
-    .history-item[open] summary { background: var(--primary-light); }
-    .history-item .history-header { display: grid; gap: 2px; min-width: 0; }
-    .history-item .name { font-size: 14px; font-weight: 600; }
-    .history-item .history-meta { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .history-item .history-content { padding: 13px 15px; border-top: 1px solid var(--border); }
-    .history-item .history-row { display: grid; gap: 7px; }
-    .history-item .history-row .line { font-size: 12px; color: var(--text-2); line-height: 1.6; }
-    .history-item .chevron { font-size: 12px; transition: transform .2s; color: var(--muted); }
-    .history-item[open] .chevron { transform: rotate(180deg); }
-
-    /* ── State boxes ─────────────────────────────── */
     .state-box { text-align: center; padding: 44px 24px; color: var(--muted); }
     .state-box .icon { font-size: 34px; display: block; margin-bottom: 10px; }
     .state-box h3 { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
@@ -414,7 +394,6 @@
     #results-section, #download-section { display: none; }
     #results-section.visible, #download-section.visible { display: block; }
 
-    /* ── Footer ──────────────────────────────────── */
     footer {
       background: var(--surface); border-top: 1px solid var(--border);
       padding: 18px 24px; text-align: center; font-size: 13px; color: var(--muted);
@@ -430,7 +409,6 @@
 <body>
 <div class="page">
 
-  <!-- Navigation -->
   <nav>
     <div class="nav-inner">
       <a href="/" class="nav-logo">
@@ -439,24 +417,24 @@
       </a>
       <ul class="nav-links">
         <li><a href="/" class="active">Tool</a></li>
+        <li><a href="/scan">Scan</a></li>
         <li><a href="/dashboard">Dashboard</a></li>
         <li><a href="/plans">Plans</a></li>
         <li><a href="/admin">Admin</a></li>
       </ul>
       <div class="nav-right">
         <a href="/health" target="_blank" class="nbtn nbtn-outline">● API Status</a>
-        <a href="/plans" class="nbtn nbtn-primary">View Plans</a>
+        <a href="/scan" class="nbtn nbtn-primary">📦 Scan Packets</a>
       </div>
     </div>
   </nav>
 
   <main>
 
-    <!-- Page header -->
     <div class="page-header">
       <div>
         <h1>PDF Invoice Filter</h1>
-        <p>Upload your invoice PDF and apply filters to extract exactly the pages you need.</p>
+        <p>Upload your Meesho label PDF to extract order details, AWB numbers, and filter pages.</p>
       </div>
     </div>
 
@@ -536,18 +514,6 @@
       </div>
     </div>
 
-    <!-- Customer history -->
-    <details class="card" id="historyCard">
-      <summary class="history-card-summary">
-        <div>
-          <div class="section-label">Known Customer Dashboard</div>
-          <div class="history-summary" id="historySummary">Loading saved customer records…</div>
-        </div>
-        <span class="chevron">▼</span>
-      </summary>
-      <div class="history-grid" id="historyList"></div>
-    </details>
-
     <!-- Step 3 — Download (shown after analysis) -->
     <div class="card" id="downloadActionsCard" style="display:none;">
       <div class="section-label">Step 3 — Download Filtered Pages</div>
@@ -604,6 +570,16 @@
     <div id="results-section">
       <div class="card">
         <div class="stats-row" id="statsRow"></div>
+
+        <!-- Delivery partner filter buttons -->
+        <div class="partner-filter-wrap" id="partnerFilterWrap" style="display:none;">
+          <div class="partner-filter-label">Filter by Delivery Partner</div>
+          <div class="partner-filter-row" id="partnerFilterRow"></div>
+        </div>
+
+        <!-- Unmatched pages notice -->
+        <div class="unmatched-notice" id="unmatchedNotice" style="display:none;"></div>
+
         <div class="results-header">
           <div class="section-label" style="margin-bottom:0;">Page Results</div>
           <div class="filter-tabs" id="filterTabs">
@@ -612,6 +588,7 @@
             <button class="tab" data-filter="text">Keyword</button>
             <button class="tab" data-filter="qty">Qty &gt; 1</button>
             <button class="tab" data-filter="exchange">Exchange</button>
+            <button class="tab" data-filter="unmatched">Unmatched</button>
           </div>
         </div>
         <div class="page-list" id="pageList"></div>
@@ -622,6 +599,7 @@
 
   <footer>
     PDF Suite &nbsp;·&nbsp;
+    <a href="/scan">Packet Scanner</a> &nbsp;·&nbsp;
     <a href="/plans">Pricing Plans</a> &nbsp;·&nbsp;
     <a href="/admin">Admin Dashboard</a> &nbsp;·&nbsp;
     Built with Node.js + Express
@@ -629,14 +607,14 @@
 </div>
 
 <script>
-  // ── State ───────────────────────────────────────────────────────────────────
-  let allResults     = [];
-  let activeFilter   = 'all';
-  let appliedFilters = { text: false, qty: false, exchange: false };
-  let uploadId       = null;   // cached file ID returned by /upload
+  let allResults      = [];
+  let activeFilter    = 'all';
+  let activePartner   = 'all';
+  let appliedFilters  = { text: false, qty: false, exchange: false };
+  let uploadId        = null;
   let downloadBuckets = { keyword: [], qty: [], exchange: [], unmatched: [] };
+  let batchId         = null;
 
-  // ── Elements ─────────────────────────────────────────────────────────────────
   const dropZone        = document.getElementById('dropZone');
   const fileInput       = document.getElementById('fileInput');
   const fileChip        = document.getElementById('fileChip');
@@ -669,13 +647,13 @@
   const downloadQtyCount      = document.getElementById('downloadQtyCount');
   const downloadExchangeCount = document.getElementById('downloadExchangeCount');
   const downloadUnmatchedCount= document.getElementById('downloadUnmatchedCount');
-  const historySummary = document.getElementById('historySummary');
-  const historyList    = document.getElementById('historyList');
   const fc1 = document.getElementById('fc1');
   const fc2 = document.getElementById('fc2');
   const fc3 = document.getElementById('fc3');
+  const partnerFilterWrap = document.getElementById('partnerFilterWrap');
+  const partnerFilterRow  = document.getElementById('partnerFilterRow');
+  const unmatchedNotice   = document.getElementById('unmatchedNotice');
 
-  // ── Filter card toggles ───────────────────────────────────────────────────────
   togText.addEventListener('change', () => {
     fc1.classList.toggle('active-f1', togText.checked);
     keywordWrap.classList.toggle('visible', togText.checked);
@@ -684,19 +662,15 @@
   togQty.addEventListener('change',      () => fc2.classList.toggle('active-f2', togQty.checked));
   togExchange.addEventListener('change', () => fc3.classList.toggle('active-f3', togExchange.checked));
 
-  // ── File selection ────────────────────────────────────────────────────────────
   fileInput.addEventListener('change', () => handleFile(fileInput.files[0]));
 
-  // ── Download buttons → single-click generate & download ──────────────────────
   downloadKeywordBtn.addEventListener('click',   () => generateAndDownload('keyword'));
   downloadQtyBtn.addEventListener('click',       () => generateAndDownload('qty'));
   downloadExchangeBtn.addEventListener('click',  () => generateAndDownload('exchange'));
   downloadUnmatchedBtn.addEventListener('click', () => generateAndDownload('unmatched'));
 
   downloadActionsCard.style.display = 'none';
-  loadCustomerHistory();
 
-  // ── Drag-and-drop ─────────────────────────────────────────────────────────────
   dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
   dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
   dropZone.addEventListener('drop', e => {
@@ -719,7 +693,6 @@
     submitBtn.disabled = false;
   }
 
-  // ── Analyse ───────────────────────────────────────────────────────────────────
   submitBtn.addEventListener('click', async () => {
     const file = fileInput.files[0];
     if (!file) return;
@@ -766,7 +739,6 @@
     }
   });
 
-  // ── Generate & download — single click, no re-upload ─────────────────────────
   const MODE_LABELS = { keyword: 'Keyword', qty: 'Qty > 1', exchange: 'Exchange', unmatched: 'Non-matching' };
   const BTN_MAP = {
     keyword: downloadKeywordBtn, qty: downloadQtyBtn,
@@ -792,13 +764,11 @@
       const data = await resp.json();
       if (!resp.ok) throw new Error(data.error || 'Failed to generate PDF');
 
-      // Update banner
       downloadBtn.href = data.downloadUrl;
       downloadNote.textContent = `${data.pageCount} ${MODE_LABELS[mode]} page${data.pageCount !== 1 ? 's' : ''} · re-downloadable for 1 hour`;
       downloadSection.classList.add('visible');
       downloadSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-      // Trigger download automatically
       const a = document.createElement('a');
       a.href = data.downloadUrl; a.download = ''; a.style.display = 'none';
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
@@ -810,7 +780,6 @@
     }
   }
 
-  // ── XHR upload with progress ──────────────────────────────────────────────────
   function xhrUpload(url, body, onProgress) {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
@@ -827,17 +796,15 @@
     });
   }
 
-  // ── Render results ────────────────────────────────────────────────────────────
   function renderResults(data) {
     allResults     = data.results || [];
     appliedFilters = data.filtersApplied || { text: false, qty: false, exchange: false };
     activeFilter   = 'all';
+    activePartner  = 'all';
 
-    // Store for single-click download
     uploadId        = data.uploadId || null;
+    batchId         = data.batchId  || null;
     downloadBuckets = data.downloadBuckets || { keyword: [], qty: [], exchange: [], unmatched: [] };
-
-    if (data.customerHistory) renderHistory(data.customerHistory);
 
     document.querySelectorAll('.tab').forEach(t => t.className = 'tab');
     document.querySelector('[data-filter="all"]').classList.add('active-all');
@@ -849,7 +816,8 @@
 
     let statsHtml = `
       <div class="stat-card s-total"><div class="stat-num">${data.totalPages}</div><div class="stat-label">Total Pages</div></div>
-      <div class="stat-card s-matched"><div class="stat-num">${data.matchedPages}</div><div class="stat-label">Matched</div></div>`;
+      <div class="stat-card s-matched"><div class="stat-num">${data.matchedPages}</div><div class="stat-label">Matched</div></div>
+      <div class="stat-card s-unmatched"><div class="stat-num">${unmCount}</div><div class="stat-label">Unmatched</div></div>`;
     if (appliedFilters.text)     statsHtml += `<div class="stat-card s-text"><div class="stat-num">${textCount}</div><div class="stat-label">Keyword</div></div>`;
     if (appliedFilters.qty)      statsHtml += `<div class="stat-card s-qty"><div class="stat-num">${qtyCount}</div><div class="stat-label">Qty &gt; 1</div></div>`;
     if (appliedFilters.exchange) statsHtml += `<div class="stat-card s-exch"><div class="stat-num">${exchCount}</div><div class="stat-label">Exchange</div></div>`;
@@ -866,22 +834,61 @@
     downloadUnmatchedBtn.disabled = unmCount === 0;
     downloadActionsCard.style.display = 'block';
 
+    // Unmatched notice
+    if (unmCount > 0) {
+      const unmPages = downloadBuckets.unmatched.join(', ');
+      unmatchedNotice.innerHTML = `<strong>${unmCount} unmatched page${unmCount !== 1 ? 's' : ''}:</strong> ${esc(unmPages)}`;
+      unmatchedNotice.style.display = 'block';
+    } else {
+      unmatchedNotice.style.display = 'none';
+    }
+
+    // Delivery partner filter buttons
+    const partners = data.deliveryPartners || [];
+    if (partners.length > 0) {
+      partnerFilterRow.innerHTML = `<button class="partner-btn active" data-partner="all">All Partners</button>` +
+        partners.map(p => `<button class="partner-btn" data-partner="${esc(p)}">${esc(p)}</button>`).join('');
+      partnerFilterWrap.style.display = 'block';
+      partnerFilterRow.querySelectorAll('.partner-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          activePartner = btn.dataset.partner;
+          partnerFilterRow.querySelectorAll('.partner-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          renderList();
+        });
+      });
+    } else {
+      partnerFilterWrap.style.display = 'none';
+    }
+
+    // Batch saved notice
+    if (batchId) {
+      const ts = data.batchSavedAt ? new Date(data.batchSavedAt).toLocaleString() : '';
+      const scanLink = `/scan`;
+      console.log(`Batch saved: ${batchId} at ${ts}`);
+    }
+
     resultsSection.classList.add('visible');
     renderList();
     resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function renderList() {
-    const filtered = allResults.filter(r => {
-      if (activeFilter === 'matched')  return r.isMatch;
-      if (activeFilter === 'text')     return r.isTextMatch;
-      if (activeFilter === 'qty')      return r.isQtyMatch;
-      if (activeFilter === 'exchange') return r.isExchangeMatch;
+    let filtered = allResults.filter(r => {
+      if (activeFilter === 'matched')   return r.isMatch;
+      if (activeFilter === 'text')      return r.isTextMatch;
+      if (activeFilter === 'qty')       return r.isQtyMatch;
+      if (activeFilter === 'exchange')  return r.isExchangeMatch;
+      if (activeFilter === 'unmatched') return !r.isTextMatch && !r.isQtyMatch && !r.isExchangeMatch;
       return true;
     });
 
+    if (activePartner !== 'all') {
+      filtered = filtered.filter(r => (r.deliveryPartner || '') === activePartner);
+    }
+
     if (filtered.length === 0) {
-      pageList.innerHTML = `<div class="state-box"><span class="icon">🔍</span><h3>No pages</h3><p>Try a different tab filter.</p></div>`;
+      pageList.innerHTML = `<div class="state-box"><span class="icon">🔍</span><h3>No pages</h3><p>Try a different filter or partner.</p></div>`;
       return;
     }
     pageList.innerHTML = filtered.map(pageCard).join('');
@@ -907,21 +914,25 @@
         ? `<span class="badge-pill bp-purple">🔄 Exchange</span>`
         : `<span class="badge-pill bp-gray">🔄 —</span>`);
     }
-    if (r.knownCustomer)        badges.push(`<span class="badge-pill bp-green">👤 Known</span>`);
-    if (r.knownCustomerAddress) badges.push(`<span class="badge-pill bp-amber">🏠 Address</span>`);
-    if (r.knownBillTo)          badges.push(`<span class="badge-pill bp-purple">🚚 Bill/Ship</span>`);
+    if (r.deliveryPartner) badges.push(`<span class="badge-pill bp-teal">🚚 ${esc(r.deliveryPartner)}</span>`);
 
     const addressLine = firstLine(r.customerAddress || r.billTo || '—');
     const orderLabel  = r.orderNo ? `<span class="badge-pill bp-gray">📋 ${esc(r.orderNo)}</span>` : '';
+    const awbLabel    = r.awb     ? `<span class="badge-pill bp-teal">🏷 ${esc(r.awb)}</span>`     : '';
+
+    const subParts = [`Page ${r.pageNumber}`];
+    if (r.orderNo) subParts.push(`Order ${esc(r.orderNo)}`);
+    if (r.sku)     subParts.push(`SKU: ${esc(r.sku)}`);
+
     return `
       <div class="page-item ${r.isMatch ? 'matched' : 'unmatched'}">
         <div class="page-header">
           <div class="page-num">${r.pageNumber}</div>
           <div class="page-meta">
             <div class="address">${esc(addressLine)}</div>
-            <div class="sub">Page ${r.pageNumber}${r.orderNo ? ' · Order ' + esc(r.orderNo) : ''}</div>
+            <div class="sub">${subParts.join(' · ')}</div>
           </div>
-          <div class="page-badges">${orderLabel}${badges.join('')}</div>
+          <div class="page-badges">${awbLabel}${orderLabel}${badges.join('')}</div>
           <span class="chevron">▼</span>
         </div>
         <div class="page-details">
@@ -939,6 +950,18 @@
               <pre>${esc(r.orderNo || '(not found)')}</pre>
             </div>
             <div class="detail-block">
+              <label>AWB / Tracking No.</label>
+              <pre>${esc(r.awb || '(not found)')}</pre>
+            </div>
+            <div class="detail-block">
+              <label>SKU</label>
+              <pre>${esc(r.sku || '(not found)')}</pre>
+            </div>
+            <div class="detail-block">
+              <label>Delivery Partner</label>
+              <pre>${esc(r.deliveryPartner || '(not found)')}</pre>
+            </div>
+            <div class="detail-block">
               <label>Qty extracted</label>
               <pre>${r.qty}${r.isQtyMatch ? '  ✓ > 1' : ''}</pre>
             </div>
@@ -952,49 +975,13 @@
     if (!tab) return;
     activeFilter = tab.dataset.filter;
     document.querySelectorAll('.tab').forEach(t => t.className = 'tab');
-    const cls = { all:'active-all', matched:'active-all', text:'active-text', qty:'active-qty', exchange:'active-exch' };
+    const cls = {
+      all: 'active-all', matched: 'active-all', text: 'active-text',
+      qty: 'active-qty', exchange: 'active-exch', unmatched: 'active-unmatched'
+    };
     tab.classList.add(cls[activeFilter] || 'active-all');
     renderList();
   });
-
-  function loadCustomerHistory() {
-    fetch('/customer-history')
-      .then(res => { if (!res.ok) throw new Error(); return res.json(); })
-      .then(data => renderHistory(data))
-      .catch(() => { historySummary.textContent = 'No saved customer data yet.'; historyList.innerHTML = ''; });
-  }
-
-  function renderHistory(data) {
-    if (!data || !Array.isArray(data.customers) || data.customers.length === 0) {
-      historySummary.textContent = 'No saved customer data yet. Analyse a PDF to populate this dashboard.';
-      historyList.innerHTML = '';
-      return;
-    }
-    historySummary.textContent = `${data.totalCustomers} customer${data.totalCustomers !== 1 ? 's' : ''} on record.`;
-    historyList.innerHTML = data.customers.slice(0, 10).map(c => {
-      const orderCount = Array.isArray(c.orders) ? c.orders.length : 0;
-      const repeatTag  = c.isRepeat ? `<span style="font-size:11px;font-weight:600;padding:2px 7px;border-radius:12px;background:#fef3c7;color:#d97706;border:1px solid #fde68a;">Repeat</span>` : '';
-      return `
-      <div class="history-item">
-        <details>
-          <summary>
-            <div class="history-header">
-              <div class="name">${esc(c.customerName || 'Unknown')} ${repeatTag}</div>
-              <div class="history-meta">${esc(c.customerAddress || c.billTo || 'No address')} · ${orderCount} order${orderCount !== 1 ? 's' : ''}</div>
-            </div>
-            <span class="chevron">▼</span>
-          </summary>
-          <div class="history-content">
-            <div class="history-row">
-              <div class="line"><strong>Address:</strong> ${esc(c.customerAddress || 'Not captured')}</div>
-              <div class="line"><strong>Bill To:</strong> ${esc(c.billTo || 'Not captured')}</div>
-              ${orderCount > 0 ? `<div class="line"><strong>Orders:</strong> ${c.orders.map(o => esc(o.orderNo || '—')).join(', ')}</div>` : ''}
-            </div>
-          </div>
-        </details>
-      </div>`;
-    }).join('');
-  }
 
   function setLoading(on) {
     submitBtn.disabled = on;

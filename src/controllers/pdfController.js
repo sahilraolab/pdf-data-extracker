@@ -5,6 +5,7 @@ const { extractPages }                             = require('../services/pdfPar
 const { processPages }                             = require('../services/filterService');
 const { generateFilteredPdf }                      = require('../services/pdfGeneratorService');
 const { annotateAndPersistHistory, getCustomerHistory } = require('../services/customerHistoryService');
+const { saveBatch } = require('../services/batchService');
 const logger = require('../utils/logger');
 
 // ─── Upload cache ──────────────────────────────────────────────────────────────
@@ -55,7 +56,19 @@ async function uploadAndProcess(req, res) {
       results,
     } = processPages(pageTexts, { filterText, qtyFilter, exchangeFilter });
 
-    const customerHistory = annotateAndPersistHistory(results);
+    annotateAndPersistHistory(results);
+
+    // Derive unique delivery partners from results
+    const deliveryPartners = [...new Set(
+      results.map(r => r.deliveryPartner).filter(Boolean)
+    )].sort();
+
+    // Save dated batch for barcode scan workflow
+    const { batchId, savedAt: batchSavedAt } = saveBatch({
+      filename:         req.file.originalname,
+      results,
+      deliveryPartners,
+    });
 
     // Cache file so download buttons work without re-uploading
     const uploadId = cacheUploadedFile(uploadedFilePath);
@@ -65,8 +78,10 @@ async function uploadAndProcess(req, res) {
       matchedPages,
       filtersApplied,
       results,
-      customerHistory,
       uploadId,
+      batchId,
+      batchSavedAt,
+      deliveryPartners,
       downloadBuckets: {
         keyword:   keywordPageNumbers,
         qty:       qtyPageNumbers,

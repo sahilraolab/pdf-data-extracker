@@ -180,48 +180,4 @@ function getAllOrders() {
   return orders.slice().sort((a, b) => new Date(b.processedAt) - new Date(a.processedAt));
 }
 
-// ─── Scan / claim event integration ───────────────────────────────────────────
-
-function lookupOrder(orderNo) {
-  if (!orderNo) return null;
-  const store = loadStore();
-  const order = store.orders.find(o => o.orderNo === String(orderNo));
-  if (!order) return null;
-  return { ...order, customer: store.customers[order.customerKey] || null };
-}
-
-function recordScanEvent(orderNo, eventData) {
-  if (!orderNo) return false;
-  const store = loadStore();
-  const order = store.orders.find(o => o.orderNo === String(orderNo));
-  if (!order) return false;
-
-  if (!Array.isArray(order.scanEvents)) order.scanEvents = [];
-
-  const existing = order.scanEvents.find(e => e.awb === eventData.awb);
-  if (existing) {
-    Object.assign(existing, eventData, { updatedAt: new Date().toISOString() });
-  } else {
-    order.scanEvents.push({ ...eventData, createdAt: new Date().toISOString() });
-  }
-
-  // Mirror onto the customer's per-order record
-  const cust = store.customers[order.customerKey];
-  if (cust && Array.isArray(cust.orders)) {
-    const custOrder = cust.orders.find(o => o.orderNo === String(orderNo));
-    if (custOrder) {
-      if (!Array.isArray(custOrder.scanEvents)) custOrder.scanEvents = [];
-      const cExisting = custOrder.scanEvents.find(e => e.awb === eventData.awb);
-      if (cExisting) {
-        Object.assign(cExisting, eventData, { updatedAt: new Date().toISOString() });
-      } else {
-        custOrder.scanEvents.push({ ...eventData, createdAt: new Date().toISOString() });
-      }
-    }
-  }
-
-  saveStore(store);
-  return true;
-}
-
-module.exports = { annotateAndPersistHistory, getCustomerHistory, getOrdersByDate, getAllOrders, lookupOrder, recordScanEvent };
+module.exports = { annotateAndPersistHistory, getCustomerHistory, getOrdersByDate, getAllOrders };

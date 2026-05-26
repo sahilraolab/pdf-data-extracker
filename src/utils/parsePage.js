@@ -1,4 +1,4 @@
-const { extractSection, extractQty, extractOrderNo } = require('./extractSection');
+const { extractSection, extractQty, extractOrderNo, extractAWB, extractSKU, extractDeliveryPartner } = require('./extractSection');
 
 /**
  * Parses a single page's raw text and extracts structured fields.
@@ -41,8 +41,11 @@ function parsePage(pageText, pageNumber) {
     ['TAX INVOICE', 'Tax Invoice', 'TAX  INVOICE', 'Grand Total', 'GRAND TOTAL']
   );
 
-  const qty = extractQty(productDetails);
-  const orderNo = extractOrderNo(pageText);
+  const qty             = extractQty(productDetails);
+  const orderNo         = extractOrderNo(pageText);
+  const awb             = extractAWB(pageText);
+  const sku             = extractSKU(productDetails, pageText);
+  const deliveryPartner = extractDeliveryPartner(pageText);
 
   return {
     customerAddress,
@@ -50,7 +53,10 @@ function parsePage(pageText, pageNumber) {
     productDetails,
     qty,
     orderNo,
-    rawText: pageText,   // kept for full-page filters (e.g. exchange heading)
+    awb,
+    sku,
+    deliveryPartner,
+    rawText: pageText,
   };
 }
 

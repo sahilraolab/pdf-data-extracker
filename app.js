@@ -10,7 +10,8 @@ const {
   cleanupOldCacheFiles,
 } = require('./src/controllers/pdfController');
 const { cleanupOldOutputFiles } = require('./src/services/pdfGeneratorService');
-const { getOrdersByDate, getAllOrders, lookupOrder, recordScanEvent } = require('./src/services/customerHistoryService');
+const { getOrdersByDate, getAllOrders } = require('./src/services/customerHistoryService');
+const { saveBatch, markPacked, getScanStats, getBatch, listBatches } = require('./src/services/batchService');
 const logger = require('./src/utils/logger');
 
 // ─── Mock admin data ──────────────────────────────────────────────────────────
@@ -79,6 +80,7 @@ app.use((req, _res, next) => {
 app.get('/plans',     (_req, res) => res.sendFile(path.join(__dirname, 'public', 'plans.html')));
 app.get('/admin',     (_req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 app.get('/dashboard', (_req, res) => res.sendFile(path.join(__dirname, 'public', 'dashboard.html')));
+app.get('/scan',      (_req, res) => res.sendFile(path.join(__dirname, 'public', 'scan.html')));
 
 // ─── Admin API ────────────────────────────────────────────────────────────────
 
@@ -125,40 +127,52 @@ app.get('/api/orders', (req, res) => {
   }
 });
 
-// ─── Order lookup & scan-event endpoints (used by meesho-scan integration) ───
+// ─── Barcode scan ecosystem ────────────────────────────────────────────────────
 
-// GET /api/orders/lookup?orderNo=XXX
-// Returns { found: true, order: {...} } or { found: false }
-app.get('/api/orders/lookup', (req, res) => {
-  const { orderNo } = req.query;
-  if (!orderNo || typeof orderNo !== 'string' || orderNo.length > 64) {
-    return res.status(400).json({ error: 'orderNo is required.' });
+// GET /api/scan/stats?date=YYYY-MM-DD
+app.get('/api/scan/stats', (req, res) => {
+  try {
+    const date = req.query.date || new Date().toISOString().split('T')[0];
+    return res.json(getScanStats(date));
+  } catch (err) {
+    logger.error(`Scan stats error: ${err.message}`);
+    return res.status(500).json({ error: 'Unable to load scan stats.' });
   }
-  const result = lookupOrder(orderNo.trim());
-  if (!result) return res.json({ found: false });
-  return res.json({ found: true, order: result });
 });
 
-// POST /api/orders/scan-event
-// Body: { orderNo, awb, scanStatus, claimStatus, claimId, claimType, packetState, claimWindowDays, scannedAt }
-// Called by meesho-scan when a claim is filed against an order that was found in a PDF.
-app.post('/api/orders/scan-event', (req, res) => {
-  const { orderNo, awb, scanStatus, claimStatus, claimId, claimType, packetState, claimWindowDays, scannedAt } = req.body || {};
-  if (!orderNo || !awb) {
-    return res.status(400).json({ error: 'orderNo and awb are required.' });
+// GET /api/scan/batches?date=YYYY-MM-DD
+app.get('/api/scan/batches', (req, res) => {
+  try {
+    const date = req.query.date || new Date().toISOString().split('T')[0];
+    return res.json(listBatches(date));
+  } catch (err) {
+    logger.error(`List batches error: ${err.message}`);
+    return res.status(500).json({ error: 'Unable to list batches.' });
   }
-  const ok = recordScanEvent(String(orderNo), {
-    awb:             String(awb),
-    scanStatus:      scanStatus  || 'scanned',
-    claimStatus:     claimStatus || null,
-    claimId:         claimId     || null,
-    claimType:       claimType   || null,
-    packetState:     packetState || null,
-    claimWindowDays: claimWindowDays != null ? Number(claimWindowDays) : null,
-    scannedAt:       scannedAt   || new Date().toISOString(),
-  });
-  if (!ok) return res.status(404).json({ error: 'Order not found in PDF records.' });
-  return res.json({ ok: true });
+});
+
+// GET /api/scan/batch/:batchId
+app.get('/api/scan/batch/:batchId', (req, res) => {
+  try {
+    const batch = getBatch(req.params.batchId);
+    if (!batch) return res.status(404).json({ error: 'Batch not found.' });
+    return res.json(batch);
+  } catch (err) {
+    logger.error(`Get batch error: ${err.message}`);
+    return res.status(500).json({ error: 'Unable to load batch.' });
+  }
+});
+
+// POST /api/scan/mark-packed
+// Body: { code } — can be AWB number or order number from barcode scan
+app.post('/api/scan/mark-packed', (req, res) => {
+  const { code } = req.body || {};
+  if (!code || typeof code !== 'string' || code.trim().length < 3) {
+    return res.status(400).json({ error: 'code (AWB or order number) is required.' });
+  }
+  const result = markPacked(code.trim());
+  if (!result) return res.json({ found: false, code: code.trim() });
+  return res.json({ found: true, ...result });
 });
 
 // ─── Generate PDF from cache (no re-upload needed) ───────────────────────────
