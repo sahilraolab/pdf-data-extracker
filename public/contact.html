@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact — PDF Suite</title>
+  <meta name="description" content="Contact PDF Suite to get access to our Meesho label PDF management tool. We set up accounts personally and discuss pricing directly with each supplier." />
+  <link rel="canonical" href="https://pdf.techseventeen.com/contact" />
+  <meta property="og:title" content="Get Access to PDF Suite — Contact Us" />
+  <meta property="og:description" content="Contact PDF Suite to get access to our Meesho label PDF management tool. We set up accounts personally and discuss pricing directly with each supplier." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://pdf.techseventeen.com/contact" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:        #1e40af;
+      --primary-dark:   #1e3a8a;
+      --primary-light:  #eff6ff;
+      --primary-border: #bfdbfe;
+      --bg:             #f1f5f9;
+      --surface:        #ffffff;
+      --border:         #e2e8f0;
+      --text:           #0f172a;
+      --text-2:         #475569;
+      --muted:          #94a3b8;
+      --green:          #059669;
+      --green-light:    #ecfdf5;
+      --green-border:   #6ee7b7;
+      --radius:         8px;
+      --shadow:         0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+      --shadow-md:      0 4px 6px -1px rgba(0,0,0,.10), 0 2px 4px -1px rgba(0,0,0,.06);
+      --shadow-lg:      0 10px 15px -3px rgba(0,0,0,.12), 0 4px 6px -2px rgba(0,0,0,.07);
+    }
+
+    html, body {
+      min-height: 100vh;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: var(--shadow);
+    }
+    .nav-inner {
+      max-width: 1100px; margin: 0 auto;
+      padding: 0 24px; height: 64px;
+      display: flex; align-items: center; gap: 28px;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: var(--text);
+      font-weight: 800; font-size: 18px; letter-spacing: -.3px;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: var(--primary);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 18px;
+    }
+    .nav-links { display: flex; gap: 2px; list-style: none; }
+    .nav-links a {
+      padding: 6px 14px; border-radius: 6px;
+      text-decoration: none; font-size: 14px; font-weight: 500;
+      color: var(--text-2); transition: all .15s;
+    }
+    .nav-links a:hover { background: var(--bg); color: var(--text); }
+    .nav-links a.active { color: var(--primary); background: var(--primary-light); }
+    .nav-right { margin-left: auto; }
+    .nbtn {
+      padding: 8px 18px; border-radius: 7px;
+      font-size: 14px; font-weight: 600;
+      cursor: pointer; text-decoration: none; border: none;
+      transition: all .15s; font-family: inherit; display: inline-block;
+    }
+    .nbtn-primary { background: var(--primary); color: #fff; }
+    .nbtn-primary:hover { background: var(--primary-dark); }
+
+    /* ── PAGE HERO ── */
+    .page-hero {
+      background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 60%, #172554 100%);
+      color: #fff; padding: 72px 24px 64px; text-align: center;
+    }
+    .page-hero h1 {
+      font-size: clamp(30px, 5vw, 46px);
+      font-weight: 800; letter-spacing: -.4px; margin-bottom: 14px;
+    }
+    .page-hero p {
+      font-size: 18px; color: #bfdbfe;
+      max-width: 580px; margin: 0 auto; line-height: 1.65;
+    }
+
+    /* ── CONTACT LAYOUT ── */
+    .contact-section {
+      padding: 64px 24px 80px;
+    }
+    .contact-inner {
+      max-width: 980px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1.5fr; gap: 48px;
+      align-items: start;
+    }
+    @media (max-width: 720px) {
+      .contact-inner { grid-template-columns: 1fr; }
+    }
+
+    /* ── LEFT PANEL ── */
+    .contact-info h2 {
+      font-size: 22px; font-weight: 800; margin-bottom: 10px; letter-spacing: -.2px;
+    }
+    .contact-info > p {
+      font-size: 15px; color: var(--text-2); line-height: 1.7; margin-bottom: 28px;
+    }
+    .contact-method {
+      display: flex; gap: 14px; align-items: flex-start;
+      margin-bottom: 20px;
+    }
+    .method-icon {
+      width: 46px; height: 46px; border-radius: 12px;
+      background: var(--primary-light); border: 1px solid var(--primary-border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+    }
+    .method-icon.green { background: #dcfce7; border-color: #86efac; }
+    .method-body h4 { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+    .method-body a {
+      font-size: 14px; color: var(--primary);
+      text-decoration: none; font-weight: 600; display: block;
+    }
+    .method-body a:hover { text-decoration: underline; }
+    .method-body p { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+    .pricing-note {
+      background: var(--primary-light); border: 1px solid var(--primary-border);
+      border-radius: 12px; padding: 18px 20px; margin-top: 28px;
+    }
+    .pricing-note h4 { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 8px; }
+    .pricing-note p  { font-size: 14px; color: var(--text-2); line-height: 1.65; }
+
+    /* ── FORM ── */
+    .contact-form-wrap {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 36px 32px;
+      box-shadow: var(--shadow-lg);
+    }
+    .contact-form-wrap h3 {
+      font-size: 19px; font-weight: 700; margin-bottom: 6px; letter-spacing: -.2px;
+    }
+    .contact-form-wrap .sub {
+      font-size: 14px; color: var(--text-2); margin-bottom: 28px;
+    }
+
+    .form-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+      margin-bottom: 0;
+    }
+    @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+
+    .form-group { margin-bottom: 18px; }
+    .form-group label {
+      display: block; font-size: 13px; font-weight: 600;
+      color: var(--text); margin-bottom: 7px;
+    }
+    .form-group label .req { color: var(--primary); }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%; padding: 11px 14px;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-size: 15px; font-family: inherit; color: var(--text);
+      background: var(--surface); outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .form-group textarea { resize: vertical; min-height: 120px; }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(30,64,175,.10);
+    }
+    .form-group input::placeholder,
+    .form-group textarea::placeholder { color: var(--muted); }
+    .form-group input:disabled,
+    .form-group textarea:disabled { opacity: .6; cursor: not-allowed; }
+
+    .btn-submit {
+      width: 100%; padding: 14px;
+      background: var(--primary); color: #fff;
+      border: none; border-radius: 9px;
+      font-size: 15px; font-weight: 700; font-family: inherit;
+      cursor: pointer; transition: all .15s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-submit:hover:not(:disabled) { background: var(--primary-dark); }
+    .btn-submit:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-submit:active:not(:disabled) { transform: scale(.99); }
+
+    /* ── SUCCESS / ERROR ── */
+    .success-box {
+      background: var(--green-light); border: 1px solid var(--green-border);
+      border-radius: 12px; padding: 28px 24px; text-align: center;
+      display: none;
+    }
+    .success-box.visible { display: block; }
+    .success-box .big-icon { font-size: 44px; margin-bottom: 14px; }
+    .success-box h3 { font-size: 20px; font-weight: 700; color: var(--green); margin-bottom: 10px; }
+    .success-box p  { font-size: 15px; color: var(--text-2); line-height: 1.65; }
+    .success-box .back-link {
+      display: inline-block; margin-top: 20px;
+      color: var(--primary); font-weight: 600; text-decoration: none; font-size: 14px;
+    }
+    .success-box .back-link:hover { text-decoration: underline; }
+
+    .error-box {
+      background: #fef2f2; border: 1px solid #fecaca;
+      border-radius: 8px; padding: 11px 15px;
+      font-size: 13px; color: #dc2626;
+      margin-bottom: 18px; display: none;
+    }
+    .error-box.visible { display: block; }
+
+    /* ── FAQ ── */
+    .faq-section { padding: 0 24px 72px; }
+    .faq-inner { max-width: 700px; margin: 0 auto; }
+    .faq-inner h2 {
+      font-size: 26px; font-weight: 800; margin-bottom: 32px; letter-spacing: -.3px;
+    }
+    .faq-item {
+      border-bottom: 1px solid var(--border); padding: 18px 0;
+    }
+    .faq-item:first-of-type { border-top: 1px solid var(--border); }
+    .faq-q {
+      font-size: 16px; font-weight: 700; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+      user-select: none;
+    }
+    .faq-q .icon { font-size: 18px; color: var(--muted); transition: transform .2s; }
+    .faq-item.open .faq-q .icon { transform: rotate(45deg); }
+    .faq-a {
+      font-size: 15px; color: var(--text-2); line-height: 1.7;
+      margin-top: 0; max-height: 0; overflow: hidden;
+      transition: max-height .3s ease, margin-top .2s;
+    }
+    .faq-item.open .faq-a { max-height: 300px; margin-top: 12px; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: #0f172a; color: #94a3b8;
+      padding: 48px 24px 32px;
+    }
+    .footer-inner { max-width: 1060px; margin: 0 auto; }
+    .footer-top {
+      display: grid; grid-template-columns: 2fr 1fr 1fr;
+      gap: 40px; margin-bottom: 40px;
+    }
+    @media (max-width: 640px) { .footer-top { grid-template-columns: 1fr; } }
+    .footer-brand .logo {
+      display: flex; align-items: center; gap: 10px;
+      color: #fff; font-weight: 800; font-size: 18px;
+      text-decoration: none; margin-bottom: 14px;
+    }
+    .footer-brand .logo-icon {
+      width: 34px; height: 34px; background: var(--primary);
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .footer-brand p { font-size: 14px; line-height: 1.65; max-width: 280px; }
+    .footer-col h4 { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 14px; text-transform: uppercase; letter-spacing: .6px; }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .footer-col ul li a { font-size: 14px; color: #94a3b8; text-decoration: none; transition: color .15s; }
+    .footer-col ul li a:hover { color: #fff; }
+    .footer-bottom {
+      border-top: 1px solid #1e293b; padding-top: 24px; font-size: 13px;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .footer-bottom a { color: #94a3b8; text-decoration: none; }
+    .footer-bottom a:hover { color: #fff; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="/home" class="nav-logo">
+      <div class="logo-icon">📄</div>
+      PDF Suite
+    </a>
+    <ul class="nav-links">
+      <li><a href="/home">Home</a></li>
+      <li><a href="/about">About</a></li>
+      <li><a href="/contact" class="active">Contact</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="/login" class="nbtn nbtn-primary">Login →</a>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <h1>Get Access to PDF Suite</h1>
+  <p>Contact us to set up your account. We'll share credentials and billing details personally — no automated signups.</p>
+</div>
+
+<!-- CONTACT SECTION -->
+<div class="contact-section">
+  <div class="contact-inner">
+
+    <!-- LEFT: Contact info -->
+    <div class="contact-info">
+      <h2>Reach Us Directly</h2>
+      <p>We onboard every Meesho supplier personally. Send us a message and we'll get back to you within one business day to discuss your needs, set up your account, and walk you through the tool.</p>
+
+      <div class="pricing-note">
+        <h4>💰 About Pricing</h4>
+        <p>We don't post fixed prices because every supplier's volume and needs are different. We discuss pricing personally and keep it fair. No surprise charges — everything is agreed upfront before you start.</p>
+      </div>
+    </div>
+
+    <!-- RIGHT: Form -->
+    <div class="contact-form-wrap" id="formWrap">
+      <h3>Send Us a Message</h3>
+      <p class="sub">Fill out the form and we'll be in touch personally.</p>
+
+      <div class="error-box" id="errorBox"></div>
+
+      <form id="contactForm" novalidate>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="nameInput">Your Name <span class="req">*</span></label>
+            <input type="text" id="nameInput" placeholder="Ramesh Gupta" autocomplete="name" required />
+          </div>
+          <div class="form-group">
+            <label for="emailInput">Email Address <span class="req">*</span></label>
+            <input type="email" id="emailInput" placeholder="you@example.com" autocomplete="email" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="bizInput">Business / Shop Name</label>
+          <input type="text" id="bizInput" placeholder="e.g. Ramesh Garments, Surat" autocomplete="organization" />
+        </div>
+        <div class="form-group">
+          <label for="msgInput">Your Message <span class="req">*</span></label>
+          <textarea id="msgInput" placeholder="Tell us a bit about your Meesho business, how many orders you dispatch daily, and what you're looking for in PDF Suite." required></textarea>
+        </div>
+        <button type="submit" class="btn-submit" id="submitBtn">
+          Send Message
+        </button>
+      </form>
+    </div>
+
+    <!-- SUCCESS STATE (hidden initially) -->
+    <div class="success-box" id="successBox">
+      <div class="big-icon">🎉</div>
+      <h3>Thank you! We'll be in touch.</h3>
+      <p>Your message has been received. We'll personally get back to you within one business day to discuss your account setup and how PDF Suite can help your Meesho business.</p>
+      <a href="/home" class="back-link">← Back to PDF Suite Home</a>
+    </div>
+
+  </div>
+</div>
+
+<!-- FAQ -->
+<div class="faq-section">
+  <div class="faq-inner">
+    <h2>Frequently Asked Questions</h2>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        How do I get access to PDF Suite?
+        <span class="icon">+</span>
+      </div>
+      <div class="faq-a">
+        Contact us using the form on this page or reach out on WhatsApp. We set up every account personally after a quick conversation. There's no self-registration — this ensures every supplier gets the right setup for their volume and workflow.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        How much does PDF Suite cost?
+        <span class="icon">+</span>
+      </div>
+      <div class="faq-a">
+        Pricing is discussed personally and tailored to your usage. We don't publish a fixed price list because every supplier's order volume and needs are different. When you contact us, we'll understand your requirements and give you a transparent price. There are no hidden charges.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        Does PDF Suite work with all Meesho label PDF formats?
+        <span class="icon">+</span>
+      </div>
+      <div class="faq-a">
+        Yes. We continuously update PDF Suite to stay compatible with Meesho's label PDF format. If you encounter a PDF that isn't processing correctly, contact us on WhatsApp and we'll fix it quickly — often within 24 hours.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        Is my order data safe with PDF Suite?
+        <span class="icon">+</span>
+      </div>
+      <div class="faq-a">
+        Yes. Uploaded PDFs are deleted from our servers after processing. We do not sell or share your order data with anyone. All data is transmitted over HTTPS. Please read our full Privacy Policy for details.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        Can I use PDF Suite on my phone?
+        <span class="icon">+</span>
+      </div>
+      <div class="faq-a">
+        PDF Suite works best on a desktop or laptop browser for uploading and reviewing large PDFs. The website is responsive and will work on a phone or tablet for basic use, but we recommend a desktop for daily operations.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        How quickly can I get started after contacting you?
+        <span class="icon">+</span>
+      </div>
+      <div class="faq-a">
+        Usually within one business day. Once we've had a quick chat to understand your setup, we create your account and share login credentials. We also do a short walkthrough so you're comfortable using the tool from day one.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="/home" class="logo">
+          <div class="logo-icon">📄</div>
+          PDF Suite
+        </a>
+        <p>Smart tools for Meesho suppliers. Filter label PDFs, extract order data, and track packing — built for Indian sellers.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="/home">Home</a></li>
+          <li><a href="/about">About</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/login">Login</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="/privacy">Privacy Policy</a></li>
+          <li><a href="/terms">Terms of Service</a></li>
+          <li><a href="/contact">Contact Us</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 PDF Suite. All rights reserved. Built for Meesho suppliers in India.</span>
+      <span>
+        <a href="/privacy">Privacy</a> &nbsp;·&nbsp;
+        <a href="/terms">Terms</a> &nbsp;·&nbsp;
+        <a href="/contact">Contact</a>
+      </span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ── Contact form ─────────────────────────────────────────────────────────────
+  const form      = document.getElementById('contactForm');
+  const formWrap  = document.getElementById('formWrap');
+  const successBox= document.getElementById('successBox');
+  const errorBox  = document.getElementById('errorBox');
+  const submitBtn = document.getElementById('submitBtn');
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    hideError();
+
+    const name  = document.getElementById('nameInput').value.trim();
+    const email = document.getElementById('emailInput').value.trim();
+    const msg   = document.getElementById('msgInput').value.trim();
+
+    if (!name)  { showError('Please enter your name.'); return; }
+    if (!email || !email.includes('@')) { showError('Please enter a valid email address.'); return; }
+    if (!msg)   { showError('Please write a short message so we know how to help you.'); return; }
+
+    const biz = document.getElementById('bizInput').value.trim();
+
+    setLoading(true);
+
+    fetch('/api/leads', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, biz, message: msg }),
+    })
+    .then(function(res) { return res.json().then(function(d) { return { ok: res.ok, data: d }; }); })
+    .then(function(r) {
+      setLoading(false);
+      if (!r.ok) { showError(r.data.error || 'Something went wrong. Please try again.'); return; }
+      formWrap.style.display = 'none';
+      successBox.classList.add('visible');
+      successBox.style.display = 'block';
+      successBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    })
+    .catch(function() {
+      setLoading(false);
+      showError('Network error. Please check your connection and try again.');
+    });
+  });
+
+  function setLoading(on) {
+    submitBtn.disabled = on;
+    submitBtn.textContent = on ? 'Sending…' : 'Send Message';
+    ['nameInput','emailInput','bizInput','msgInput'].forEach(function(id) {
+      const el = document.getElementById(id);
+      if (el) el.disabled = on;
+    });
+  }
+
+  function showError(msg) {
+    errorBox.textContent = '⚠ ' + msg;
+    errorBox.classList.add('visible');
+    errorBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  function hideError() { errorBox.classList.remove('visible'); }
+
+  // ── FAQ accordion ─────────────────────────────────────────────────────────────
+  document.querySelectorAll('.faq-item').forEach(function(item) {
+    item.querySelector('.faq-q').addEventListener('click', function() {
+      const isOpen = item.classList.contains('open');
+      // Close all
+      document.querySelectorAll('.faq-item').forEach(function(i) { i.classList.remove('open'); });
+      // Open clicked if it was closed
+      if (!isOpen) item.classList.add('open');
+    });
+  });
+</script>
+</body>
+</html>

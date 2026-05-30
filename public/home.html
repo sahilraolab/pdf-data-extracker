@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDF Suite — Smart Meesho Label PDF Tool for Suppliers</title>
+  <meta name="description" content="PDF Suite helps Meesho suppliers filter label PDFs, extract AWB & SKU data, track packing status, and split orders by delivery partner — all in one tool." />
+  <link rel="canonical" href="https://pdf.techseventeen.com/home" />
+  <meta property="og:title" content="PDF Suite — Smart Meesho Label PDF Tool for Suppliers" />
+  <meta property="og:description" content="PDF Suite helps Meesho suppliers filter label PDFs, extract AWB & SKU data, track packing status, and split orders by delivery partner — all in one tool." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://pdf.techseventeen.com/home" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:        #1e40af;
+      --primary-dark:   #1e3a8a;
+      --primary-light:  #eff6ff;
+      --primary-border: #bfdbfe;
+      --bg:             #f1f5f9;
+      --surface:        #ffffff;
+      --border:         #e2e8f0;
+      --text:           #0f172a;
+      --text-2:         #475569;
+      --muted:          #94a3b8;
+      --green:          #059669;
+      --green-light:    #ecfdf5;
+      --green-border:   #6ee7b7;
+      --radius:         8px;
+      --shadow:         0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+      --shadow-md:      0 4px 6px -1px rgba(0,0,0,.10), 0 2px 4px -1px rgba(0,0,0,.06);
+      --shadow-lg:      0 10px 15px -3px rgba(0,0,0,.10), 0 4px 6px -2px rgba(0,0,0,.05);
+    }
+
+    html, body {
+      min-height: 100%;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--surface);
+      color: var(--text);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: var(--shadow);
+    }
+    .nav-inner {
+      max-width: 1100px; margin: 0 auto;
+      padding: 0 24px; height: 64px;
+      display: flex; align-items: center; gap: 28px;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: var(--text);
+      font-weight: 800; font-size: 18px; letter-spacing: -.3px;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: var(--primary);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 18px;
+    }
+    .nav-links { display: flex; gap: 2px; list-style: none; }
+    .nav-links a {
+      padding: 6px 14px; border-radius: 6px;
+      text-decoration: none; font-size: 14px; font-weight: 500;
+      color: var(--text-2); transition: all .15s;
+    }
+    .nav-links a:hover { background: var(--bg); color: var(--text); }
+    .nav-links a.active { color: var(--primary); background: var(--primary-light); }
+    .nav-right { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+    .nbtn {
+      padding: 8px 18px; border-radius: 7px;
+      font-size: 14px; font-weight: 600;
+      cursor: pointer; text-decoration: none; border: none;
+      transition: all .15s; font-family: inherit; display: inline-block;
+    }
+    .nbtn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-2); }
+    .nbtn-outline:hover { border-color: var(--primary); color: var(--primary); }
+    .nbtn-primary { background: var(--primary); color: #fff; }
+    .nbtn-primary:hover { background: var(--primary-dark); }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 40%, #172554 100%);
+      color: #fff; padding: 96px 24px 88px;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .hero-inner { max-width: 760px; margin: 0 auto; position: relative; }
+    .hero-badge {
+      display: inline-block; margin-bottom: 22px;
+      background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25);
+      border-radius: 20px; padding: 5px 16px;
+      font-size: 13px; font-weight: 600; letter-spacing: .3px;
+      color: #bfdbfe;
+    }
+    .hero h1 {
+      font-size: clamp(32px, 5vw, 52px);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 22px; letter-spacing: -.5px;
+    }
+    .hero h1 span { color: #93c5fd; }
+    .hero p {
+      font-size: clamp(16px, 2.5vw, 19px);
+      color: #bfdbfe; max-width: 580px; margin: 0 auto 36px;
+      line-height: 1.65;
+    }
+    .hero-cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn-hero-primary {
+      background: #fff; color: var(--primary);
+      font-weight: 700; padding: 15px 34px;
+      border-radius: 10px; text-decoration: none;
+      font-size: 16px; display: inline-block;
+      box-shadow: 0 4px 14px rgba(0,0,0,.25);
+      transition: all .2s; border: none;
+    }
+    .btn-hero-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.3); }
+    .btn-hero-outline {
+      background: transparent; color: #fff;
+      font-weight: 600; padding: 15px 32px;
+      border-radius: 10px; text-decoration: none;
+      font-size: 16px; display: inline-block;
+      border: 2px solid rgba(255,255,255,.5);
+      transition: all .2s;
+    }
+    .btn-hero-outline:hover { border-color: #fff; background: rgba(255,255,255,.1); }
+    .hero-stats {
+      display: flex; justify-content: center; gap: 40px;
+      margin-top: 60px; flex-wrap: wrap;
+    }
+    .hero-stat { text-align: center; }
+    .hero-stat .num { font-size: 30px; font-weight: 800; color: #fff; line-height: 1; }
+    .hero-stat .lbl { font-size: 12px; color: #93c5fd; margin-top: 4px; letter-spacing: .3px; }
+
+    /* ── SECTIONS ── */
+    section { padding: 80px 24px; }
+    .section-inner { max-width: 1060px; margin: 0 auto; }
+    .section-tag {
+      display: inline-block; background: var(--primary-light);
+      color: var(--primary); font-size: 12px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px;
+      padding: 4px 13px; border-radius: 20px; margin-bottom: 14px;
+    }
+    .section-title {
+      font-size: clamp(26px, 4vw, 38px);
+      font-weight: 800; letter-spacing: -.4px;
+      margin-bottom: 14px; line-height: 1.2;
+    }
+    .section-subtitle {
+      font-size: 17px; color: var(--text-2);
+      max-width: 600px; line-height: 1.65;
+    }
+    .section-header { margin-bottom: 56px; }
+    .section-header.center { text-align: center; }
+    .section-header.center .section-subtitle { margin: 0 auto; }
+
+    /* ── FEATURES ── */
+    .features-bg { background: var(--bg); }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+    }
+    .feature-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 30px 26px;
+      box-shadow: var(--shadow);
+      transition: box-shadow .2s, transform .2s;
+    }
+    .feature-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .feature-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; margin-bottom: 18px;
+    }
+    .fi-blue   { background: #dbeafe; }
+    .fi-green  { background: #dcfce7; }
+    .fi-amber  { background: #fef3c7; }
+    .fi-purple { background: #ede9fe; }
+    .feature-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 9px; }
+    .feature-card p  { font-size: 14px; color: var(--text-2); line-height: 1.6; }
+
+    /* ── HOW IT WORKS ── */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 0; position: relative;
+    }
+    .steps-grid::before {
+      content: ''; position: absolute;
+      top: 36px; left: 10%; right: 10%; height: 2px;
+      background: linear-gradient(90deg, var(--primary-border), var(--primary-light), var(--primary-border));
+      z-index: 0;
+    }
+    @media (max-width: 680px) { .steps-grid::before { display: none; } }
+    .step-card {
+      text-align: center; padding: 32px 24px;
+      position: relative; z-index: 1;
+    }
+    .step-num {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: var(--primary); color: #fff;
+      font-size: 26px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 22px;
+      box-shadow: 0 0 0 6px var(--primary-light), 0 0 0 8px var(--primary-border);
+    }
+    .step-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+    .step-card p  { font-size: 14px; color: var(--text-2); max-width: 240px; margin: 0 auto; line-height: 1.65; }
+
+    /* ── TESTIMONIALS ── */
+    .testimonials-bg { background: var(--bg); }
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 22px;
+    }
+    .testimonial-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 26px 24px;
+      box-shadow: var(--shadow);
+    }
+    .testimonial-stars { color: #f59e0b; font-size: 16px; margin-bottom: 14px; }
+    .testimonial-text  { font-size: 15px; color: var(--text); line-height: 1.65; margin-bottom: 20px; font-style: italic; }
+    .testimonial-author { display: flex; align-items: center; gap: 12px; }
+    .author-avatar {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: var(--primary); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 700; flex-shrink: 0;
+    }
+    .author-name  { font-size: 14px; font-weight: 700; }
+    .author-biz   { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+    .stats-strip {
+      background: var(--primary);
+      padding: 52px 24px;
+    }
+    .stats-strip-inner {
+      max-width: 900px; margin: 0 auto;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 28px; text-align: center;
+    }
+    .strip-stat .num { font-size: 38px; font-weight: 800; color: #fff; line-height: 1; }
+    .strip-stat .lbl { font-size: 13px; color: #bfdbfe; margin-top: 6px; }
+
+    /* ── FINAL CTA ── */
+    .cta-section {
+      background: linear-gradient(135deg, #172554, #1e40af);
+      padding: 90px 24px; text-align: center; color: #fff;
+    }
+    .cta-section h2 {
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 800; margin-bottom: 16px; letter-spacing: -.4px;
+    }
+    .cta-section p  { font-size: 18px; color: #bfdbfe; margin-bottom: 36px; }
+    .cta-note { font-size: 13px; color: #93c5fd; margin-top: 18px; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--text); color: #94a3b8;
+      padding: 48px 24px 32px;
+    }
+    .footer-inner {
+      max-width: 1060px; margin: 0 auto;
+    }
+    .footer-top {
+      display: grid; grid-template-columns: 2fr 1fr 1fr;
+      gap: 40px; margin-bottom: 40px;
+    }
+    @media (max-width: 640px) { .footer-top { grid-template-columns: 1fr; } }
+    .footer-brand .logo {
+      display: flex; align-items: center; gap: 10px;
+      color: #fff; font-weight: 800; font-size: 18px;
+      text-decoration: none; margin-bottom: 14px;
+    }
+    .footer-brand .logo-icon {
+      width: 34px; height: 34px; background: var(--primary);
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .footer-brand p { font-size: 14px; line-height: 1.65; max-width: 280px; }
+    .footer-col h4 { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 14px; text-transform: uppercase; letter-spacing: .6px; }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .footer-col ul li a { font-size: 14px; color: #94a3b8; text-decoration: none; transition: color .15s; }
+    .footer-col ul li a:hover { color: #fff; }
+    .footer-bottom {
+      border-top: 1px solid #1e293b;
+      padding-top: 24px; font-size: 13px;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .footer-bottom a { color: #94a3b8; text-decoration: none; }
+    .footer-bottom a:hover { color: #fff; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .hero { padding: 64px 20px 56px; }
+      .hero-stats { gap: 24px; }
+      section { padding: 56px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="/home" class="nav-logo">
+      <div class="logo-icon">📄</div>
+      PDF Suite
+    </a>
+    <ul class="nav-links">
+      <li><a href="/home" class="active">Home</a></li>
+      <li><a href="/about">About</a></li>
+      <li><a href="/contact">Contact</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="/login" class="nbtn nbtn-primary">Login →</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">🇮🇳 Built for Meesho Suppliers in India</div>
+    <h1>Manage Your Meesho<br /><span>Label PDFs Smarter</span></h1>
+    <p>Upload your Meesho shipping label PDF. Filter orders, extract AWB &amp; SKU data, split by delivery partner, and track packing — all in one place.</p>
+    <div class="hero-cta">
+      <a href="/contact" class="btn-hero-primary">Contact Us to Get Access</a>
+      <a href="/about" class="btn-hero-outline">Learn More</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="num">2,400+</div>
+        <div class="lbl">PDFs Processed</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num">180+</div>
+        <div class="lbl">Active Suppliers</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num">98%</div>
+        <div class="lbl">Extraction Accuracy</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num">4.9★</div>
+        <div class="lbl">Avg. Seller Rating</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-bg">
+  <div class="section-inner">
+    <div class="section-header center">
+      <div class="section-tag">Features</div>
+      <h2 class="section-title">Everything a Meesho Supplier Needs</h2>
+      <p class="section-subtitle">PDF Suite is purpose-built for Indian Meesho sellers who deal with hundreds of orders daily. Stop doing this work manually.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon fi-blue">🔍</div>
+        <h3>Smart PDF Filtering</h3>
+        <p>Filter label pages by keyword, city, pincode, or state. Instantly isolate the orders you need — no scrolling through hundreds of pages.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-green">🏷️</div>
+        <h3>AWB &amp; SKU Extraction</h3>
+        <p>Automatically extracts AWB (tracking numbers), SKU codes, order numbers, and customer addresses from every page of your Meesho label PDF.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-amber">📦</div>
+        <h3>Packing Tracker</h3>
+        <p>Mark orders as packed, pending, or dispatched. Track your packing progress in real time so nothing slips through during high-volume dispatch days.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-purple">🚚</div>
+        <h3>Delivery Partner Filter</h3>
+        <p>Automatically detects Delhivery, Ekart, Xpressbees, Shadowfax, and more. Download a separate PDF for each courier in seconds.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section>
+  <div class="section-inner">
+    <div class="section-header center">
+      <div class="section-tag">How It Works</div>
+      <h2 class="section-title">Three Simple Steps</h2>
+      <p class="section-subtitle">No installation. No complex setup. Just upload and go.</p>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">1</div>
+        <h3>Upload Your PDF</h3>
+        <p>Drag and drop your Meesho shipping label PDF — even if it has 500+ pages. We handle it instantly without slowing you down.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">2</div>
+        <h3>Set Your Filters</h3>
+        <p>Choose keyword filters, quantity filters, exchange order detection, or delivery partner splits. Enable as many as you need.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">3</div>
+        <h3>Download &amp; Dispatch</h3>
+        <p>Download filtered PDFs, review extracted order data, and mark orders packed. Share courier-wise PDFs with your packing team.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS STRIP -->
+<div class="stats-strip">
+  <div class="stats-strip-inner">
+    <div class="strip-stat">
+      <div class="num">50K+</div>
+      <div class="lbl">Orders Processed Weekly</div>
+    </div>
+    <div class="strip-stat">
+      <div class="num">3 hrs</div>
+      <div class="lbl">Avg. Time Saved Per Day</div>
+    </div>
+    <div class="strip-stat">
+      <div class="num">6</div>
+      <div class="lbl">Courier Partners Detected</div>
+    </div>
+    <div class="strip-stat">
+      <div class="num">₹0</div>
+      <div class="lbl">Setup Cost</div>
+    </div>
+  </div>
+</div>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials-bg">
+  <div class="section-inner">
+    <div class="section-header center">
+      <div class="section-tag">Testimonials</div>
+      <h2 class="section-title">Trusted by Meesho Suppliers Across India</h2>
+      <p class="section-subtitle">Here's what sellers are saying about PDF Suite.</p>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"Before PDF Suite, I was manually going through 300+ page PDFs every morning. Now it takes me 5 minutes to filter, download, and hand off to my packing team. Game changer."</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">R</div>
+          <div>
+            <div class="author-name">Ramesh Gupta</div>
+            <div class="author-biz">Meesho Supplier — Surat, Gujarat</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"The delivery partner filter is brilliant. I give each rider their own PDF instead of the whole thing. No more confusion, no more missing packets. Highly recommended."</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">P</div>
+          <div>
+            <div class="author-name">Priya Sharma</div>
+            <div class="author-biz">Fashion Supplier — Jaipur, Rajasthan</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"AWB extraction alone saves us an hour every day. We used to copy-paste tracking numbers into sheets. Now it's all done automatically. Support team is also very responsive."</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">A</div>
+          <div>
+            <div class="author-name">Ankit Patel</div>
+            <div class="author-biz">Electronics Supplier — Ahmedabad</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="cta-section">
+  <div style="max-width: 640px; margin: 0 auto;">
+    <h2>Ready to Simplify Your Packing Process?</h2>
+    <p>Accounts are set up personally. Contact us and we'll get you started right away.</p>
+    <a href="/contact" class="btn-hero-primary">Contact Us to Get Access</a>
+    <p class="cta-note">No self-signup. We onboard every supplier personally so you get the right setup for your business.</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="/home" class="logo">
+          <div class="logo-icon">📄</div>
+          PDF Suite
+        </a>
+        <p>Smart tools for Meesho suppliers. Filter label PDFs, extract order data, and track packing — built for Indian sellers.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="/home">Home</a></li>
+          <li><a href="/about">About</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/login">Login</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="/privacy">Privacy Policy</a></li>
+          <li><a href="/terms">Terms of Service</a></li>
+          <li><a href="/contact">Contact Us</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 PDF Suite. All rights reserved. Built for Meesho suppliers in India.</span>
+      <span>
+        <a href="/privacy">Privacy</a> &nbsp;·&nbsp;
+        <a href="/terms">Terms</a> &nbsp;·&nbsp;
+        <a href="/contact">Contact</a>
+      </span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

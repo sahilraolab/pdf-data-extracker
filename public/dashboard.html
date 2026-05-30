@@ -194,19 +194,20 @@
   <!-- Navigation -->
   <nav>
     <div class="nav-inner">
-      <a href="/" class="nav-logo">
+      <a href="/tool" class="nav-logo">
         <div class="logo-icon">📄</div>
         PDF Suite
       </a>
       <ul class="nav-links">
-        <li><a href="/">Tool</a></li>
+        <li><a href="/tool">Tool</a></li>
+        <li><a href="/scan">Scan</a></li>
         <li><a href="/dashboard" class="active">Dashboard</a></li>
-        <li><a href="/plans">Plans</a></li>
-        <li><a href="/admin">Admin</a></li>
+        <li id="adminNavLink" style="display:none;"><a href="/admin">Admin</a></li>
       </ul>
       <div class="nav-right">
         <button class="nbtn nbtn-outline" id="refreshBtn">↻ Refresh</button>
-        <a href="/" class="nbtn nbtn-primary">+ Analyse PDF</a>
+        <span class="nbtn nbtn-outline" id="hdrUserName" style="cursor:default;"></span>
+        <button onclick="appLogout()" class="nbtn nbtn-outline">Sign Out</button>
       </div>
     </div>
   </nav>
@@ -377,7 +378,26 @@
   </footer>
 
   <script>
-    // ── State ──────────────────────────────────────────────────────────────────
+    // ── Auth guard ──────────────────────────────────────────────────────────
+    (async () => {
+      try {
+        const r = await fetch('/api/auth/me', { credentials: 'same-origin' });
+        if (!r.ok) return (window.location.href = '/login?next=/dashboard');
+        const u = (await r.json()).user;
+        const el = document.getElementById('hdrUserName');
+        if (el) el.textContent = u.name || u.email;
+        if (u.role === 'admin') {
+          const al = document.getElementById('adminNavLink');
+          if (al) al.style.display = '';
+        }
+      } catch { window.location.href = '/login?next=/dashboard'; }
+    })();
+    async function appLogout() {
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
+      window.location.href = '/login';
+    }
+
+    // ── State ────────────────────────────────────────────────────────────────
     let allCustomers = [];
     let allOrders    = [];
     let todayOrders  = [];

@@ -1,7 +1,17 @@
-const express = require('express');
-const path = require('path');
-const fs = require('fs');
-const upload = require('./src/middleware/upload');
+'use strict';
+
+require('dotenv').config();
+
+const express      = require('express');
+const path         = require('path');
+const fs           = require('fs');
+const cookieParser = require('cookie-parser');
+
+const upload     = require('./src/middleware/upload');
+const { requireAuth, requireAdmin } = require('./src/middleware/authMiddleware');
+
+const authCtrl   = require('./src/controllers/authController');
+const adminCtrl  = require('./src/controllers/adminController');
 const {
   uploadAndProcess,
   generateFromCache,
@@ -12,113 +22,125 @@ const {
 const { cleanupOldOutputFiles } = require('./src/services/pdfGeneratorService');
 const { getOrdersByDate, getAllOrders } = require('./src/services/customerHistoryService');
 const { saveBatch, markPacked, getScanStats, getBatch, listBatches } = require('./src/services/batchService');
+const { seedAdmin, incrementUploadCount } = require('./src/services/authService');
+const { leads } = require('./src/services/dbService');
 const logger = require('./src/utils/logger');
 
-// ─── Mock admin data ──────────────────────────────────────────────────────────
+// Ensure logs dir
+fs.mkdirSync(path.join(__dirname, 'logs'), { recursive: true });
 
-const MOCK_USERS = [
-  { id: 1,  name: 'Priya Sharma',    email: 'priya.sharma@gmail.com',       plan: 'professional', joined: '2024-12-01', lastActive: '2025-05-23', uploads: 156,  status: 'active' },
-  { id: 2,  name: 'Rahul Gupta',     email: 'rahul.gupta@outlook.com',      plan: 'free',         joined: '2025-01-10', lastActive: '2025-05-20', uploads: 12,   status: 'active' },
-  { id: 3,  name: 'Anjali Singh',    email: 'anjali.singh@yahoo.com',       plan: 'business',     joined: '2024-11-15', lastActive: '2025-05-22', uploads: 421,  status: 'active' },
-  { id: 4,  name: 'Vikram Patel',    email: 'vikram.patel@company.com',     plan: 'professional', joined: '2025-02-01', lastActive: '2025-05-19', uploads: 89,   status: 'active' },
-  { id: 5,  name: 'Sneha Reddy',     email: 'sneha.reddy@gmail.com',        plan: 'free',         joined: '2025-03-15', lastActive: '2025-04-30', uploads: 7,    status: 'inactive' },
-  { id: 6,  name: 'Arjun Kumar',     email: 'arjun.kumar@business.in',      plan: 'business',     joined: '2024-10-20', lastActive: '2025-05-23', uploads: 892,  status: 'active' },
-  { id: 7,  name: 'Meera Nair',      email: 'meera.nair@gmail.com',         plan: 'professional', joined: '2025-01-25', lastActive: '2025-05-21', uploads: 234,  status: 'active' },
-  { id: 8,  name: 'Suresh Iyer',     email: 'suresh.iyer@email.com',        plan: 'free',         joined: '2025-04-01', lastActive: '2025-05-15', uploads: 4,    status: 'active' },
-  { id: 9,  name: 'Kavita Joshi',    email: 'kavita.joshi@firm.com',        plan: 'business',     joined: '2024-09-10', lastActive: '2025-05-23', uploads: 1203, status: 'active' },
-  { id: 10, name: 'Rohan Mehta',     email: 'rohan.mehta@startup.io',       plan: 'professional', joined: '2025-02-28', lastActive: '2025-05-18', uploads: 67,   status: 'active' },
-  { id: 11, name: 'Pooja Verma',     email: 'pooja.verma@gmail.com',        plan: 'free',         joined: '2025-05-01', lastActive: '2025-05-10', uploads: 2,    status: 'active' },
-  { id: 12, name: 'Aditya Bansal',   email: 'aditya.bansal@trader.com',     plan: 'professional', joined: '2024-12-20', lastActive: '2025-05-22', uploads: 445,  status: 'active' },
-  { id: 13, name: 'Nisha Kapoor',    email: 'nisha.kapoor@shop.in',         plan: 'free',         joined: '2025-04-18', lastActive: '2025-05-05', uploads: 3,    status: 'inactive' },
-  { id: 14, name: 'Deepak Mishra',   email: 'deepak.mishra@logistics.com',  plan: 'business',     joined: '2024-08-05', lastActive: '2025-05-24', uploads: 2187, status: 'active' },
-  { id: 15, name: 'Swati Rao',       email: 'swati.rao@gmail.com',          plan: 'professional', joined: '2025-03-10', lastActive: '2025-05-20', uploads: 78,   status: 'active' },
-];
-
-const MOCK_PAYMENTS = [
-  { id: 'TXN2505240001', user: 'Kavita Joshi',  email: 'kavita.joshi@firm.com',       plan: 'business',     amount: 2999, date: '2025-05-24', status: 'success' },
-  { id: 'TXN2505230001', user: 'Priya Sharma',  email: 'priya.sharma@gmail.com',      plan: 'professional', amount: 999,  date: '2025-05-23', status: 'success' },
-  { id: 'TXN2505220001', user: 'Meera Nair',    email: 'meera.nair@gmail.com',        plan: 'professional', amount: 999,  date: '2025-05-22', status: 'success' },
-  { id: 'TXN2505210001', user: 'Arjun Kumar',   email: 'arjun.kumar@business.in',     plan: 'business',     amount: 2999, date: '2025-05-21', status: 'success' },
-  { id: 'TXN2505200001', user: 'Vikram Patel',  email: 'vikram.patel@company.com',    plan: 'professional', amount: 999,  date: '2025-05-20', status: 'success' },
-  { id: 'TXN2505190001', user: 'Swati Rao',     email: 'swati.rao@gmail.com',         plan: 'professional', amount: 999,  date: '2025-05-19', status: 'success' },
-  { id: 'TXN2505180001', user: 'Rohan Mehta',   email: 'rohan.mehta@startup.io',      plan: 'professional', amount: 999,  date: '2025-05-18', status: 'success' },
-  { id: 'TXN2505170001', user: 'Unknown User',  email: 'test@example.com',            plan: 'professional', amount: 999,  date: '2025-05-17', status: 'failed' },
-  { id: 'TXN2505150001', user: 'Aditya Bansal', email: 'aditya.bansal@trader.com',    plan: 'professional', amount: 999,  date: '2025-05-15', status: 'success' },
-  { id: 'TXN2505100001', user: 'Anjali Singh',  email: 'anjali.singh@yahoo.com',      plan: 'business',     amount: 2999, date: '2025-05-10', status: 'success' },
-  { id: 'TXN2505050001', user: 'Deepak Mishra', email: 'deepak.mishra@logistics.com', plan: 'business',     amount: 2999, date: '2025-05-05', status: 'success' },
-  { id: 'TXN2505020001', user: 'Kavita Joshi',  email: 'kavita.joshi@firm.com',       plan: 'business',     amount: 2999, date: '2025-05-02', status: 'success' },
-  { id: 'TXN2504250001', user: 'Priya Sharma',  email: 'priya.sharma@gmail.com',      plan: 'professional', amount: 999,  date: '2025-04-25', status: 'success' },
-  { id: 'TXN2504200001', user: 'Arjun Kumar',   email: 'arjun.kumar@business.in',     plan: 'business',     amount: 2999, date: '2025-04-20', status: 'success' },
-  { id: 'TXN2504150001', user: 'Meera Nair',    email: 'meera.nair@gmail.com',        plan: 'professional', amount: 999,  date: '2025-04-15', status: 'success' },
-];
-
-// Ensure log directory exists before logger writes to it
-const logsDir = path.join(__dirname, 'logs');
-if (!fs.existsSync(logsDir)) {
-  fs.mkdirSync(logsDir, { recursive: true });
-}
-
-const app = express();
+const app  = express();
 const PORT = process.env.PORT || 3000;
+const pub  = p => path.join(__dirname, 'public', p);
 
-// ─── Middleware ───────────────────────────────────────────────────────────────
+// ── Middleware ─────────────────────────────────────────────────────────────────
 
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(express.static(path.join(__dirname, 'public')));
 
-// Request logger
-app.use((req, _res, next) => {
-  logger.info(`${req.method} ${req.originalUrl}`);
-  next();
-});
+// Serve public folder for assets (CSS/images/fonts) but NOT HTML via static
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
-// ─── Routes ───────────────────────────────────────────────────────────────────
+app.use((req, _res, next) => { logger.info(`${req.method} ${req.originalUrl}`); next(); });
 
-// ─── Page routes ──────────────────────────────────────────────────────────────
+// ── Public page routes ─────────────────────────────────────────────────────────
 
-app.get('/plans',     (_req, res) => res.sendFile(path.join(__dirname, 'public', 'plans.html')));
-app.get('/admin',     (_req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
-app.get('/dashboard', (_req, res) => res.sendFile(path.join(__dirname, 'public', 'dashboard.html')));
-app.get('/scan',      (_req, res) => res.sendFile(path.join(__dirname, 'public', 'scan.html')));
+app.get('/',         (_req, res) => res.sendFile(pub('home.html')));
+app.get('/home',     (_req, res) => res.sendFile(pub('home.html')));
+app.get('/login',    (_req, res) => res.sendFile(pub('login.html')));
+app.get('/about',    (_req, res) => res.sendFile(pub('about.html')));
+app.get('/privacy',  (_req, res) => res.sendFile(pub('privacy.html')));
+app.get('/terms',    (_req, res) => res.sendFile(pub('terms.html')));
+app.get('/contact',  (_req, res) => res.sendFile(pub('contact.html')));
+app.get('/plans',    (_req, res) => res.redirect(301, '/contact'));
 
-// ─── Admin API ────────────────────────────────────────────────────────────────
+// ── Protected page routes ──────────────────────────────────────────────────────
 
-app.get('/api/admin/stats', (_req, res) => {
-  const planDist = {
-    free:         MOCK_USERS.filter(u => u.plan === 'free').length,
-    professional: MOCK_USERS.filter(u => u.plan === 'professional').length,
-    business:     MOCK_USERS.filter(u => u.plan === 'business').length,
-  };
-  const successPayments = MOCK_PAYMENTS.filter(p => p.status === 'success');
-  const monthlyRevenue  = successPayments
-    .filter(p => p.date.startsWith('2025-05'))
-    .reduce((s, p) => s + p.amount, 0);
+app.get('/tool',      requireAuth, (_req, res) => res.sendFile(pub('index.html')));
+app.get('/scan',      requireAuth, (_req, res) => res.sendFile(pub('scan.html')));
+app.get('/dashboard', requireAuth, (_req, res) => res.sendFile(pub('dashboard.html')));
+app.get('/admin',     requireAuth, requireAdmin, (_req, res) => res.sendFile(pub('admin.html')));
 
-  res.json({
-    totalUsers:           MOCK_USERS.length,
-    newUsersThisMonth:    MOCK_USERS.filter(u => u.joined.startsWith('2025-05')).length,
-    activeSubscriptions:  MOCK_USERS.filter(u => u.status === 'active' && u.plan !== 'free').length,
-    monthlyRevenue,
-    revenueGrowth:        18,
-    totalUploads:         MOCK_USERS.reduce((s, u) => s + u.uploads, 0),
-    monthlyUploads:       312,
-    planDistribution:     planDist,
-  });
-});
+// ── Auth API ───────────────────────────────────────────────────────────────────
 
-app.get('/api/admin/users',    (_req, res) => res.json(MOCK_USERS));
-app.get('/api/admin/payments', (_req, res) => res.json(MOCK_PAYMENTS));
+app.post('/api/auth/login',            authCtrl.postLogin);
+app.post('/api/auth/logout',           requireAuth, authCtrl.postLogout);
+app.get ('/api/auth/me',               requireAuth, authCtrl.getMe);
+app.post('/api/auth/impersonate/:userId', requireAuth, requireAdmin, authCtrl.postImpersonate);
+app.post('/api/auth/exit-impersonate', requireAuth, authCtrl.postExitImpersonate);
 
-// ─── Orders API ───────────────────────────────────────────────────────────────
+// ── Admin API ──────────────────────────────────────────────────────────────────
 
-// GET /api/orders?date=YYYY-MM-DD  → orders for a specific date (default: today)
-// GET /api/orders?all=true         → all stored orders
-app.get('/api/orders', (req, res) => {
+app.get   ('/api/admin/stats',          requireAuth, requireAdmin, adminCtrl.getStats);
+app.get   ('/api/admin/users',          requireAuth, requireAdmin, adminCtrl.getUsers);
+app.post  ('/api/admin/users',          requireAuth, requireAdmin, adminCtrl.postUser);
+app.patch ('/api/admin/users/:id',      requireAuth, requireAdmin, adminCtrl.patchUser);
+app.delete('/api/admin/users/:id',      requireAuth, requireAdmin, adminCtrl.deleteUser);
+app.post  ('/api/admin/users/:id/toggle',    requireAuth, requireAdmin, adminCtrl.toggleUser);
+app.post  ('/api/admin/users/:id/force-logout', requireAuth, requireAdmin, adminCtrl.forceLogout);
+
+// ── Leads API ─────────────────────────────────────────────────────────────────
+
+// Public: anyone can submit a lead from the contact page
+app.post('/api/leads', async (req, res) => {
   try {
-    if (req.query.all === 'true') {
-      return res.json(getAllOrders());
-    }
+    const { name, email, biz, message } = req.body || {};
+    if (!name?.trim() || !email?.trim() || !message?.trim())
+      return res.status(400).json({ error: 'Name, email, and message are required.' });
+    if (!email.includes('@'))
+      return res.status(400).json({ error: 'Enter a valid email address.' });
+    const doc = await leads.insertAsync({
+      name:      name.trim(),
+      email:     email.trim().toLowerCase(),
+      biz:       biz?.trim() || '',
+      message:   message.trim(),
+      status:    'new',        // new | contacted | closed
+      createdAt: new Date().toISOString(),
+      notes:     '',
+    });
+    logger.info(`[LEAD] New lead: ${email.trim()} — ${name.trim()}`);
+    res.status(201).json({ ok: true, id: doc._id });
+  } catch (err) {
+    logger.error(`[LEAD] insert error: ${err.message}`);
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
+// Admin: list all leads
+app.get('/api/admin/leads', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const all = await leads.findAsync({});
+    all.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    res.json(all);
+  } catch { res.status(500).json({ error: 'Server error.' }); }
+});
+
+// Admin: update lead status or notes
+app.patch('/api/admin/leads/:id', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { status, notes } = req.body || {};
+    const $set = {};
+    if (status) $set.status = status;
+    if (notes  !== undefined) $set.notes = notes;
+    await leads.updateAsync({ _id: req.params.id }, { $set }, {});
+    res.json({ ok: true });
+  } catch { res.status(500).json({ error: 'Server error.' }); }
+});
+
+// Admin: delete a lead
+app.delete('/api/admin/leads/:id', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    await leads.removeAsync({ _id: req.params.id }, {});
+    res.json({ ok: true });
+  } catch { res.status(500).json({ error: 'Server error.' }); }
+});
+
+// ── Orders API (protected) ────────────────────────────────────────────────────
+
+app.get('/api/orders', requireAuth, (req, res) => {
+  try {
+    if (req.query.all === 'true') return res.json(getAllOrders());
     const date = req.query.date || new Date().toISOString().split('T')[0];
     return res.json(getOrdersByDate(date));
   } catch (err) {
@@ -127,10 +149,9 @@ app.get('/api/orders', (req, res) => {
   }
 });
 
-// ─── Barcode scan ecosystem ────────────────────────────────────────────────────
+// ── Barcode scan ecosystem (protected) ───────────────────────────────────────
 
-// GET /api/scan/stats?date=YYYY-MM-DD
-app.get('/api/scan/stats', (req, res) => {
+app.get('/api/scan/stats', requireAuth, (req, res) => {
   try {
     const date = req.query.date || new Date().toISOString().split('T')[0];
     return res.json(getScanStats(date));
@@ -140,8 +161,7 @@ app.get('/api/scan/stats', (req, res) => {
   }
 });
 
-// GET /api/scan/batches?date=YYYY-MM-DD
-app.get('/api/scan/batches', (req, res) => {
+app.get('/api/scan/batches', requireAuth, (req, res) => {
   try {
     const date = req.query.date || new Date().toISOString().split('T')[0];
     return res.json(listBatches(date));
@@ -151,8 +171,7 @@ app.get('/api/scan/batches', (req, res) => {
   }
 });
 
-// GET /api/scan/batch/:batchId
-app.get('/api/scan/batch/:batchId', (req, res) => {
+app.get('/api/scan/batch/:batchId', requireAuth, (req, res) => {
   try {
     const batch = getBatch(req.params.batchId);
     if (!batch) return res.status(404).json({ error: 'Batch not found.' });
@@ -163,9 +182,7 @@ app.get('/api/scan/batch/:batchId', (req, res) => {
   }
 });
 
-// POST /api/scan/mark-packed
-// Body: { code } — can be AWB number or order number from barcode scan
-app.post('/api/scan/mark-packed', (req, res) => {
+app.post('/api/scan/mark-packed', requireAuth, (req, res) => {
   const { code } = req.body || {};
   if (!code || typeof code !== 'string' || code.trim().length < 3) {
     return res.status(400).json({ error: 'code (AWB or order number) is required.' });
@@ -175,68 +192,51 @@ app.post('/api/scan/mark-packed', (req, res) => {
   return res.json({ found: true, ...result });
 });
 
-// ─── Generate PDF from cache (no re-upload needed) ───────────────────────────
+// ── PDF routes (protected) ────────────────────────────────────────────────────
 
-app.post('/generate-pdf', generateFromCache);
-
-// Health check
-app.get('/health', (_req, res) => {
-  res.json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-  });
+app.post('/upload', requireAuth, upload.single('file'), async (req, res, next) => {
+  // Track upload count for the user
+  if (req.sessionUser?._id) incrementUploadCount(req.sessionUser._id).catch(() => {});
+  return uploadAndProcess(req, res, next);
 });
 
-// Upload and process PDF
-// Query params:
-//   onlyMatched=true  → results contains only matched pages
-//   generatePdf=true  → also produce downloadable filtered PDF
-//   downloadMode=keyword|qty|exchange|unmatched
-//       → selects which pages are included in the generated PDF
-app.post('/upload', upload.single('file'), uploadAndProcess);
+app.post('/generate-pdf',          requireAuth, generateFromCache);
+app.get ('/download/:filename',    requireAuth, downloadFilteredPdf);
+app.get ('/customer-history',      requireAuth, getCustomerHistoryRoute);
 
-// Download generated filtered PDF (one-time)
-app.get('/download/:filename', downloadFilteredPdf);
+// ── Health (public) ────────────────────────────────────────────────────────────
 
-// Customer history dashboard data
-app.get('/customer-history', getCustomerHistoryRoute);
+app.get('/health', (_req, res) => res.json({ status: 'ok', ts: new Date().toISOString(), uptime: process.uptime() }));
 
-// ─── Error Handlers ───────────────────────────────────────────────────────────
+// ── Error handlers ─────────────────────────────────────────────────────────────
 
-// Multer file validation errors
 app.use((err, req, res, _next) => {
-  if (err && err.message === 'Only PDF files are accepted') {
+  if (err?.message === 'Only PDF files are accepted')
     return res.status(415).json({ error: err.message });
-  }
-  if (err && err.code === 'LIMIT_FILE_SIZE') {
-    return res.status(413).json({ error: 'File too large. Maximum allowed size is 50 MB.' });
-  }
-
+  if (err?.code === 'LIMIT_FILE_SIZE')
+    return res.status(413).json({ error: 'File too large. Maximum 50 MB.' });
   logger.error(`Unhandled error: ${err.message}`, { stack: err.stack });
-  return res.status(500).json({ error: 'Unexpected server error', details: err.message });
+  return res.status(500).json({ error: 'Server error', details: err.message });
 });
 
-// 404 fallback — serve index.html for unknown GET routes so the UI is reachable
+// 404 fallback
 app.use((req, res) => {
-  if (req.method === 'GET') {
-    return res.sendFile(path.join(__dirname, 'public', 'index.html'));
-  }
-  res.status(404).json({ error: 'Route not found.' });
+  if (req.method === 'GET') return res.sendFile(pub('home.html'));
+  res.status(404).json({ error: 'Not found.' });
 });
 
-// ─── Start ────────────────────────────────────────────────────────────────────
+// ── Start ──────────────────────────────────────────────────────────────────────
 
-app.listen(PORT, () => {
-  logger.info(`PDF processing server running on port ${PORT}`);
-  logger.info(`Health: http://localhost:${PORT}/health`);
-  logger.info(`Upload: POST http://localhost:${PORT}/upload`);
+async function start() {
+  await seedAdmin();
+  app.listen(PORT, () => {
+    logger.info(`PDF Suite running on port ${PORT}`);
+    cleanupOldOutputFiles();
+    cleanupOldCacheFiles();
+    setInterval(() => { cleanupOldOutputFiles(); cleanupOldCacheFiles(); }, 60 * 60 * 1000);
+  });
+}
 
-  // Clean up stale output and cache files from a previous run
-  cleanupOldOutputFiles();
-  cleanupOldCacheFiles();
-  // Also run cleanup every hour
-  setInterval(() => { cleanupOldOutputFiles(); cleanupOldCacheFiles(); }, 60 * 60 * 1000);
-});
+start().catch(err => { logger.error('Startup failed:', err.message); process.exit(1); });
 
 module.exports = app;

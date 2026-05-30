@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terms of Service — PDF Suite</title>
+  <meta name="description" content="PDF Suite Terms of Service — the rules and conditions governing use of our Meesho label PDF management tools." />
+  <link rel="canonical" href="https://pdf.techseventeen.com/terms" />
+  <meta property="og:title" content="Terms of Service — PDF Suite" />
+  <meta property="og:description" content="PDF Suite Terms of Service — the rules and conditions governing use of our Meesho label PDF management tools." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://pdf.techseventeen.com/terms" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:        #1e40af;
+      --primary-dark:   #1e3a8a;
+      --primary-light:  #eff6ff;
+      --primary-border: #bfdbfe;
+      --bg:             #f1f5f9;
+      --surface:        #ffffff;
+      --border:         #e2e8f0;
+      --text:           #0f172a;
+      --text-2:         #475569;
+      --muted:          #94a3b8;
+      --radius:         8px;
+      --shadow:         0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+    }
+
+    html, body {
+      min-height: 100vh;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: var(--shadow);
+    }
+    .nav-inner {
+      max-width: 1100px; margin: 0 auto;
+      padding: 0 24px; height: 64px;
+      display: flex; align-items: center; gap: 28px;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: var(--text);
+      font-weight: 800; font-size: 18px; letter-spacing: -.3px;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: var(--primary);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 18px;
+    }
+    .nav-links { display: flex; gap: 2px; list-style: none; }
+    .nav-links a {
+      padding: 6px 14px; border-radius: 6px;
+      text-decoration: none; font-size: 14px; font-weight: 500;
+      color: var(--text-2); transition: all .15s;
+    }
+    .nav-links a:hover { background: var(--bg); color: var(--text); }
+    .nav-right { margin-left: auto; }
+    .nbtn {
+      padding: 8px 18px; border-radius: 7px;
+      font-size: 14px; font-weight: 600;
+      cursor: pointer; text-decoration: none; border: none;
+      transition: all .15s; font-family: inherit; display: inline-block;
+    }
+    .nbtn-primary { background: var(--primary); color: #fff; }
+    .nbtn-primary:hover { background: var(--primary-dark); }
+
+    /* ── LEGAL PAGE LAYOUT ── */
+    .legal-page {
+      max-width: 780px; margin: 0 auto;
+      padding: 52px 24px 80px;
+    }
+    .legal-header { margin-bottom: 40px; }
+    .legal-badge {
+      display: inline-block; background: var(--primary-light);
+      color: var(--primary); font-size: 12px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px;
+      padding: 4px 13px; border-radius: 20px; margin-bottom: 16px;
+    }
+    .legal-header h1 {
+      font-size: clamp(28px, 4vw, 40px);
+      font-weight: 800; letter-spacing: -.4px; margin-bottom: 10px;
+    }
+    .legal-header .meta { font-size: 14px; color: var(--muted); }
+    .legal-header .intro {
+      font-size: 16px; color: var(--text-2);
+      line-height: 1.7; margin-top: 16px;
+      padding: 16px 20px;
+      background: var(--primary-light);
+      border: 1px solid var(--primary-border);
+      border-radius: 10px;
+    }
+
+    .legal-toc {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 20px 24px; margin-bottom: 36px;
+      box-shadow: var(--shadow);
+    }
+    .legal-toc h3 { font-size: 14px; font-weight: 700; margin-bottom: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; }
+    .legal-toc ol { padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+    .legal-toc ol li a { font-size: 14px; color: var(--primary); text-decoration: none; }
+    .legal-toc ol li a:hover { text-decoration: underline; }
+
+    .legal-section { margin-bottom: 48px; scroll-margin-top: 80px; }
+    .legal-section h2 {
+      font-size: 20px; font-weight: 700;
+      margin-bottom: 14px; padding-bottom: 10px;
+      border-bottom: 2px solid var(--primary-light);
+      color: var(--primary);
+    }
+    .legal-section h3 { font-size: 16px; font-weight: 700; margin: 20px 0 10px; }
+    .legal-section p {
+      font-size: 15px; color: var(--text-2);
+      line-height: 1.75; margin-bottom: 14px;
+    }
+    .legal-section p:last-child { margin-bottom: 0; }
+    .legal-section ul, .legal-section ol {
+      padding-left: 22px; margin-bottom: 14px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .legal-section li { font-size: 15px; color: var(--text-2); line-height: 1.65; }
+    .legal-section strong { color: var(--text); }
+    .legal-section a { color: var(--primary); }
+
+    .warning-box {
+      background: #fef2f2; border: 1px solid #fecaca;
+      border-radius: 10px; padding: 16px 20px; margin: 16px 0;
+      font-size: 15px; color: #991b1b; line-height: 1.65;
+    }
+    .warning-box strong { color: #7f1d1d; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: #0f172a; color: #94a3b8;
+      padding: 48px 24px 32px;
+    }
+    .footer-inner { max-width: 1060px; margin: 0 auto; }
+    .footer-top {
+      display: grid; grid-template-columns: 2fr 1fr 1fr;
+      gap: 40px; margin-bottom: 40px;
+    }
+    @media (max-width: 640px) { .footer-top { grid-template-columns: 1fr; } }
+    .footer-brand .logo {
+      display: flex; align-items: center; gap: 10px;
+      color: #fff; font-weight: 800; font-size: 18px;
+      text-decoration: none; margin-bottom: 14px;
+    }
+    .footer-brand .logo-icon {
+      width: 34px; height: 34px; background: var(--primary);
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .footer-brand p { font-size: 14px; line-height: 1.65; max-width: 280px; }
+    .footer-col h4 { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 14px; text-transform: uppercase; letter-spacing: .6px; }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .footer-col ul li a { font-size: 14px; color: #94a3b8; text-decoration: none; transition: color .15s; }
+    .footer-col ul li a:hover { color: #fff; }
+    .footer-bottom {
+      border-top: 1px solid #1e293b; padding-top: 24px; font-size: 13px;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .footer-bottom a { color: #94a3b8; text-decoration: none; }
+    .footer-bottom a:hover { color: #fff; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="/home" class="nav-logo">
+      <div class="logo-icon">📄</div>
+      PDF Suite
+    </a>
+    <ul class="nav-links">
+      <li><a href="/home">Home</a></li>
+      <li><a href="/about">About</a></li>
+      <li><a href="/contact">Contact</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="/login" class="nbtn nbtn-primary">Login →</a>
+    </div>
+  </div>
+</nav>
+
+<!-- LEGAL CONTENT -->
+<div class="legal-page">
+
+  <div class="legal-header">
+    <div class="legal-badge">Legal</div>
+    <h1>Terms of Service</h1>
+    <div class="meta">Last updated: May 2025 &nbsp;·&nbsp; Effective from: May 1, 2025</div>
+    <div class="intro">
+      Please read these Terms of Service carefully before using PDF Suite. By accessing or using our service, you agree to be bound by these terms. If you do not agree to these terms, please do not use our service.
+    </div>
+  </div>
+
+  <div class="legal-toc">
+    <h3>Table of Contents</h3>
+    <ol>
+      <li><a href="#t1">Service Description</a></li>
+      <li><a href="#t2">Account Eligibility and Access</a></li>
+      <li><a href="#t3">Acceptable Use</a></li>
+      <li><a href="#t4">User Content and Uploaded Files</a></li>
+      <li><a href="#t5">Intellectual Property</a></li>
+      <li><a href="#t6">Payment and Billing</a></li>
+      <li><a href="#t7">Disclaimers and No Warranties</a></li>
+      <li><a href="#t8">Limitation of Liability</a></li>
+      <li><a href="#t9">Indemnification</a></li>
+      <li><a href="#t10">Service Availability and Modifications</a></li>
+      <li><a href="#t11">Termination</a></li>
+      <li><a href="#t12">Governing Law and Dispute Resolution</a></li>
+      <li><a href="#t13">Contact Information</a></li>
+    </ol>
+  </div>
+
+  <!-- 1 -->
+  <div class="legal-section" id="t1">
+    <h2>1. Service Description</h2>
+    <p><strong>PDF Suite</strong> ("the Service", "we", "us", or "our") is a web-based software tool that enables Meesho suppliers and sellers in India to upload Meesho shipping label PDFs, filter order pages by various criteria, extract order data (AWB numbers, SKU codes, order numbers, customer addresses), split PDFs by delivery partner, and track packing progress.</p>
+    <p>The Service is accessed via a web browser at <strong>pdf.techseventeen.com</strong>. No software installation is required. Accounts are created and managed by our team — there is no self-registration feature. The Service is intended for commercial use by Meesho sellers and suppliers operating in India.</p>
+  </div>
+
+  <!-- 2 -->
+  <div class="legal-section" id="t2">
+    <h2>2. Account Eligibility and Access</h2>
+    <p>To use PDF Suite, you must:</p>
+    <ul>
+      <li>Be at least 18 years of age or the age of majority in your jurisdiction.</li>
+      <li>Be operating as a legitimate Meesho supplier or seller.</li>
+      <li>Have received account credentials directly from the PDF Suite team.</li>
+      <li>Not be prohibited from using the Service under applicable Indian law.</li>
+    </ul>
+    <p>Your account is personal and non-transferable. You are responsible for maintaining the confidentiality of your login credentials and for all activity that occurs under your account. You agree to notify us immediately at <a href="mailto:pdf@techseventeen.com">pdf@techseventeen.com</a> if you suspect any unauthorised access to your account.</p>
+    <p>We reserve the right to refuse or revoke access to any person or entity at our sole discretion, including for suspected misuse or violation of these Terms.</p>
+  </div>
+
+  <!-- 3 -->
+  <div class="legal-section" id="t3">
+    <h2>3. Acceptable Use</h2>
+    <p>You agree to use PDF Suite only for its intended purpose — managing your own Meesho shipping label PDFs for your legitimate supplier operations. The following uses are expressly prohibited:</p>
+    <ul>
+      <li>Uploading PDFs that do not belong to you or that you are not authorised to process.</li>
+      <li>Using the Service to process data on behalf of third parties without their consent.</li>
+      <li>Attempting to reverse-engineer, copy, or replicate any part of the Service's functionality or source code.</li>
+      <li>Using automated tools, bots, scrapers, or scripts to access or stress-test the Service.</li>
+      <li>Uploading malicious files, including files containing malware, exploits, or oversized files intended to cause denial-of-service.</li>
+      <li>Sharing your account credentials with others outside your immediate team without our written approval.</li>
+      <li>Using the Service in any way that violates applicable Indian law, including the Information Technology Act, 2000 and the Digital Personal Data Protection Act, 2023.</li>
+      <li>Attempting to gain unauthorised access to our systems, databases, or other users' accounts.</li>
+      <li>Reselling, sublicensing, or commercially redistributing access to PDF Suite without our prior written consent.</li>
+    </ul>
+    <p>Violation of these acceptable use terms may result in immediate suspension or termination of your account without notice or refund.</p>
+  </div>
+
+  <!-- 4 -->
+  <div class="legal-section" id="t4">
+    <h2>4. User Content and Uploaded Files</h2>
+    <p>You retain all ownership rights to the PDFs you upload and the order data they contain. By uploading content to PDF Suite, you grant us a limited, non-exclusive licence to process, store temporarily, and display the content solely for the purpose of providing the Service to you.</p>
+    <p>You represent and warrant that:</p>
+    <ul>
+      <li>You have the right to upload and process the PDF files you submit.</li>
+      <li>The customer addresses and personal data contained in your Meesho label PDFs are being processed by you in your capacity as a Meesho supplier, and such processing is covered by Meesho's data sharing relationship with you.</li>
+      <li>You will not upload any content that infringes intellectual property rights, violates privacy laws, or contains illegal material.</li>
+    </ul>
+    <p>We do not claim ownership of your order data and will not use it for any purpose other than providing the Service as described in our <a href="/privacy">Privacy Policy</a>.</p>
+  </div>
+
+  <!-- 5 -->
+  <div class="legal-section" id="t5">
+    <h2>5. Intellectual Property</h2>
+    <p>All intellectual property in the PDF Suite software, design, user interface, algorithms, and associated documentation is owned exclusively by us and is protected under applicable Indian intellectual property laws, including the Copyright Act, 1957.</p>
+    <p>You are granted a limited, non-exclusive, non-transferable licence to use the Service during the period of your active account. This licence does not permit you to copy, modify, distribute, sell, or create derivative works of any part of our software or design.</p>
+    <p>The "PDF Suite" name, logo, and associated branding are our trademarks. You may not use them without our prior written consent.</p>
+  </div>
+
+  <!-- 6 -->
+  <div class="legal-section" id="t6">
+    <h2>6. Payment and Billing</h2>
+    <p>Pricing for PDF Suite is discussed and agreed upon personally between you and our team at the time of onboarding. There are no publicly posted prices — billing arrangements are customised to each supplier's usage needs.</p>
+    <p>All payments are made in Indian Rupees (INR) via the method agreed upon at onboarding (e.g., UPI, bank transfer). We do not store payment card information on our servers.</p>
+    <p>We reserve the right to modify pricing with reasonable advance notice. Continued use of the Service after a pricing change constitutes acceptance of the new pricing. If you do not agree to a pricing change, you may cancel your account before the change takes effect.</p>
+    <p>Payments are generally non-refundable unless otherwise agreed in writing. If you believe you have been incorrectly charged, please contact us within 7 days of the charge.</p>
+  </div>
+
+  <!-- 7 -->
+  <div class="legal-section" id="t7">
+    <h2>7. Disclaimers and No Warranties</h2>
+    <div class="warning-box">
+      <strong>The Service is provided "as is" and "as available" without warranty of any kind.</strong>
+    </div>
+    <p>To the fullest extent permitted by applicable law, we disclaim all warranties, express or implied, including but not limited to:</p>
+    <ul>
+      <li>Implied warranties of merchantability, fitness for a particular purpose, and non-infringement.</li>
+      <li>Warranties that the Service will be uninterrupted, error-free, or free of viruses or other harmful components.</li>
+      <li>Warranties regarding the accuracy, completeness, or reliability of data extracted from uploaded PDFs (AWB numbers, addresses, SKU codes). Extraction is based on pattern matching and may not be 100% accurate for all PDF formats. You should verify critical order data independently.</li>
+      <li>Warranties that the Service will be compatible with all browser versions or operating systems.</li>
+    </ul>
+    <p>You use the Service at your own risk. We are not affiliated with, endorsed by, or in any way officially connected to Meesho or its parent company. "Meesho" is a trademark of its respective owners.</p>
+  </div>
+
+  <!-- 8 -->
+  <div class="legal-section" id="t8">
+    <h2>8. Limitation of Liability</h2>
+    <p>To the maximum extent permitted by applicable Indian law, in no event shall PDF Suite, its team members, employees, or affiliates be liable to you for:</p>
+    <ul>
+      <li>Any indirect, incidental, special, consequential, or punitive damages.</li>
+      <li>Loss of profits, revenue, data, business, or goodwill.</li>
+      <li>Damages arising from errors in data extraction, missed orders, incorrect filtering results, or file processing failures.</li>
+      <li>Damages arising from service interruptions, downtime, or data loss.</li>
+      <li>Any claim or damage arising from your reliance on the Service for critical dispatch or logistics decisions.</li>
+    </ul>
+    <p>In any event, our total cumulative liability to you for any claims arising from or related to the Service shall not exceed the amount you have paid to us in the 30 days preceding the event giving rise to the claim, or INR 1,000, whichever is lower.</p>
+    <p>Some jurisdictions do not allow the exclusion of certain warranties or limitation of liability for consequential damages. In such jurisdictions, our liability is limited to the maximum extent permitted by law.</p>
+  </div>
+
+  <!-- 9 -->
+  <div class="legal-section" id="t9">
+    <h2>9. Indemnification</h2>
+    <p>You agree to indemnify, defend, and hold harmless PDF Suite and its team members from and against any and all claims, damages, losses, costs, and expenses (including reasonable legal fees) arising from:</p>
+    <ul>
+      <li>Your use or misuse of the Service.</li>
+      <li>Your violation of these Terms of Service.</li>
+      <li>Your violation of any applicable law or regulation.</li>
+      <li>Any claim that content you uploaded to the Service infringes the rights of a third party.</li>
+    </ul>
+  </div>
+
+  <!-- 10 -->
+  <div class="legal-section" id="t10">
+    <h2>10. Service Availability and Modifications</h2>
+    <p>We strive to keep PDF Suite available and functional, but we do not guarantee continuous uptime. The Service may be temporarily unavailable due to scheduled maintenance, technical issues, or circumstances beyond our control.</p>
+    <p>We reserve the right to:</p>
+    <ul>
+      <li>Modify, update, or discontinue any feature of the Service at any time without prior notice.</li>
+      <li>Change these Terms of Service at any time by posting an updated version at <strong>pdf.techseventeen.com/terms</strong>. Your continued use of the Service after changes are posted constitutes acceptance.</li>
+      <li>Impose usage limits (e.g., file size, number of uploads per day) to ensure fair service for all users.</li>
+    </ul>
+    <p>We will make reasonable efforts to notify active users of significant changes via email in advance.</p>
+  </div>
+
+  <!-- 11 -->
+  <div class="legal-section" id="t11">
+    <h2>11. Termination</h2>
+    <p>Either party may terminate the service relationship at any time. You may request account closure by contacting us at <a href="mailto:pdf@techseventeen.com">pdf@techseventeen.com</a>. We may suspend or terminate your account:</p>
+    <ul>
+      <li>If you violate any provision of these Terms.</li>
+      <li>If you engage in behaviour that we reasonably determine to be harmful to the Service, other users, or our team.</li>
+      <li>If payment is overdue and not resolved within a reasonable period after notice.</li>
+      <li>If we decide to discontinue the Service (with reasonable notice where possible).</li>
+    </ul>
+    <p>Upon termination, your access to the Service will cease. Any data associated with your account may be deleted in accordance with our Privacy Policy. Clauses that by their nature should survive termination — including Sections 5, 7, 8, 9, and 12 — shall survive.</p>
+  </div>
+
+  <!-- 12 -->
+  <div class="legal-section" id="t12">
+    <h2>12. Governing Law and Dispute Resolution</h2>
+    <p>These Terms of Service are governed by and construed in accordance with the laws of <strong>India</strong>, without regard to its conflict of laws provisions. The courts of India shall have exclusive jurisdiction over any disputes arising from or related to these Terms or your use of the Service.</p>
+    <p>Before initiating any formal legal proceeding, the parties agree to attempt to resolve disputes informally by contacting us at <a href="mailto:pdf@techseventeen.com">pdf@techseventeen.com</a>. We will make genuine efforts to resolve the matter within 30 days of receiving a written complaint.</p>
+    <p>If informal resolution is not possible, disputes shall be subject to binding arbitration under the Arbitration and Conciliation Act, 1996 (India), with proceedings conducted in English.</p>
+  </div>
+
+  <!-- 13 -->
+  <div class="legal-section" id="t13">
+    <h2>13. Contact Information</h2>
+    <p>For any questions, concerns, or communications regarding these Terms of Service, please contact us:</p>
+    <ul>
+      <li><strong>Email:</strong> <a href="mailto:pdf@techseventeen.com">pdf@techseventeen.com</a></li>
+      <li><strong>Website:</strong> <a href="/contact">pdf.techseventeen.com/contact</a></li>
+    </ul>
+    <p>These Terms of Service constitute the entire agreement between you and PDF Suite regarding your use of the Service, and supersede all prior agreements or understandings on this subject.</p>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="/home" class="logo">
+          <div class="logo-icon">📄</div>
+          PDF Suite
+        </a>
+        <p>Smart tools for Meesho suppliers. Filter label PDFs, extract order data, and track packing — built for Indian sellers.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="/home">Home</a></li>
+          <li><a href="/about">About</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/login">Login</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="/privacy">Privacy Policy</a></li>
+          <li><a href="/terms">Terms of Service</a></li>
+          <li><a href="/contact">Contact Us</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 PDF Suite. All rights reserved. Built for Meesho suppliers in India.</span>
+      <span>
+        <a href="/privacy">Privacy</a> &nbsp;·&nbsp;
+        <a href="/terms">Terms</a> &nbsp;·&nbsp;
+        <a href="/contact">Contact</a>
+      </span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

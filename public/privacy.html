@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — PDF Suite</title>
+  <meta name="description" content="PDF Suite Privacy Policy — how we collect, use, and protect your data when you use our Meesho label PDF management tools." />
+  <link rel="canonical" href="https://pdf.techseventeen.com/privacy" />
+  <meta property="og:title" content="Privacy Policy — PDF Suite" />
+  <meta property="og:description" content="PDF Suite Privacy Policy — how we collect, use, and protect your data when you use our Meesho label PDF management tools." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://pdf.techseventeen.com/privacy" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:        #1e40af;
+      --primary-dark:   #1e3a8a;
+      --primary-light:  #eff6ff;
+      --primary-border: #bfdbfe;
+      --bg:             #f1f5f9;
+      --surface:        #ffffff;
+      --border:         #e2e8f0;
+      --text:           #0f172a;
+      --text-2:         #475569;
+      --muted:          #94a3b8;
+      --radius:         8px;
+      --shadow:         0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+    }
+
+    html, body {
+      min-height: 100vh;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: var(--shadow);
+    }
+    .nav-inner {
+      max-width: 1100px; margin: 0 auto;
+      padding: 0 24px; height: 64px;
+      display: flex; align-items: center; gap: 28px;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: var(--text);
+      font-weight: 800; font-size: 18px; letter-spacing: -.3px;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: var(--primary);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 18px;
+    }
+    .nav-links { display: flex; gap: 2px; list-style: none; }
+    .nav-links a {
+      padding: 6px 14px; border-radius: 6px;
+      text-decoration: none; font-size: 14px; font-weight: 500;
+      color: var(--text-2); transition: all .15s;
+    }
+    .nav-links a:hover { background: var(--bg); color: var(--text); }
+    .nav-right { margin-left: auto; }
+    .nbtn {
+      padding: 8px 18px; border-radius: 7px;
+      font-size: 14px; font-weight: 600;
+      cursor: pointer; text-decoration: none; border: none;
+      transition: all .15s; font-family: inherit; display: inline-block;
+    }
+    .nbtn-primary { background: var(--primary); color: #fff; }
+    .nbtn-primary:hover { background: var(--primary-dark); }
+
+    /* ── LEGAL PAGE LAYOUT ── */
+    .legal-page {
+      max-width: 780px; margin: 0 auto;
+      padding: 52px 24px 80px;
+    }
+    .legal-header { margin-bottom: 40px; }
+    .legal-badge {
+      display: inline-block; background: var(--primary-light);
+      color: var(--primary); font-size: 12px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px;
+      padding: 4px 13px; border-radius: 20px; margin-bottom: 16px;
+    }
+    .legal-header h1 {
+      font-size: clamp(28px, 4vw, 40px);
+      font-weight: 800; letter-spacing: -.4px; margin-bottom: 10px;
+    }
+    .legal-header .meta {
+      font-size: 14px; color: var(--muted);
+    }
+    .legal-header .intro {
+      font-size: 16px; color: var(--text-2);
+      line-height: 1.7; margin-top: 16px;
+      padding: 16px 20px;
+      background: var(--primary-light);
+      border: 1px solid var(--primary-border);
+      border-radius: 10px;
+    }
+
+    .legal-toc {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 20px 24px; margin-bottom: 36px;
+      box-shadow: var(--shadow);
+    }
+    .legal-toc h3 { font-size: 14px; font-weight: 700; margin-bottom: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; }
+    .legal-toc ol { padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+    .legal-toc ol li a {
+      font-size: 14px; color: var(--primary); text-decoration: none;
+    }
+    .legal-toc ol li a:hover { text-decoration: underline; }
+
+    .legal-section { margin-bottom: 48px; scroll-margin-top: 80px; }
+    .legal-section h2 {
+      font-size: 20px; font-weight: 700;
+      margin-bottom: 14px; padding-bottom: 10px;
+      border-bottom: 2px solid var(--primary-light);
+      color: var(--primary);
+    }
+    .legal-section h3 {
+      font-size: 16px; font-weight: 700;
+      margin: 20px 0 10px;
+    }
+    .legal-section p {
+      font-size: 15px; color: var(--text-2);
+      line-height: 1.75; margin-bottom: 14px;
+    }
+    .legal-section p:last-child { margin-bottom: 0; }
+    .legal-section ul, .legal-section ol {
+      padding-left: 22px; margin-bottom: 14px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .legal-section li {
+      font-size: 15px; color: var(--text-2); line-height: 1.65;
+    }
+    .legal-section strong { color: var(--text); }
+    .legal-section a { color: var(--primary); }
+
+    .highlight-box {
+      background: var(--primary-light); border: 1px solid var(--primary-border);
+      border-radius: 10px; padding: 18px 20px; margin: 18px 0;
+      font-size: 15px; color: var(--text-2); line-height: 1.7;
+    }
+    .highlight-box strong { color: var(--primary); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: #0f172a; color: #94a3b8;
+      padding: 48px 24px 32px;
+    }
+    .footer-inner { max-width: 1060px; margin: 0 auto; }
+    .footer-top {
+      display: grid; grid-template-columns: 2fr 1fr 1fr;
+      gap: 40px; margin-bottom: 40px;
+    }
+    @media (max-width: 640px) { .footer-top { grid-template-columns: 1fr; } }
+    .footer-brand .logo {
+      display: flex; align-items: center; gap: 10px;
+      color: #fff; font-weight: 800; font-size: 18px;
+      text-decoration: none; margin-bottom: 14px;
+    }
+    .footer-brand .logo-icon {
+      width: 34px; height: 34px; background: var(--primary);
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .footer-brand p { font-size: 14px; line-height: 1.65; max-width: 280px; }
+    .footer-col h4 { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 14px; text-transform: uppercase; letter-spacing: .6px; }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .footer-col ul li a { font-size: 14px; color: #94a3b8; text-decoration: none; transition: color .15s; }
+    .footer-col ul li a:hover { color: #fff; }
+    .footer-bottom {
+      border-top: 1px solid #1e293b; padding-top: 24px; font-size: 13px;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .footer-bottom a { color: #94a3b8; text-decoration: none; }
+    .footer-bottom a:hover { color: #fff; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="/home" class="nav-logo">
+      <div class="logo-icon">📄</div>
+      PDF Suite
+    </a>
+    <ul class="nav-links">
+      <li><a href="/home">Home</a></li>
+      <li><a href="/about">About</a></li>
+      <li><a href="/contact">Contact</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="/login" class="nbtn nbtn-primary">Login →</a>
+    </div>
+  </div>
+</nav>
+
+<!-- LEGAL CONTENT -->
+<div class="legal-page">
+
+  <div class="legal-header">
+    <div class="legal-badge">Legal</div>
+    <h1>Privacy Policy</h1>
+    <div class="meta">Last updated: May 2025 &nbsp;·&nbsp; Effective from: May 1, 2025</div>
+    <div class="intro">
+      This Privacy Policy explains how <strong>PDF Suite</strong> ("we", "us", or "our") collects, uses, stores, and protects information about you when you use our website and services at <strong>pdf.techseventeen.com</strong>. By using PDF Suite, you agree to the practices described in this policy.
+    </div>
+  </div>
+
+  <div class="legal-toc">
+    <h3>Table of Contents</h3>
+    <ol>
+      <li><a href="#s1">Information We Collect</a></li>
+      <li><a href="#s2">How We Use Your Information</a></li>
+      <li><a href="#s3">Data Storage and Security</a></li>
+      <li><a href="#s4">Uploaded PDF Files</a></li>
+      <li><a href="#s5">Cookies and Session Data</a></li>
+      <li><a href="#s6">Third-Party Services</a></li>
+      <li><a href="#s7">Data Sharing and Disclosure</a></li>
+      <li><a href="#s8">Your Rights and Data Requests</a></li>
+      <li><a href="#s9">Children's Privacy</a></li>
+      <li><a href="#s10">Changes to This Policy</a></li>
+      <li><a href="#s11">Contact Us</a></li>
+    </ol>
+  </div>
+
+  <!-- 1 -->
+  <div class="legal-section" id="s1">
+    <h2>1. Information We Collect</h2>
+    <p>We collect the following categories of information when you use PDF Suite:</p>
+
+    <h3>1.1 Account Information</h3>
+    <p>When your account is created (by our team on your behalf), we store your <strong>email address</strong> and a <strong>hashed password</strong>. We may also record your business name and contact details you provide to us during onboarding. We do not store credit card or payment information on our servers — billing is handled personally and outside the platform.</p>
+
+    <h3>1.2 Usage Data</h3>
+    <p>We automatically collect certain technical information when you use PDF Suite, including:</p>
+    <ul>
+      <li>IP address and approximate geographic location (city/country level)</li>
+      <li>Browser type and version, operating system</li>
+      <li>Pages visited and features used within the tool</li>
+      <li>Date and time of access</li>
+      <li>Session duration</li>
+    </ul>
+    <p>This data is used solely for security monitoring, debugging, and improving the service.</p>
+
+    <h3>1.3 PDF Upload Data</h3>
+    <p>When you upload a PDF, we temporarily store the file on our servers to process it. Please see <a href="#s4">Section 4 (Uploaded PDF Files)</a> for full details on how this is handled.</p>
+
+    <h3>1.4 Contact Form Submissions</h3>
+    <p>If you contact us through our contact form or email, we store your name, email address, and the content of your message to respond to you and for record-keeping purposes.</p>
+  </div>
+
+  <!-- 2 -->
+  <div class="legal-section" id="s2">
+    <h2>2. How We Use Your Information</h2>
+    <p>We use the information we collect for the following purposes:</p>
+    <ul>
+      <li><strong>To provide and operate the service</strong> — authenticating your account, processing your PDF uploads, returning filtered results, and enabling downloads.</li>
+      <li><strong>To communicate with you</strong> — responding to support requests, notifying you about service changes, or sharing billing details as agreed.</li>
+      <li><strong>To improve the product</strong> — understanding how features are used, diagnosing errors, and making the tool more reliable.</li>
+      <li><strong>To ensure security</strong> — detecting unauthorised access, monitoring for abuse, and maintaining system integrity.</li>
+      <li><strong>To comply with legal obligations</strong> — retaining records as required by applicable Indian law.</li>
+    </ul>
+    <p>We do not use your data for advertising, behavioural profiling, or any purpose beyond operating and improving PDF Suite.</p>
+  </div>
+
+  <!-- 3 -->
+  <div class="legal-section" id="s3">
+    <h2>3. Data Storage and Security</h2>
+    <p>PDF Suite is hosted on servers located in India or within jurisdictions that provide adequate data protection standards. We implement the following security measures:</p>
+    <ul>
+      <li>Passwords are stored as salted cryptographic hashes (bcrypt). We never store plain-text passwords.</li>
+      <li>All data in transit is encrypted using TLS/HTTPS.</li>
+      <li>Access to production systems is restricted to authorised team members.</li>
+      <li>Log files are periodically purged and do not contain sensitive user data.</li>
+    </ul>
+    <p>While we take reasonable precautions to protect your data, no system is completely immune to security threats. We encourage you to use a strong, unique password and to contact us immediately if you suspect any unauthorised access to your account.</p>
+  </div>
+
+  <!-- 4 -->
+  <div class="legal-section" id="s4">
+    <h2>4. Uploaded PDF Files</h2>
+    <div class="highlight-box">
+      <strong>Your PDFs are processed in real time and deleted from our servers.</strong> We do not permanently store the content of uploaded label PDFs.
+    </div>
+    <p>When you upload a Meesho label PDF to PDF Suite:</p>
+    <ul>
+      <li>The file is temporarily stored on our server for the duration of processing (typically a few seconds to a few minutes for large files).</li>
+      <li>After processing, the original upload file is scheduled for deletion. Generated output PDFs (filtered downloads) are stored temporarily — typically for up to 1 hour — to allow re-downloading, then deleted automatically.</li>
+      <li>Extracted metadata (AWB numbers, order numbers, SKU codes, addresses) may be stored in our database linked to your account for dashboard history and packing tracker functionality. This data is not shared with third parties.</li>
+      <li>You can request deletion of your stored order data at any time by contacting us at <a href="mailto:pdf@techseventeen.com">pdf@techseventeen.com</a>.</li>
+    </ul>
+    <p>Please be aware that Meesho label PDFs contain customer delivery addresses and personal data. You are responsible for ensuring you have the right to upload and process this data under applicable privacy laws.</p>
+  </div>
+
+  <!-- 5 -->
+  <div class="legal-section" id="s5">
+    <h2>5. Cookies and Session Data</h2>
+    <p>PDF Suite uses the following types of cookies and local storage:</p>
+
+    <h3>5.1 Essential Session Cookies</h3>
+    <p>We use HTTP-only session cookies to maintain your logged-in state. These cookies are necessary for the service to function and do not track your activity across other websites. They expire when you log out or after a period of inactivity.</p>
+
+    <h3>5.2 Browser Session Storage</h3>
+    <p>We use browser <code>sessionStorage</code> to temporarily cache your last PDF analysis results within your current browser session. This data lives entirely in your browser and is not transmitted to our servers beyond the initial analysis.</p>
+
+    <h3>5.3 No Third-Party Tracking Cookies</h3>
+    <p>We do not use Google Analytics, Facebook Pixel, or any other third-party tracking or advertising cookies. We do not place persistent tracking cookies on your device.</p>
+  </div>
+
+  <!-- 6 -->
+  <div class="legal-section" id="s6">
+    <h2>6. Third-Party Services</h2>
+    <p>PDF Suite operates primarily with self-hosted infrastructure. We do not embed third-party scripts on our pages. Where we use third-party services, these are limited to:</p>
+    <ul>
+      <li><strong>Hosting provider</strong> — our server infrastructure provider processes network-level data (IP addresses, bandwidth usage) in accordance with their own privacy policy.</li>
+      <li><strong>Email</strong> — if we send you transactional emails, they are sent through a secure email provider. We do not use bulk marketing email platforms.</li>
+    </ul>
+    <p>We do not share your personal data with any third party for commercial, marketing, or advertising purposes.</p>
+  </div>
+
+  <!-- 7 -->
+  <div class="legal-section" id="s7">
+    <h2>7. Data Sharing and Disclosure</h2>
+    <p>We do not sell, trade, rent, or share your personal information with third parties, except in the following limited circumstances:</p>
+    <ul>
+      <li><strong>Legal requirements</strong> — if required by law, court order, or government authority under applicable Indian law (including the Information Technology Act, 2000 and rules thereunder).</li>
+      <li><strong>Protection of rights</strong> — if we believe disclosure is necessary to protect the rights, property, or safety of PDF Suite, our users, or the public.</li>
+      <li><strong>Business transfer</strong> — in the event of a merger, acquisition, or sale of all or part of our business, your information may be transferred to the acquiring entity, subject to the same privacy protections described in this policy.</li>
+    </ul>
+  </div>
+
+  <!-- 8 -->
+  <div class="legal-section" id="s8">
+    <h2>8. Your Rights and Data Requests</h2>
+    <p>You have the following rights regarding your personal data held by PDF Suite:</p>
+    <ul>
+      <li><strong>Access</strong> — you may request a copy of the personal data we hold about you.</li>
+      <li><strong>Correction</strong> — you may request correction of inaccurate personal data.</li>
+      <li><strong>Deletion</strong> — you may request deletion of your account and associated personal data. Please note that some information may need to be retained for legal compliance purposes.</li>
+      <li><strong>Data portability</strong> — you may request your extracted order data in a structured, machine-readable format (CSV).</li>
+      <li><strong>Withdrawal of consent</strong> — where processing is based on consent, you may withdraw it at any time by contacting us.</li>
+    </ul>
+    <p>To exercise any of these rights, please email us at <a href="mailto:pdf@techseventeen.com">pdf@techseventeen.com</a> with the subject line "Data Request". We will respond within 30 days.</p>
+  </div>
+
+  <!-- 9 -->
+  <div class="legal-section" id="s9">
+    <h2>9. Children's Privacy</h2>
+    <p>PDF Suite is a business tool intended for use by adults operating commercial supplier accounts on Meesho. We do not knowingly collect personal information from anyone under the age of 18. If we become aware that we have collected data from a minor, we will delete it promptly.</p>
+  </div>
+
+  <!-- 10 -->
+  <div class="legal-section" id="s10">
+    <h2>10. Changes to This Policy</h2>
+    <p>We may update this Privacy Policy from time to time to reflect changes in our practices, legal requirements, or service features. When we make significant changes, we will update the "Last updated" date at the top of this page. Where appropriate, we will notify active users via email.</p>
+    <p>Continued use of PDF Suite after any changes constitutes your acceptance of the updated policy. We encourage you to review this page periodically.</p>
+  </div>
+
+  <!-- 11 -->
+  <div class="legal-section" id="s11">
+    <h2>11. Contact Us</h2>
+    <p>If you have any questions, concerns, or requests regarding this Privacy Policy or the way we handle your data, please contact us:</p>
+    <ul>
+      <li><strong>Email:</strong> <a href="mailto:pdf@techseventeen.com">pdf@techseventeen.com</a></li>
+      <li><strong>Website:</strong> <a href="/contact">pdf.techseventeen.com/contact</a></li>
+    </ul>
+    <p>We take privacy concerns seriously and will respond to all enquiries promptly.</p>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="/home" class="logo">
+          <div class="logo-icon">📄</div>
+          PDF Suite
+        </a>
+        <p>Smart tools for Meesho suppliers. Filter label PDFs, extract order data, and track packing — built for Indian sellers.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="/home">Home</a></li>
+          <li><a href="/about">About</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/login">Login</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="/privacy">Privacy Policy</a></li>
+          <li><a href="/terms">Terms of Service</a></li>
+          <li><a href="/contact">Contact Us</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 PDF Suite. All rights reserved. Built for Meesho suppliers in India.</span>
+      <span>
+        <a href="/privacy">Privacy</a> &nbsp;·&nbsp;
+        <a href="/terms">Terms</a> &nbsp;·&nbsp;
+        <a href="/contact">Contact</a>
+      </span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

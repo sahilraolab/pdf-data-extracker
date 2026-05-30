@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About — PDF Suite</title>
+  <meta name="description" content="Learn about PDF Suite — the team of Meesho sellers and developers behind India's smartest label PDF management tool for suppliers." />
+  <link rel="canonical" href="https://pdf.techseventeen.com/about" />
+  <meta property="og:title" content="About PDF Suite — Smart Tools for Meesho Suppliers" />
+  <meta property="og:description" content="Learn about PDF Suite — the team of Meesho sellers and developers behind India's smartest label PDF management tool for suppliers." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://pdf.techseventeen.com/about" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:        #1e40af;
+      --primary-dark:   #1e3a8a;
+      --primary-light:  #eff6ff;
+      --primary-border: #bfdbfe;
+      --bg:             #f1f5f9;
+      --surface:        #ffffff;
+      --border:         #e2e8f0;
+      --text:           #0f172a;
+      --text-2:         #475569;
+      --muted:          #94a3b8;
+      --green:          #059669;
+      --green-light:    #ecfdf5;
+      --radius:         8px;
+      --shadow:         0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+      --shadow-md:      0 4px 6px -1px rgba(0,0,0,.10), 0 2px 4px -1px rgba(0,0,0,.06);
+    }
+
+    html, body {
+      min-height: 100vh;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--surface);
+      color: var(--text);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: var(--shadow);
+    }
+    .nav-inner {
+      max-width: 1100px; margin: 0 auto;
+      padding: 0 24px; height: 64px;
+      display: flex; align-items: center; gap: 28px;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: var(--text);
+      font-weight: 800; font-size: 18px; letter-spacing: -.3px;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: var(--primary);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 18px;
+    }
+    .nav-links { display: flex; gap: 2px; list-style: none; }
+    .nav-links a {
+      padding: 6px 14px; border-radius: 6px;
+      text-decoration: none; font-size: 14px; font-weight: 500;
+      color: var(--text-2); transition: all .15s;
+    }
+    .nav-links a:hover { background: var(--bg); color: var(--text); }
+    .nav-links a.active { color: var(--primary); background: var(--primary-light); }
+    .nav-right { margin-left: auto; }
+    .nbtn {
+      padding: 8px 18px; border-radius: 7px;
+      font-size: 14px; font-weight: 600;
+      cursor: pointer; text-decoration: none; border: none;
+      transition: all .15s; font-family: inherit; display: inline-block;
+    }
+    .nbtn-primary { background: var(--primary); color: #fff; }
+    .nbtn-primary:hover { background: var(--primary-dark); }
+
+    /* ── PAGE HERO ── */
+    .page-hero {
+      background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 60%, #172554 100%);
+      color: #fff; padding: 72px 24px 64px; text-align: center;
+    }
+    .page-hero h1 {
+      font-size: clamp(30px, 5vw, 46px);
+      font-weight: 800; letter-spacing: -.4px; margin-bottom: 14px;
+    }
+    .page-hero p {
+      font-size: 18px; color: #bfdbfe;
+      max-width: 560px; margin: 0 auto; line-height: 1.65;
+    }
+
+    /* ── SECTIONS ── */
+    section { padding: 72px 24px; }
+    .section-inner { max-width: 860px; margin: 0 auto; }
+    .section-inner.wide { max-width: 1060px; }
+    .section-tag {
+      display: inline-block; background: var(--primary-light);
+      color: var(--primary); font-size: 12px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px;
+      padding: 4px 13px; border-radius: 20px; margin-bottom: 14px;
+    }
+    .section-title {
+      font-size: clamp(24px, 4vw, 34px);
+      font-weight: 800; letter-spacing: -.3px;
+      margin-bottom: 16px; line-height: 1.2;
+    }
+    .body-text {
+      font-size: 16px; color: var(--text-2); line-height: 1.75;
+      margin-bottom: 18px;
+    }
+    .body-text strong { color: var(--text); }
+    .body-text:last-child { margin-bottom: 0; }
+
+    /* ── MISSION ── */
+    .mission-bg { background: var(--bg); }
+    .mission-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--primary);
+      border-radius: 12px; padding: 32px 28px;
+      box-shadow: var(--shadow);
+    }
+    .mission-card h3 {
+      font-size: 20px; font-weight: 700; margin-bottom: 12px; color: var(--primary);
+    }
+    .mission-card p {
+      font-size: 17px; color: var(--text-2); line-height: 1.75; font-style: italic;
+    }
+
+    /* ── VALUES ── */
+    .values-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px; margin-top: 40px;
+    }
+    .value-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 24px 20px;
+      box-shadow: var(--shadow);
+    }
+    .value-icon { font-size: 28px; margin-bottom: 12px; }
+    .value-card h4 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+    .value-card p  { font-size: 14px; color: var(--text-2); line-height: 1.6; }
+
+    /* ── STORY TIMELINE ── */
+    .timeline { margin-top: 36px; display: flex; flex-direction: column; gap: 0; }
+    .timeline-item {
+      display: grid; grid-template-columns: 100px 1fr;
+      gap: 20px; padding-bottom: 32px; position: relative;
+    }
+    .timeline-item::before {
+      content: ''; position: absolute;
+      left: 49px; top: 28px; bottom: 0;
+      width: 2px; background: var(--border);
+    }
+    .timeline-item:last-child::before { display: none; }
+    .timeline-date {
+      font-size: 13px; font-weight: 700; color: var(--primary);
+      padding-top: 2px; text-align: right; position: relative;
+    }
+    .timeline-dot {
+      position: absolute; right: -7px; top: 5px;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: var(--primary); border: 2px solid #fff;
+      box-shadow: 0 0 0 2px var(--primary-border);
+    }
+    .timeline-content h4 { font-size: 16px; font-weight: 700; margin-bottom: 5px; }
+    .timeline-content p  { font-size: 14px; color: var(--text-2); line-height: 1.65; }
+
+    /* ── CONTACT ── */
+    .contact-bg { background: var(--bg); }
+    .contact-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px; margin-top: 32px;
+    }
+    .contact-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 24px 20px;
+      box-shadow: var(--shadow); text-align: center;
+    }
+    .contact-card .icon { font-size: 30px; margin-bottom: 12px; }
+    .contact-card h4 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    .contact-card p  { font-size: 14px; color: var(--text-2); }
+    .contact-card a  { color: var(--primary); text-decoration: none; font-weight: 600; }
+    .contact-card a:hover { text-decoration: underline; }
+
+    /* ── CTA STRIP ── */
+    .cta-strip {
+      background: linear-gradient(135deg, #172554, #1e40af);
+      padding: 64px 24px; text-align: center; color: #fff;
+    }
+    .cta-strip h2 { font-size: clamp(24px, 4vw, 34px); font-weight: 800; margin-bottom: 14px; letter-spacing: -.3px; }
+    .cta-strip p  { font-size: 17px; color: #bfdbfe; margin-bottom: 30px; }
+    .btn-cta {
+      display: inline-block; background: #fff; color: var(--primary);
+      font-weight: 700; padding: 14px 32px; border-radius: 10px;
+      text-decoration: none; font-size: 15px;
+      box-shadow: 0 4px 14px rgba(0,0,0,.2);
+      transition: all .2s;
+    }
+    .btn-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(0,0,0,.25); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: #0f172a; color: #94a3b8;
+      padding: 48px 24px 32px;
+    }
+    .footer-inner { max-width: 1060px; margin: 0 auto; }
+    .footer-top {
+      display: grid; grid-template-columns: 2fr 1fr 1fr;
+      gap: 40px; margin-bottom: 40px;
+    }
+    @media (max-width: 640px) { .footer-top { grid-template-columns: 1fr; } }
+    .footer-brand .logo {
+      display: flex; align-items: center; gap: 10px;
+      color: #fff; font-weight: 800; font-size: 18px;
+      text-decoration: none; margin-bottom: 14px;
+    }
+    .footer-brand .logo-icon {
+      width: 34px; height: 34px; background: var(--primary);
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .footer-brand p { font-size: 14px; line-height: 1.65; max-width: 280px; }
+    .footer-col h4 { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 14px; text-transform: uppercase; letter-spacing: .6px; }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .footer-col ul li a { font-size: 14px; color: #94a3b8; text-decoration: none; transition: color .15s; }
+    .footer-col ul li a:hover { color: #fff; }
+    .footer-bottom {
+      border-top: 1px solid #1e293b; padding-top: 24px; font-size: 13px;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .footer-bottom a { color: #94a3b8; text-decoration: none; }
+    .footer-bottom a:hover { color: #fff; }
+
+    @media (max-width: 600px) {
+      .timeline-item { grid-template-columns: 1fr; }
+      .timeline-item::before { display: none; }
+      .timeline-date { text-align: left; }
+      .timeline-dot  { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="/home" class="nav-logo">
+      <div class="logo-icon">📄</div>
+      PDF Suite
+    </a>
+    <ul class="nav-links">
+      <li><a href="/home">Home</a></li>
+      <li><a href="/about" class="active">About</a></li>
+      <li><a href="/contact">Contact</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="/login" class="nbtn nbtn-primary">Login →</a>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <h1>About PDF Suite</h1>
+  <p>We are a small, focused team helping Meesho suppliers across India take control of their order dispatch — one PDF at a time.</p>
+</div>
+
+<!-- WHO WE ARE -->
+<section>
+  <div class="section-inner">
+    <div class="section-tag">Who We Are</div>
+    <h2 class="section-title">Built by Sellers, for Sellers</h2>
+    <p class="body-text">
+      PDF Suite was built by a team based in India that understands the day-to-day grind of running a Meesho supplier business. We are not a large enterprise software company. We are a small, dedicated team that has worked directly with Meesho suppliers, watched them struggle with the manual labor of PDF management, and decided to build a solution that actually fits into their workflow.
+    </p>
+    <p class="body-text">
+      Our team includes developers and operations specialists who have hands-on experience with <strong>Meesho label PDFs, packing workflows, and dispatch logistics</strong>. We speak your language — we know what AWB numbers, SKU codes, Delhivery pickups, and exchange orders mean in practice.
+    </p>
+    <p class="body-text">
+      We are based in India, and we support Indian suppliers in Indian time zones. When you reach us on WhatsApp, a real person responds. When you need help with a new PDF format Meesho pushes out, we update the tool — often within 24 hours.
+    </p>
+  </div>
+</section>
+
+<!-- MISSION -->
+<section class="mission-bg">
+  <div class="section-inner">
+    <div class="section-tag">Our Mission</div>
+    <h2 class="section-title">Simplify Operations for Every Meesho Supplier</h2>
+    <div class="mission-card">
+      <h3>Mission Statement</h3>
+      <p>"To eliminate manual, error-prone PDF work from the daily operations of Meesho suppliers in India — so they can focus on growing their business, not wrestling with files."</p>
+    </div>
+    <div class="values-grid">
+      <div class="value-card">
+        <div class="value-icon">🎯</div>
+        <h4>Purpose-Built</h4>
+        <p>Every feature in PDF Suite exists because a real supplier asked for it or struggled without it. We build nothing that doesn't solve a real problem.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🤝</div>
+        <h4>Personal Support</h4>
+        <p>No ticket queues. No chatbots. We onboard every supplier personally and stay accessible over WhatsApp and email for as long as you use PDF Suite.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">⚡</div>
+        <h4>Speed First</h4>
+        <p>Dispatch days are hectic. PDF Suite is engineered to be fast — upload, filter, and download in under a minute, even for 500-page PDFs.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🔒</div>
+        <h4>Data Privacy</h4>
+        <p>Your order data belongs to you. We never sell or share your data. Uploaded PDFs are deleted from our servers after processing.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STORY -->
+<section>
+  <div class="section-inner">
+    <div class="section-tag">Our Story</div>
+    <h2 class="section-title">Why We Built This</h2>
+    <p class="body-text">
+      It started with a simple observation: every Meesho supplier we spoke to was doing the same painful thing every single morning. They would download their shipping label PDF from Meesho — sometimes hundreds of pages long — and then manually scroll through it, looking for specific cities, exchange orders, or high-quantity shipments to handle separately.
+    </p>
+    <p class="body-text">
+      Some were using Ctrl+F in PDF readers. Others were printing everything and sorting by hand. A few had figured out workarounds using spreadsheets, but none of these solutions were reliable or fast enough for a busy dispatch day.
+    </p>
+    <p class="body-text">
+      We built the first version of PDF Suite in a single weekend to solve this for one supplier. Within a month, five more suppliers were asking for access. That is when we knew this needed to be a proper product.
+    </p>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-date">
+          2023
+          <div class="timeline-dot"></div>
+        </div>
+        <div class="timeline-content">
+          <h4>First Version — Keyword Filter</h4>
+          <p>Built a basic PDF keyword filter to help one Meesho supplier in Surat extract city-specific shipping labels from a 200-page PDF. Ran it from a simple Node.js script.</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">
+          Early 2024
+          <div class="timeline-dot"></div>
+        </div>
+        <div class="timeline-content">
+          <h4>AWB &amp; SKU Extraction Added</h4>
+          <p>After suppliers asked for order data export, we added automatic AWB number, SKU code, and order number extraction from each PDF page.</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">
+          Mid 2024
+          <div class="timeline-dot"></div>
+        </div>
+        <div class="timeline-content">
+          <h4>Delivery Partner Detection</h4>
+          <p>Suppliers handling multiple couriers — Delhivery, Ekart, Xpressbees — needed courier-wise PDFs. We built automatic delivery partner detection and split-download.</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">
+          2025
+          <div class="timeline-dot"></div>
+        </div>
+        <div class="timeline-content">
+          <h4>PDF Suite — Full Product Launch</h4>
+          <p>Launched PDF Suite as a fully hosted product with the packing tracker, admin dashboard, and personal onboarding. Now serving suppliers across Surat, Jaipur, Mumbai, Delhi, and more.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT INFO -->
+<section class="contact-bg">
+  <div class="section-inner">
+    <div class="section-tag">Get in Touch</div>
+    <h2 class="section-title">We're Here to Help</h2>
+    <p class="body-text">Have questions about PDF Suite? Want to get access? Reach us through any of the channels below. We respond personally — no bots, no delay.</p>
+    <div class="contact-cards">
+      <div class="contact-card">
+        <div class="icon">✉️</div>
+        <h4>Email</h4>
+        <p><a href="mailto:pdf@techseventeen.com">pdf@techseventeen.com</a></p>
+        <p style="font-size:13px; color:var(--muted); margin-top:6px;">We reply within 24 hours on business days</p>
+      </div>
+      <div class="contact-card">
+        <div class="icon">💬</div>
+        <h4>WhatsApp</h4>
+        <p><a href="https://wa.me/919999999999" target="_blank" rel="noopener">Message us on WhatsApp</a></p>
+        <p style="font-size:13px; color:var(--muted); margin-top:6px;">Fastest way to reach us</p>
+      </div>
+      <div class="contact-card">
+        <div class="icon">📋</div>
+        <h4>Contact Form</h4>
+        <p><a href="/contact">Fill out our form</a></p>
+        <p style="font-size:13px; color:var(--muted); margin-top:6px;">For access requests and detailed queries</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-strip">
+  <h2>Ready to Get Started?</h2>
+  <p>Contact us to set up your account. We onboard every supplier personally.</p>
+  <a href="/contact" class="btn-cta">Contact Us to Get Access</a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="/home" class="logo">
+          <div class="logo-icon">📄</div>
+          PDF Suite
+        </a>
+        <p>Smart tools for Meesho suppliers. Filter label PDFs, extract order data, and track packing — built for Indian sellers.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="/home">Home</a></li>
+          <li><a href="/about">About</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/login">Login</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="/privacy">Privacy Policy</a></li>
+          <li><a href="/terms">Terms of Service</a></li>
+          <li><a href="/contact">Contact Us</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 PDF Suite. All rights reserved. Built for Meesho suppliers in India.</span>
+      <span>
+        <a href="/privacy">Privacy</a> &nbsp;·&nbsp;
+        <a href="/terms">Terms</a> &nbsp;·&nbsp;
+        <a href="/contact">Contact</a>
+      </span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

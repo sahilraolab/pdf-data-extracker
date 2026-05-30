@@ -1,14 +1,26 @@
+# Dependencies
 node_modules/
+
+# Environment — never commit real credentials
+.env
+.env.local
+.env.production
+
+# Runtime data (user uploads, generated PDFs, DB files)
 uploads/
 output/
 logs/
-*.env
+data/
+
+# OS / editor
 .DS_Store
+Thumbs.db
 .claude
 .idea/
 .vscode/
+
+# Misc
 *.log
 *.tmp
 dist/
 build/
-.sixth/

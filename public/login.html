@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — PDF Suite</title>
+  <meta name="description" content="Sign in to PDF Suite to access your Meesho label PDF management tools." />
+  <link rel="canonical" href="https://pdf.techseventeen.com/login" />
+  <meta property="og:title" content="Login — PDF Suite" />
+  <meta property="og:description" content="Sign in to PDF Suite to access your Meesho label PDF management tools." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://pdf.techseventeen.com/login" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:        #1e40af;
+      --primary-dark:   #1e3a8a;
+      --primary-light:  #eff6ff;
+      --primary-border: #bfdbfe;
+      --bg:             #f1f5f9;
+      --surface:        #ffffff;
+      --border:         #e2e8f0;
+      --text:           #0f172a;
+      --text-2:         #475569;
+      --muted:          #94a3b8;
+      --red:            #dc2626;
+      --red-light:      #fef2f2;
+      --radius:         8px;
+      --shadow:         0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+      --shadow-md:      0 4px 6px -1px rgba(0,0,0,.08), 0 2px 4px -1px rgba(0,0,0,.05);
+      --shadow-lg:      0 10px 15px -3px rgba(0,0,0,.10), 0 4px 6px -2px rgba(0,0,0,.05);
+    }
+
+    html, body {
+      min-height: 100vh;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: var(--shadow);
+    }
+    .nav-inner {
+      max-width: 1100px; margin: 0 auto;
+      padding: 0 24px; height: 64px;
+      display: flex; align-items: center; gap: 28px;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: var(--text);
+      font-weight: 800; font-size: 18px; letter-spacing: -.3px;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: var(--primary);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 18px;
+    }
+    .nav-links { display: flex; gap: 2px; list-style: none; }
+    .nav-links a {
+      padding: 6px 14px; border-radius: 6px;
+      text-decoration: none; font-size: 14px; font-weight: 500;
+      color: var(--text-2); transition: all .15s;
+    }
+    .nav-links a:hover { background: var(--bg); color: var(--text); }
+    .nav-right { margin-left: auto; }
+    .nbtn {
+      padding: 8px 18px; border-radius: 7px;
+      font-size: 14px; font-weight: 600;
+      cursor: pointer; text-decoration: none; border: none;
+      transition: all .15s; font-family: inherit; display: inline-block;
+    }
+    .nbtn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-2); }
+    .nbtn-outline:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* ── LOGIN LAYOUT ── */
+    .login-page {
+      min-height: calc(100vh - 64px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 40px 20px;
+    }
+    .login-wrap {
+      width: 100%; max-width: 420px;
+    }
+    .login-brand {
+      text-align: center; margin-bottom: 32px;
+    }
+    .login-brand-icon {
+      width: 60px; height: 60px;
+      background: var(--primary);
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; margin: 0 auto 14px;
+      box-shadow: 0 8px 24px rgba(30,64,175,.3);
+    }
+    .login-brand h1 {
+      font-size: 22px; font-weight: 800;
+      letter-spacing: -.3px; color: var(--text);
+    }
+    .login-brand p {
+      font-size: 14px; color: var(--text-2); margin-top: 5px;
+    }
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px 32px;
+      box-shadow: var(--shadow-lg);
+    }
+    .login-card h2 {
+      font-size: 19px; font-weight: 700;
+      margin-bottom: 6px; letter-spacing: -.2px;
+    }
+    .login-card .sub {
+      font-size: 14px; color: var(--text-2); margin-bottom: 28px;
+    }
+    .form-group { margin-bottom: 18px; }
+    .form-group label {
+      display: block; font-size: 13px; font-weight: 600;
+      color: var(--text); margin-bottom: 7px;
+    }
+    .form-group input {
+      width: 100%; padding: 11px 14px;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-size: 15px; font-family: inherit; color: var(--text);
+      background: var(--surface); outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .form-group input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(30,64,175,.12);
+    }
+    .form-group input::placeholder { color: var(--muted); }
+    .form-group input:disabled { opacity: .6; cursor: not-allowed; }
+
+    .error-box {
+      background: var(--red-light); border: 1px solid #fecaca;
+      border-radius: 8px; padding: 11px 15px;
+      font-size: 13px; color: var(--red);
+      margin-bottom: 18px; display: none;
+    }
+    .error-box.visible { display: block; }
+
+    .btn-submit {
+      width: 100%; padding: 13px;
+      background: var(--primary); color: #fff;
+      border: none; border-radius: 9px;
+      font-size: 15px; font-weight: 700; font-family: inherit;
+      cursor: pointer; transition: all .15s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-submit:hover:not(:disabled) { background: var(--primary-dark); }
+    .btn-submit:disabled { opacity: .55; cursor: not-allowed; }
+    .btn-submit:active:not(:disabled) { transform: scale(.99); }
+
+    .spinner {
+      width: 16px; height: 16px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,.4);
+      border-top-color: #fff;
+      animation: spin .6s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner.visible { display: block; }
+
+    .login-footer {
+      text-align: center; margin-top: 22px;
+      font-size: 13px; color: var(--muted);
+    }
+    .login-footer a {
+      color: var(--primary); text-decoration: none; font-weight: 600;
+    }
+    .login-footer a:hover { text-decoration: underline; }
+    .login-footer .sep { margin: 10px 0; color: var(--border); }
+
+    .checking-overlay {
+      position: fixed; inset: 0;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 999; flex-direction: column; gap: 16px;
+    }
+    .checking-overlay .big-spinner {
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 3px solid var(--border); border-top-color: var(--primary);
+      animation: spin .7s linear infinite;
+    }
+    .checking-overlay p { font-size: 14px; color: var(--text-2); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: #0f172a; color: #94a3b8;
+      padding: 22px 24px; text-align: center; font-size: 13px;
+    }
+    footer a { color: #60a5fa; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    footer span + span::before { content: ' · '; }
+  </style>
+</head>
+<body>
+
+<!-- CHECKING OVERLAY — shown while auto-checking session -->
+<div class="checking-overlay" id="checkingOverlay">
+  <div class="big-spinner"></div>
+  <p>Checking session…</p>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="/home" class="nav-logo">
+      <div class="logo-icon">📄</div>
+      PDF Suite
+    </a>
+    <ul class="nav-links">
+      <li><a href="/home">Home</a></li>
+      <li><a href="/about">About</a></li>
+      <li><a href="/contact">Contact</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="/home" class="nbtn nbtn-outline">← Back to Home</a>
+    </div>
+  </div>
+</nav>
+
+<div class="login-page">
+  <div class="login-wrap">
+
+    <div class="login-brand">
+      <div class="login-brand-icon">📄</div>
+      <h1>PDF Suite</h1>
+      <p>Smart tools for Meesho suppliers</p>
+    </div>
+
+    <div class="login-card">
+      <h2>Welcome back</h2>
+      <p class="sub">Sign in to access your PDF management dashboard.</p>
+
+      <div class="error-box" id="errorBox"></div>
+
+      <form id="loginForm" novalidate>
+        <div class="form-group">
+          <label for="emailInput">Email address</label>
+          <input
+            type="email"
+            id="emailInput"
+            name="email"
+            placeholder="you@example.com"
+            autocomplete="email"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="passwordInput">Password</label>
+          <input
+            type="password"
+            id="passwordInput"
+            name="password"
+            placeholder="Enter your password"
+            autocomplete="current-password"
+            required
+          />
+        </div>
+        <button type="submit" class="btn-submit" id="submitBtn">
+          <span class="spinner" id="spinner"></span>
+          <span id="submitLabel">Sign In</span>
+        </button>
+      </form>
+    </div>
+
+    <div class="login-footer">
+      <div>Don't have an account? <a href="/contact">Contact us to get access</a></div>
+      <div class="sep">——</div>
+      <div><a href="/home">← Back to PDF Suite home</a></div>
+    </div>
+
+    <!-- Admin hint box -->
+    <div style="margin-top:18px;padding:12px 16px;background:#fefce8;border:1px solid #fde68a;border-radius:8px;font-size:12px;color:#92400e;line-height:1.6;max-width:360px;text-align:left;">
+      <strong>🔑 Admin Access</strong><br />
+      URL: <code style="background:#fef3c7;padding:1px 5px;border-radius:3px;">/login</code> — admin accounts are redirected to <code style="background:#fef3c7;padding:1px 5px;border-radius:3px;">/admin</code> automatically after sign-in.<br />
+      Default: <code style="background:#fef3c7;padding:1px 5px;border-radius:3px;">pdf@techseventeen.com</code> / <code style="background:#fef3c7;padding:1px 5px;border-radius:3px;">Admin@1234</code>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <span>© 2025 PDF Suite</span>
+  <span><a href="/privacy">Privacy Policy</a></span>
+  <span><a href="/terms">Terms of Service</a></span>
+  <span><a href="/contact">Contact</a></span>
+</footer>
+
+<script>
+  const form        = document.getElementById('loginForm');
+  const emailInput  = document.getElementById('emailInput');
+  const passInput   = document.getElementById('passwordInput');
+  const submitBtn   = document.getElementById('submitBtn');
+  const submitLabel = document.getElementById('submitLabel');
+  const spinner     = document.getElementById('spinner');
+  const errorBox    = document.getElementById('errorBox');
+  const overlay     = document.getElementById('checkingOverlay');
+
+  // ── Auto-check session on load ──────────────────────────────────────────────
+  (async function checkSession() {
+    try {
+      const res = await fetch('/api/auth/me', { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        const user = data.user;
+        const next = new URLSearchParams(location.search).get('next');
+        window.location.href = next || (user?.role === 'admin' ? '/admin' : '/tool');
+        return;
+      }
+    } catch (_) {}
+    overlay.style.display = 'none';
+  })();
+
+  // ── Login form submission ───────────────────────────────────────────────────
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideError();
+
+    const email    = emailInput.value.trim();
+    const password = passInput.value;
+
+    if (!email) { showError('Please enter your email address.'); emailInput.focus(); return; }
+    if (!password) { showError('Please enter your password.'); passInput.focus(); return; }
+
+    setLoading(true);
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok) {
+        submitLabel.textContent = 'Redirecting…';
+        const dest = (data && data.redirect) ? data.redirect : '/';
+        window.location.href = dest;
+      } else {
+        const msg = (data && data.error) || (data && data.message) || 'Invalid email or password. Please try again.';
+        showError(msg);
+        setLoading(false);
+      }
+    } catch (err) {
+      showError('Network error. Please check your connection and try again.');
+      setLoading(false);
+    }
+  });
+
+  function setLoading(on) {
+    submitBtn.disabled = on;
+    spinner.classList.toggle('visible', on);
+    submitLabel.textContent = on ? 'Signing in…' : 'Sign In';
+    emailInput.disabled = on;
+    passInput.disabled  = on;
+  }
+
+  function showError(msg) {
+    errorBox.textContent = '⚠ ' + msg;
+    errorBox.classList.add('visible');
+  }
+  function hideError() { errorBox.classList.remove('visible'); }
+</script>
+</body>
+</html>

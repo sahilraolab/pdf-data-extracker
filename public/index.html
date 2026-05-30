@@ -407,24 +407,27 @@
   </style>
 </head>
 <body>
+<div id="impersonationBar" style="display:none;background:#7c3aed;color:#fff;padding:7px 20px;font-size:13px;font-weight:500;text-align:center;">
+  👁 Viewing as another user &nbsp;—&nbsp;
+  <button onclick="exitImpersonateTop()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:2px 10px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;">Exit to Admin</button>
+</div>
 <div class="page">
 
   <nav>
     <div class="nav-inner">
-      <a href="/" class="nav-logo">
+      <a href="/tool" class="nav-logo">
         <div class="logo-icon">📄</div>
         PDF Suite
       </a>
       <ul class="nav-links">
-        <li><a href="/" class="active">Tool</a></li>
+        <li><a href="/tool" class="active">Tool</a></li>
         <li><a href="/scan">Scan</a></li>
         <li><a href="/dashboard">Dashboard</a></li>
-        <li><a href="/plans">Plans</a></li>
-        <li><a href="/admin">Admin</a></li>
+        <li id="adminNavLink" style="display:none;"><a href="/admin">Admin</a></li>
       </ul>
       <div class="nav-right">
-        <a href="/health" target="_blank" class="nbtn nbtn-outline">● API Status</a>
-        <a href="/scan" class="nbtn nbtn-primary">📦 Scan Packets</a>
+        <span class="nbtn nbtn-outline" id="hdrUserName" style="cursor:default;"></span>
+        <button onclick="appLogout()" class="nbtn nbtn-outline">Sign Out</button>
       </div>
     </div>
   </nav>
@@ -514,34 +517,6 @@
       </div>
     </div>
 
-    <!-- Step 3 — Download (shown after analysis) -->
-    <div class="card" id="downloadActionsCard" style="display:none;">
-      <div class="section-label">Step 3 — Download Filtered Pages</div>
-      <p class="section-hint">Choose which group of pages to export as a new PDF.</p>
-      <div class="download-buttons-grid">
-        <button class="download-mode-card" id="downloadKeywordBtn" type="button">
-          <div class="label">🔍 Keyword Matches</div>
-          <div class="sublabel">Pages matching the keyword filter</div>
-          <div class="count" id="downloadKeywordCount"></div>
-        </button>
-        <button class="download-mode-card" id="downloadQtyBtn" type="button">
-          <div class="label">📦 Qty &gt; 1 Matches</div>
-          <div class="sublabel">Pages where quantity is greater than one</div>
-          <div class="count" id="downloadQtyCount"></div>
-        </button>
-        <button class="download-mode-card" id="downloadExchangeBtn" type="button">
-          <div class="label">🔄 Exchange Matches</div>
-          <div class="sublabel">Pages containing exchange content</div>
-          <div class="count" id="downloadExchangeCount"></div>
-        </button>
-        <button class="download-mode-card" id="downloadUnmatchedBtn" type="button">
-          <div class="label">📄 Non-matching Pages</div>
-          <div class="sublabel">Pages that did not match any active filter</div>
-          <div class="count" id="downloadUnmatchedCount"></div>
-        </button>
-      </div>
-    </div>
-
     <!-- Analyse button -->
     <div>
       <button class="btn btn-primary" id="submitBtn" disabled>
@@ -554,7 +529,7 @@
       </div>
     </div>
 
-    <!-- Download banner -->
+    <!-- Download banner (after generating a PDF) -->
     <div id="download-section">
       <div class="download-banner">
         <span class="icon">📥</span>
@@ -566,29 +541,58 @@
       </div>
     </div>
 
-    <!-- Results -->
+    <!-- Results (download card + filters + pages all in one card) -->
     <div id="results-section">
       <div class="card">
         <div class="stats-row" id="statsRow"></div>
 
-        <!-- Delivery partner filter buttons -->
-        <div class="partner-filter-wrap" id="partnerFilterWrap" style="display:none;">
-          <div class="partner-filter-label">Filter by Delivery Partner</div>
-          <div class="partner-filter-row" id="partnerFilterRow"></div>
+        <!-- Download buttons (just above the filter tabs) -->
+        <div id="downloadActionsCard" style="display:none; border-top:1px solid var(--border); padding-top:16px; margin-bottom:16px;">
+          <div class="section-label" style="margin-bottom:10px;">Step 3 — Download Filtered Pages</div>
+          <div class="download-buttons-grid">
+            <button class="download-mode-card" id="downloadKeywordBtn" type="button">
+              <div class="label">🔍 Keyword Matches</div>
+              <div class="sublabel">Pages matching the keyword filter</div>
+              <div class="count" id="downloadKeywordCount"></div>
+            </button>
+            <button class="download-mode-card" id="downloadQtyBtn" type="button">
+              <div class="label">📦 Qty &gt; 1 Matches</div>
+              <div class="sublabel">Pages where quantity is greater than one</div>
+              <div class="count" id="downloadQtyCount"></div>
+            </button>
+            <button class="download-mode-card" id="downloadExchangeBtn" type="button">
+              <div class="label">🔄 Exchange Matches</div>
+              <div class="sublabel">Pages containing exchange content</div>
+              <div class="count" id="downloadExchangeCount"></div>
+            </button>
+            <button class="download-mode-card" id="downloadUnmatchedBtn" type="button">
+              <div class="label">📄 Non-matching Pages</div>
+              <div class="sublabel">Pages that did not match any active filter</div>
+              <div class="count" id="downloadUnmatchedCount"></div>
+            </button>
+          </div>
         </div>
 
         <!-- Unmatched pages notice -->
         <div class="unmatched-notice" id="unmatchedNotice" style="display:none;"></div>
 
+        <!-- Filter row: type tabs + partner filter buttons together -->
         <div class="results-header">
           <div class="section-label" style="margin-bottom:0;">Page Results</div>
-          <div class="filter-tabs" id="filterTabs">
-            <button class="tab active-all" data-filter="all">All</button>
-            <button class="tab" data-filter="matched">Matched</button>
-            <button class="tab" data-filter="text">Keyword</button>
-            <button class="tab" data-filter="qty">Qty &gt; 1</button>
-            <button class="tab" data-filter="exchange">Exchange</button>
-            <button class="tab" data-filter="unmatched">Unmatched</button>
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
+            <div class="filter-tabs" id="filterTabs">
+              <button class="tab active-all" data-filter="all">All</button>
+              <button class="tab" data-filter="matched">Matched</button>
+              <button class="tab" data-filter="text">Keyword</button>
+              <button class="tab" data-filter="qty">Qty &gt; 1</button>
+              <button class="tab" data-filter="exchange">Exchange</button>
+              <button class="tab" data-filter="unmatched">Unmatched</button>
+            </div>
+            <!-- Partner filter: inline with tabs, shown only when partners exist -->
+            <div id="partnerFilterWrap" style="display:none; align-items:center; gap:6px;">
+              <span style="width:1px; height:20px; background:var(--border); display:inline-block; margin:0 2px;"></span>
+              <div class="partner-filter-row" id="partnerFilterRow"></div>
+            </div>
           </div>
         </div>
         <div class="page-list" id="pageList"></div>
@@ -607,6 +611,36 @@
 </div>
 
 <script>
+  // ── Auth guard ────────────────────────────────────────────────────────────
+  let _sessionUser = null;
+  (async () => {
+    try {
+      const r = await fetch('/api/auth/me', { credentials: 'same-origin' });
+      if (!r.ok) return (window.location.href = '/login?next=/tool');
+      _sessionUser = (await r.json()).user;
+      const nameEl = document.getElementById('hdrUserName');
+      if (nameEl) nameEl.textContent = _sessionUser.name || _sessionUser.email;
+      if (_sessionUser.role === 'admin') {
+        const adminLink = document.getElementById('adminNavLink');
+        if (adminLink) adminLink.style.display = '';
+      }
+      if (_sessionUser.viewingAs) {
+        const bar = document.getElementById('impersonationBar');
+        if (bar) bar.style.display = 'block';
+      }
+    } catch { window.location.href = '/login?next=/tool'; }
+  })();
+
+  async function appLogout() {
+    await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
+    window.location.href = '/login';
+  }
+  async function exitImpersonateTop() {
+    const res  = await fetch('/api/auth/exit-impersonate', { method: 'POST', credentials: 'same-origin' });
+    const data = await res.json();
+    window.location.href = res.ok ? (data.redirect || '/admin') : '/admin';
+  }
+
   let allResults      = [];
   let activeFilter    = 'all';
   let activePartner   = 'all';
@@ -663,13 +697,57 @@
   const partnerFilterRow  = document.getElementById('partnerFilterRow');
   const unmatchedNotice   = document.getElementById('unmatchedNotice');
 
+  // ── Filter state persistence ───────────────────────────────────────────────
+  const FILTER_KEY = 'pdfsuite_filter_cfg';
+
+  function saveFilterState() {
+    try {
+      sessionStorage.setItem(FILTER_KEY, JSON.stringify({
+        text:     togText.checked,
+        keyword:  filterTextInput.value,
+        qty:      togQty.checked,
+        exchange: togExchange.checked,
+      }));
+    } catch (_) {}
+  }
+
+  function restoreFilterState() {
+    try {
+      const raw = sessionStorage.getItem(FILTER_KEY);
+      if (!raw) return;
+      const s = JSON.parse(raw);
+      if (s.text) {
+        togText.checked = true;
+        fc1.classList.add('active-f1');
+        keywordWrap.classList.add('visible');
+        filterTextInput.value = s.keyword || '';
+      }
+      if (s.qty) {
+        togQty.checked = true;
+        fc2.classList.add('active-f2');
+      }
+      if (s.exchange) {
+        togExchange.checked = true;
+        fc3.classList.add('active-f3');
+      }
+    } catch (_) {}
+  }
+
   togText.addEventListener('change', () => {
     fc1.classList.toggle('active-f1', togText.checked);
     keywordWrap.classList.toggle('visible', togText.checked);
     if (togText.checked) filterTextInput.focus();
+    saveFilterState();
   });
-  togQty.addEventListener('change',      () => fc2.classList.toggle('active-f2', togQty.checked));
-  togExchange.addEventListener('change', () => fc3.classList.toggle('active-f3', togExchange.checked));
+  togQty.addEventListener('change', () => {
+    fc2.classList.toggle('active-f2', togQty.checked);
+    saveFilterState();
+  });
+  togExchange.addEventListener('change', () => {
+    fc3.classList.toggle('active-f3', togExchange.checked);
+    saveFilterState();
+  });
+  filterTextInput.addEventListener('input', saveFilterState);
 
   fileInput.addEventListener('change', () => handleFile(fileInput.files[0]));
 
@@ -679,6 +757,9 @@
   downloadUnmatchedBtn.addEventListener('click', () => generateAndDownload('unmatched'));
 
   downloadActionsCard.style.display = 'none';
+
+  // Restore filter config on load
+  restoreFilterState();
 
   dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
   dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
@@ -877,7 +958,7 @@
     if (partners.length > 0) {
       partnerFilterRow.innerHTML = `<button class="partner-btn active" data-partner="all">All Partners</button>` +
         partners.map(p => `<button class="partner-btn" data-partner="${esc(p)}">${esc(p)}</button>`).join('');
-      partnerFilterWrap.style.display = 'block';
+      partnerFilterWrap.style.display = 'flex';
       partnerFilterRow.querySelectorAll('.partner-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           activePartner = btn.dataset.partner;

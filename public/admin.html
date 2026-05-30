@@ -3,639 +3,618 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PDF Suite — Admin Dashboard</title>
+  <title>PDF Suite — Admin</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --primary:        #1e40af;
-      --primary-dark:   #1e3a8a;
-      --primary-light:  #eff6ff;
-      --primary-border: #bfdbfe;
-      --bg:             #f1f5f9;
-      --surface:        #ffffff;
-      --border:         #e2e8f0;
-      --text:           #0f172a;
-      --text-2:         #475569;
-      --muted:          #94a3b8;
-      --green:          #059669;
-      --green-light:    #ecfdf5;
-      --red:            #dc2626;
-      --red-light:      #fef2f2;
-      --amber:          #d97706;
-      --amber-light:    #fffbeb;
-      --purple:         #7c3aed;
-      --purple-light:   #f5f3ff;
-      --radius:         8px;
-      --shadow:         0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
-      --shadow-md:      0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -1px rgba(0,0,0,.06);
+      --primary: #1e40af; --primary-d: #1e3a8a; --primary-l: #eff6ff;
+      --bg: #f1f5f9; --surface: #fff; --border: #e2e8f0;
+      --text: #0f172a; --muted: #64748b;
+      --green: #059669; --green-l: #ecfdf5;
+      --red: #dc2626; --red-l: #fee2e2;
+      --amber: #d97706; --amber-l: #fffbeb;
+      --r: 8px; --sh: 0 1px 3px rgba(0,0,0,.08);
     }
-
-    html, body {
-      min-height: 100%;
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.5;
-    }
-
-    /* ── Top nav ── */
-    nav { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow); }
-    .nav-inner { max-width: 1400px; margin: 0 auto; padding: 0 24px; height: 60px; display: flex; align-items: center; gap: 24px; }
-    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-weight: 700; font-size: 17px; }
-    .logo-icon { width: 34px; height: 34px; background: var(--primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 17px; }
-    .nav-links { display: flex; gap: 2px; list-style: none; }
-    .nav-links a { padding: 6px 13px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500; color: var(--text-2); transition: all .15s; }
-    .nav-links a:hover { background: var(--bg); color: var(--text); }
-    .nav-links a.active { color: var(--primary); background: var(--primary-light); }
-    .nav-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
-    .nbtn { padding: 7px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; border: none; transition: all .15s; font-family: inherit; }
-    .nbtn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-2); }
-    .nbtn-outline:hover { border-color: var(--primary); color: var(--primary); }
-    .admin-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; background: rgba(239,68,68,.1); color: var(--red); border: 1px solid rgba(239,68,68,.2); }
-
-    /* ── Layout ── */
-    .admin-layout { max-width: 1400px; margin: 0 auto; padding: 28px 20px 60px; }
-
-    /* ── Page header ── */
-    .admin-header {
-      display: flex; align-items: flex-start; justify-content: space-between;
-      gap: 16px; flex-wrap: wrap; margin-bottom: 24px;
-    }
-    .admin-header h1 { font-size: 22px; font-weight: 700; }
-    .admin-header p  { font-size: 13px; color: var(--text-2); margin-top: 3px; }
-    .last-refresh { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
-
-    /* ── Tab navigation ── */
-    .tab-nav {
-      display: flex; gap: 4px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 4px;
-      margin-bottom: 24px;
-      box-shadow: var(--shadow);
-      width: fit-content;
-    }
-    .tab-btn {
-      padding: 8px 20px; border-radius: 6px;
-      font-size: 14px; font-weight: 500;
-      cursor: pointer; border: none;
-      background: transparent; color: var(--text-2);
-      transition: all .15s; font-family: inherit;
-    }
-    .tab-btn:hover { background: var(--bg); color: var(--text); }
-    .tab-btn.active { background: var(--primary); color: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.1); }
-
-    /* ── Card ── */
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 22px 24px; }
-    .section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); margin-bottom: 14px; }
-
-    /* ── Stat cards ── */
-    .stats-grid {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;
-    }
-    @media (max-width: 900px) { .stats-grid { grid-template-columns: 1fr 1fr; } }
-    @media (max-width: 560px) { .stats-grid { grid-template-columns: 1fr; } }
-
-    .stat-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 20px 22px;
-      box-shadow: var(--shadow); position: relative; overflow: hidden;
-    }
-    .stat-card::before {
-      content: ''; position: absolute; top: 0; left: 0;
-      width: 4px; height: 100%; border-radius: 4px 0 0 4px;
-    }
-    .stat-card.sc-blue::before   { background: var(--primary); }
-    .stat-card.sc-green::before  { background: var(--green); }
-    .stat-card.sc-amber::before  { background: var(--amber); }
-    .stat-card.sc-purple::before { background: var(--purple); }
-
-    .stat-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin-bottom: 8px; }
-    .stat-value { font-size: 30px; font-weight: 800; line-height: 1; margin-bottom: 6px; }
-    .stat-card.sc-blue   .stat-value { color: var(--primary); }
-    .stat-card.sc-green  .stat-value { color: var(--green); }
-    .stat-card.sc-amber  .stat-value { color: var(--amber); }
-    .stat-card.sc-purple .stat-value { color: var(--purple); }
-    .stat-sub { font-size: 12px; color: var(--muted); }
-    .stat-trend { font-size: 12px; font-weight: 600; }
-    .trend-up   { color: var(--green); }
-    .trend-down { color: var(--red); }
-
-    /* ── Two-col layout ── */
-    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
-    @media (max-width: 840px) { .two-col { grid-template-columns: 1fr; } }
-
-    /* ── Plan distribution bar ── */
-    .plan-dist { display: flex; flex-direction: column; gap: 12px; }
-    .dist-row { display: flex; flex-direction: column; gap: 4px; }
-    .dist-label { display: flex; justify-content: space-between; font-size: 13px; }
-    .dist-name  { font-weight: 500; }
-    .dist-count { color: var(--muted); font-weight: 600; }
-    .dist-bar-bg { height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
-    .dist-bar { height: 100%; border-radius: 4px; transition: width .6s ease; }
-    .dist-bar.free  { background: var(--muted); }
-    .dist-bar.pro   { background: var(--primary); }
-    .dist-bar.biz   { background: var(--amber); }
-
-    /* ── Recent activity ── */
-    .activity-list { display: flex; flex-direction: column; gap: 0; }
-    .activity-item {
-      display: flex; align-items: center; gap: 12px;
-      padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 13px;
-    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+    .layout { display: flex; min-height: 100vh; }
+    .sidebar { width: 220px; background: var(--primary-d); color: #fff; display: flex; flex-direction: column; flex-shrink: 0; }
+    .sb-logo { padding: 22px 18px 14px; font-size: 16px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,.12); display: flex; align-items: center; gap: 8px; }
+    .sb-logo .tag { font-size: 10px; background: rgba(255,255,255,.15); padding: 2px 7px; border-radius: 20px; font-weight: 500; }
+    .sb-nav { flex: 1; padding: 14px 10px; display: flex; flex-direction: column; gap: 2px; }
+    .sb-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 7px; cursor: pointer; font-size: 13px; font-weight: 500; color: rgba(255,255,255,.75); border: none; background: none; width: 100%; text-align: left; transition: all .15s; text-decoration: none; }
+    .sb-item:hover { background: rgba(255,255,255,.1); color: #fff; }
+    .sb-item.active { background: rgba(255,255,255,.18); color: #fff; }
+    .sb-icon { font-size: 16px; width: 20px; text-align: center; }
+    .sb-footer { padding: 14px; border-top: 1px solid rgba(255,255,255,.12); font-size: 12px; color: rgba(255,255,255,.55); }
+    .sb-user { font-weight: 600; color: rgba(255,255,255,.85); margin-bottom: 2px; }
+    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; box-shadow: var(--sh); }
+    .topbar-title { font-size: 15px; font-weight: 600; }
+    .content { flex: 1; padding: 24px; overflow-y: auto; }
+    .screen { display: none; }
+    .screen.active { display: block; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 18px; box-shadow: var(--sh); }
+    .stat-num { font-size: 28px; font-weight: 800; line-height: 1; margin-bottom: 4px; color: var(--primary); }
+    .stat-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); box-shadow: var(--sh); }
+    .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+    .card-title { font-size: 14px; font-weight: 600; }
+    .card-body { padding: 20px; }
+    .card + .card { margin-top: 16px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 18px; border-radius: var(--r); font-size: 13px; font-weight: 600; cursor: pointer; border: none; font-family: inherit; transition: all .15s; text-decoration: none; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-d); }
+    .btn-danger { background: var(--red); color: #fff; }
+    .btn-danger:hover { background: #b91c1c; }
+    .tbl-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fafc; }
+    .badge { font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 20px; white-space: nowrap; }
+    .badge.active   { background: var(--green-l); color: var(--green); }
+    .badge.disabled { background: var(--red-l); color: var(--red); }
+    .badge.admin    { background: var(--primary-l); color: var(--primary); }
+    .badge.user     { background: #f1f5f9; color: var(--muted); }
+    .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+    .field label { font-size: 12px; font-weight: 600; color: var(--muted); }
+    .field input, .field textarea { border: 1.5px solid var(--border); border-radius: 7px; padding: 9px 12px; font-size: 13px; font-family: inherit; outline: none; transition: border-color .15s; background: #fff; color: var(--text); width: 100%; }
+    .field input:focus, .field textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30,64,175,.08); }
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+    .err { color: var(--red); font-size: 12px; margin-top: 4px; min-height: 16px; }
+    .modal-bd { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 500; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .modal-bd.open { display: flex; }
+    .modal { background: var(--surface); border-radius: 12px; width: 100%; max-width: 500px; box-shadow: 0 20px 60px rgba(0,0,0,.18); animation: mIn .2s ease; }
+    @keyframes mIn { from { transform: scale(.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .modal-head { padding: 18px 22px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .modal-head h3 { font-size: 15px; font-weight: 700; }
+    .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--muted); line-height: 1; padding: 0 4px; }
+    .modal-body { padding: 20px 22px; }
+    .modal-footer { padding: 12px 22px 18px; display: flex; justify-content: flex-end; gap: 10px; }
+    #toast { position: fixed; bottom: 20px; right: 20px; z-index: 1000; background: #1a1a1a; color: #fff; padding: 11px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; box-shadow: 0 4px 16px rgba(0,0,0,.2); transition: opacity .3s, transform .3s; opacity: 0; transform: translateY(8px); pointer-events: none; }
+    #toast.show { opacity: 1; transform: translateY(0); }
+    #toast.success { background: var(--green); }
+    #toast.error   { background: var(--red); }
+    .spin { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: sp .6s linear infinite; display: inline-block; vertical-align: middle; }
+    @keyframes sp { to { transform: rotate(360deg); } }
+    .tbl-actions { display: flex; gap: 5px; flex-wrap: wrap; }
+    .tbl-btn { padding: 4px 9px; border-radius: 5px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid; transition: all .15s; font-family: inherit; white-space: nowrap; }
+    .tbl-btn.blue  { border-color: #bfdbfe; color: var(--primary); background: var(--primary-l); }
+    .tbl-btn.blue:hover  { background: var(--primary); color: #fff; }
+    .tbl-btn.red   { border-color: #fecaca; color: var(--red); background: var(--red-l); }
+    .tbl-btn.red:hover   { background: var(--red); color: #fff; }
+    .tbl-btn.green { border-color: #6ee7b7; color: var(--green); background: var(--green-l); }
+    .tbl-btn.green:hover { background: var(--green); color: #fff; }
+    .tbl-btn.amber { border-color: #fde68a; color: var(--amber); background: var(--amber-l); }
+    .tbl-btn.amber:hover { background: var(--amber); color: #fff; }
+    #impersonationBar { display: none; background: #7c3aed; color: #fff; padding: 8px 24px; font-size: 13px; font-weight: 500; text-align: center; }
+    #impersonationBar.visible { display: block; }
+    .activity-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
     .activity-item:last-child { border-bottom: none; }
-    .activity-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .dot-green  { background: var(--green); }
-    .dot-blue   { background: var(--primary); }
-    .dot-amber  { background: var(--amber); }
-    .activity-text { flex: 1; color: var(--text-2); }
-    .activity-text strong { color: var(--text); }
-    .activity-time { font-size: 11px; color: var(--muted); flex-shrink: 0; }
-
-    /* ── Tables ── */
-    .table-wrap { overflow-x: auto; }
-    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .data-table thead th {
-      padding: 10px 14px; text-align: left;
-      background: var(--bg); font-size: 11px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: .6px;
-      color: var(--muted); border-bottom: 2px solid var(--border);
-      white-space: nowrap;
-    }
-    .data-table tbody td {
-      padding: 12px 14px; border-bottom: 1px solid var(--border);
-      color: var(--text-2); white-space: nowrap;
-    }
-    .data-table tbody td.td-main { color: var(--text); font-weight: 500; }
-    .data-table tbody tr:last-child td { border-bottom: none; }
-    .data-table tbody tr:hover td { background: var(--primary-light); }
-
-    /* Badges */
-    .badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-    .badge-free     { background: var(--bg);           color: var(--muted);   border: 1px solid var(--border); }
-    .badge-pro      { background: var(--primary-light); color: var(--primary); border: 1px solid var(--primary-border); }
-    .badge-biz      { background: var(--amber-light);   color: var(--amber);   border: 1px solid #fde68a; }
-    .badge-active   { background: var(--green-light);   color: var(--green);   border: 1px solid #6ee7b7; }
-    .badge-inactive { background: var(--bg);            color: var(--muted);   border: 1px solid var(--border); }
-    .badge-success  { background: var(--green-light);   color: var(--green);   border: 1px solid #6ee7b7; }
-    .badge-failed   { background: var(--red-light);     color: var(--red);     border: 1px solid #fecaca; }
-    .badge-pending  { background: var(--amber-light);   color: var(--amber);   border: 1px solid #fde68a; }
-
-    /* ── Search/filter bar ── */
-    .table-toolbar {
-      display: flex; align-items: center; gap: 10px;
-      margin-bottom: 16px; flex-wrap: wrap;
-    }
-    .search-input {
-      flex: 1; min-width: 200px; max-width: 320px;
-      padding: 8px 12px; border: 1px solid var(--border);
-      border-radius: 6px; font-size: 13px; font-family: inherit;
-      color: var(--text); background: var(--surface); outline: none;
-      transition: border-color .15s;
-    }
-    .search-input:focus { border-color: var(--primary); }
-    .search-input::placeholder { color: var(--muted); }
-    .filter-select {
-      padding: 8px 12px; border: 1px solid var(--border);
-      border-radius: 6px; font-size: 13px; font-family: inherit;
-      color: var(--text); background: var(--surface); cursor: pointer; outline: none;
-    }
-    .filter-select:focus { border-color: var(--primary); }
-    .table-count { font-size: 13px; color: var(--muted); margin-left: auto; }
-
-    /* ── Revenue summary box ── */
-    .rev-summary {
-      display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 18px;
-    }
-    @media (max-width: 560px) { .rev-summary { grid-template-columns: 1fr; } }
-    .rev-box {
-      background: var(--bg); border: 1px solid var(--border);
-      border-radius: 8px; padding: 14px 16px; text-align: center;
-    }
-    .rev-box .rv-num { font-size: 20px; font-weight: 700; color: var(--text); }
-    .rev-box .rv-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-top: 4px; }
-
-    /* ── Loading spinner ── */
-    .loading { text-align: center; padding: 44px; color: var(--muted); font-size: 14px; }
-    .spinner { display: inline-block; width: 24px; height: 24px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin .8s linear infinite; margin-bottom: 8px; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── Tab panes ── */
-    .tab-pane { display: none; }
-    .tab-pane.active { display: block; }
-
-    /* ── Footer ── */
-    footer { background: var(--surface); border-top: 1px solid var(--border); padding: 16px 24px; text-align: center; font-size: 13px; color: var(--muted); margin-top: 20px; }
-    footer a { color: var(--primary); text-decoration: none; }
-    footer a:hover { text-decoration: underline; }
-
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    .activity-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+    @media (max-width: 768px) { .sidebar { display: none; } .stats-grid { grid-template-columns: 1fr 1fr; } .form-grid-2 { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
 
-  <!-- Navigation -->
-  <nav>
-    <div class="nav-inner">
-      <a href="/" class="nav-logo">
-        <div class="logo-icon">📄</div>
-        PDF Suite
-      </a>
-      <ul class="nav-links">
-        <li><a href="/">Tool</a></li>
-        <li><a href="/plans">Plans</a></li>
-        <li><a href="/admin" class="active">Admin</a></li>
-      </ul>
-      <div class="nav-right">
-        <span class="admin-badge">Admin Panel</span>
-        <a href="/" class="nbtn nbtn-outline">Back to Tool</a>
-      </div>
+<div id="impersonationBar">
+  👁 Viewing as another user &nbsp;—&nbsp;
+  <button onclick="exitImpersonate()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:2px 10px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;">Exit &amp; Return to Admin</button>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sb-logo">📄 PDF Suite <span class="tag">Admin</span></div>
+    <nav class="sb-nav">
+      <button class="sb-item active" id="navDash" onclick="showScreen('dashboard')"><span class="sb-icon">📊</span>Dashboard</button>
+      <button class="sb-item" id="navUsers" onclick="showScreen('users')"><span class="sb-icon">👥</span>Users</button>
+      <button class="sb-item" id="navLeads" onclick="showScreen('leads')"><span class="sb-icon">📩</span>Leads <span id="leadsBadge" style="display:none;margin-left:auto;background:#dc2626;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;"></span></button>
+      <hr style="border:none;border-top:1px solid rgba(255,255,255,.1);margin:8px 0;" />
+      <a href="/tool" class="sb-item"><span class="sb-icon">🔧</span>PDF Tool</a>
+      <a href="/scan" class="sb-item"><span class="sb-icon">📦</span>Packet Scan</a>
+      <a href="/dashboard" class="sb-item"><span class="sb-icon">📋</span>Dashboard</a>
+    </nav>
+    <div class="sb-footer">
+      <div class="sb-user" id="sbAdminName">Admin</div>
+      <button onclick="doLogout()" style="margin-top:6px;width:100%;padding:6px;background:rgba(220,38,38,.15);border:1px solid rgba(220,38,38,.3);color:#fca5a5;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;">Sign Out</button>
     </div>
-  </nav>
+  </aside>
 
-  <div class="admin-layout">
-
-    <!-- Header -->
-    <div class="admin-header">
-      <div>
-        <h1>Admin Dashboard</h1>
-        <p>Overview of users, subscriptions, and revenue across all plans.</p>
-      </div>
-      <div class="last-refresh">
-        <span>🕐</span>
-        <span id="refreshTime">Loading…</span>
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      <div style="display:flex;gap:10px;">
+        <button onclick="loadCurrentScreen()" style="padding:6px 14px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--muted);cursor:pointer;font-size:12px;font-weight:600;">↻ Refresh</button>
       </div>
     </div>
 
-    <!-- Tab navigation -->
-    <div class="tab-nav">
-      <button class="tab-btn active" data-tab="overview">Overview</button>
-      <button class="tab-btn" data-tab="users">Users</button>
-      <button class="tab-btn" data-tab="payments">Payments</button>
-    </div>
+    <div class="content">
 
-    <!-- ── TAB: Overview ── -->
-    <div class="tab-pane active" id="pane-overview">
-
-      <!-- Stats row -->
-      <div class="stats-grid">
-        <div class="stat-card sc-blue">
-          <div class="stat-label">Total Users</div>
-          <div class="stat-value" id="statUsers">—</div>
-          <div class="stat-sub"><span class="stat-trend trend-up" id="statUsersNew"></span></div>
+      <!-- Dashboard -->
+      <div class="screen active" id="screenDashboard">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-num" id="stTotal">—</div><div class="stat-lbl">Total Users</div></div>
+          <div class="stat-card"><div class="stat-num" id="stActive">—</div><div class="stat-lbl">Active Users</div></div>
+          <div class="stat-card"><div class="stat-num" id="stOnline">—</div><div class="stat-lbl">Online Now</div></div>
+          <div class="stat-card"><div class="stat-num" id="stUploads">—</div><div class="stat-lbl">Total Uploads</div></div>
         </div>
-        <div class="stat-card sc-green">
-          <div class="stat-label">Active Subscriptions</div>
-          <div class="stat-value" id="statSubs">—</div>
-          <div class="stat-sub" id="statSubsPct"></div>
-        </div>
-        <div class="stat-card sc-amber">
-          <div class="stat-label">Monthly Revenue</div>
-          <div class="stat-value" id="statRevenue">—</div>
-          <div class="stat-sub"><span class="stat-trend trend-up" id="statRevenueGrowth"></span></div>
-        </div>
-        <div class="stat-card sc-purple">
-          <div class="stat-label">Total Uploads</div>
-          <div class="stat-value" id="statUploads">—</div>
-          <div class="stat-sub" id="statUploadsMonth"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Recent Logins</div></div>
+            <div id="recentActivity" style="padding:14px 20px;">Loading…</div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Quick Actions</div></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+              <button class="btn btn-primary" onclick="openAddUser()">+ Add New Customer</button>
+              <button class="btn" style="background:var(--green);color:#fff;" onclick="showScreen('users')">👥 Manage All Users</button>
+              <a href="/tool" class="btn" style="background:var(--primary-l);color:var(--primary);">🔧 Open PDF Tool</a>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Two columns -->
-      <div class="two-col">
-
-        <!-- Plan distribution -->
+      <!-- Users -->
+      <div class="screen" id="screenUsers">
         <div class="card">
-          <div class="section-label">Plan Distribution</div>
-          <div class="plan-dist" id="planDist">
-            <div class="loading"><div class="spinner"></div><br>Loading…</div>
+          <div class="card-header">
+            <div class="card-title">All Users</div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <input type="text" id="userSearch" placeholder="Search name or email…" oninput="filterUsers()"
+                style="padding:7px 12px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;width:200px;outline:none;" />
+              <button class="btn btn-primary" style="padding:8px 16px;font-size:13px;" onclick="openAddUser()">+ Add User</button>
+            </div>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name / Email</th><th>Role</th><th>Status</th><th>Uploads</th><th>Last Login</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="usersBody">
+                <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted);">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Leads screen -->
+      <div class="screen" id="screenLeads">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Contact Form Leads</div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <select id="leadFilter" onchange="filterLeads()"
+                style="padding:7px 12px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;outline:none;background:#fff;">
+                <option value="all">All Leads</option>
+                <option value="new">New</option>
+                <option value="contacted">Contacted</option>
+                <option value="closed">Closed</option>
+              </select>
+              <button onclick="loadLeads()" style="padding:7px 12px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--muted);cursor:pointer;font-size:12px;">↻ Refresh</button>
+            </div>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr><th>Name</th><th>Email</th><th>Business</th><th>Message</th><th>Received</th><th>Status</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="leadsBody">
+                <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted);">Loading…</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
-        <!-- Recent activity -->
-        <div class="card">
-          <div class="section-label">Recent Activity</div>
-          <div class="activity-list" id="recentActivity">
-            <div class="loading"><div class="spinner"></div><br>Loading…</div>
+        <!-- Lead detail panel -->
+        <div id="leadDetail" style="display:none;margin-top:16px;" class="card">
+          <div class="card-header">
+            <div class="card-title">Lead Details — <span id="ldName" style="font-weight:700;"></span></div>
+            <button onclick="closeLeadDetail()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);line-height:1;">×</button>
+          </div>
+          <div class="card-body" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div>
+              <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Email</div>
+              <div style="font-weight:600;" id="ldEmail"></div>
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Business</div>
+              <div id="ldBiz" style="color:var(--muted);"></div>
+            </div>
+            <div style="grid-column:1/-1;">
+              <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Message</div>
+              <div style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:12px;font-size:13px;white-space:pre-wrap;line-height:1.6;" id="ldMsg"></div>
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Status</div>
+              <select id="ldStatus" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;outline:none;background:#fff;width:100%;">
+                <option value="new">🟡 New</option>
+                <option value="contacted">🟢 Contacted</option>
+                <option value="closed">⚫ Closed</option>
+              </select>
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Internal Notes</div>
+              <input type="text" id="ldNotes" placeholder="e.g. Sent WhatsApp on 1 Jun…"
+                style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;outline:none;" />
+            </div>
+            <div style="grid-column:1/-1;display:flex;gap:10px;">
+              <button class="btn btn-primary" onclick="saveLead()">Save Changes</button>
+              <button class="btn" style="background:var(--red-l);color:var(--red);border:1px solid #fecaca;" onclick="deleteLead()">Delete Lead</button>
+            </div>
           </div>
         </div>
-
-      </div>
-
-      <!-- Recent signups -->
-      <div class="card">
-        <div class="section-label">Recent Sign-ups</div>
-        <div class="table-wrap">
-          <table class="data-table" id="recentUsersTable">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Plan</th>
-                <th>Joined</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="recentUsersTbody">
-              <tr><td colspan="5" style="text-align:center;padding:24px;color:var(--muted);">Loading…</td></tr>
-            </tbody>
-          </table>
-        </div>
       </div>
 
     </div>
-
-    <!-- ── TAB: Users ── -->
-    <div class="tab-pane" id="pane-users">
-      <div class="card">
-        <div class="table-toolbar">
-          <input type="text" class="search-input" id="userSearch" placeholder="Search by name or email…" />
-          <select class="filter-select" id="userPlanFilter">
-            <option value="">All Plans</option>
-            <option value="free">Starter</option>
-            <option value="professional">Professional</option>
-            <option value="business">Business</option>
-          </select>
-          <select class="filter-select" id="userStatusFilter">
-            <option value="">All Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
-          <span class="table-count" id="userCount"></span>
-        </div>
-        <div class="table-wrap">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Plan</th>
-                <th>Joined</th>
-                <th>Last Active</th>
-                <th>Uploads</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="usersTbody">
-              <tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted);">Loading…</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── TAB: Payments ── -->
-    <div class="tab-pane" id="pane-payments">
-
-      <div class="rev-summary" id="revSummary">
-        <div class="rev-box"><div class="rv-num" id="revTotal">—</div><div class="rv-lbl">Total Revenue</div></div>
-        <div class="rev-box"><div class="rv-num" id="revMonth">—</div><div class="rv-lbl">This Month</div></div>
-        <div class="rev-box"><div class="rv-num" id="revSuccess">—</div><div class="rv-lbl">Success Rate</div></div>
-      </div>
-
-      <div class="card">
-        <div class="table-toolbar">
-          <input type="text" class="search-input" id="paySearch" placeholder="Search by user or transaction ID…" />
-          <select class="filter-select" id="payStatusFilter">
-            <option value="">All Status</option>
-            <option value="success">Success</option>
-            <option value="failed">Failed</option>
-            <option value="pending">Pending</option>
-          </select>
-          <span class="table-count" id="payCount"></span>
-        </div>
-        <div class="table-wrap">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Transaction ID</th>
-                <th>User</th>
-                <th>Email</th>
-                <th>Plan</th>
-                <th>Amount</th>
-                <th>Date</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="paymentsTbody">
-              <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted);">Loading…</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
   </div>
+</div>
 
-  <footer>
-    PDF Suite Admin Panel &nbsp;·&nbsp;
-    <a href="/">Back to Tool</a> &nbsp;·&nbsp;
-    <a href="/plans">Plans</a>
-  </footer>
+<!-- User Modal -->
+<div class="modal-bd" id="userModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modalTitle">Add New User</h3>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editUserId" />
+      <div class="form-grid-2">
+        <div class="field"><label>Full Name</label><input type="text" id="fName" placeholder="e.g. Rahul Sharma" /></div>
+        <div class="field"><label>Email Address <span style="color:var(--red)">*</span></label><input type="email" id="fEmail" placeholder="user@example.com" /></div>
+      </div>
+      <div class="form-grid-2">
+        <div class="field"><label id="pwdLabel">Password <span style="color:var(--red)">*</span></label><input type="password" id="fPassword" placeholder="Min 6 characters" /></div>
+        <div class="field"><label>Notes (internal)</label><input type="text" id="fNotes" placeholder="Optional admin note" /></div>
+      </div>
+      <div class="err" id="modalErr"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" style="background:var(--bg);border:1px solid var(--border);color:var(--muted);" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="modalSaveBtn" onclick="saveUser()">Save User</button>
+    </div>
+  </div>
+</div>
 
-  <script>
-    // ── Tab switching ──────────────────────────────────
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById('pane-' + btn.dataset.tab).classList.add('active');
-      });
+<!-- Confirm Modal -->
+<div class="modal-bd" id="confirmModal">
+  <div class="modal" style="max-width:380px;">
+    <div class="modal-head"><h3>Confirm</h3><button class="modal-close" onclick="closeConfirm()">×</button></div>
+    <div class="modal-body"><p id="confirmMsg" style="color:var(--muted);font-size:13px;"></p></div>
+    <div class="modal-footer">
+      <button class="btn" style="background:var(--bg);border:1px solid var(--border);color:var(--muted);" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger" id="confirmOkBtn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+let me = null, allUsers = [], currentScreen = 'dashboard';
+
+(async () => {
+  try {
+    const r = await fetch('/api/auth/me', { credentials: 'same-origin' });
+    if (!r.ok) return (window.location.href = '/login?next=/admin');
+    me = (await r.json()).user;
+    if (me.role !== 'admin' && !me.viewingAs) return (window.location.href = '/tool');
+    document.getElementById('sbAdminName').textContent = me.name || me.email;
+    if (me.viewingAs) document.getElementById('impersonationBar').classList.add('visible');
+    loadDashboard();
+    // Pre-load lead badge count
+    fetch('/api/admin/leads', { credentials: 'same-origin' })
+      .then(r => r.json()).then(list => {
+        const n = list.filter(l => l.status === 'new').length;
+        const b = document.getElementById('leadsBadge');
+        if (n > 0) { b.textContent = n; b.style.display = ''; }
+      }).catch(() => {});
+  } catch { window.location.href = '/login?next=/admin'; }
+})();
+
+function showScreen(name) {
+  currentScreen = name;
+  ['dashboard','users','leads'].forEach(n => {
+    document.getElementById('screen' + n.charAt(0).toUpperCase() + n.slice(1)).classList.remove('active');
+    const btn = document.getElementById('nav' + n.charAt(0).toUpperCase() + n.slice(1));
+    if (btn) btn.classList.remove('active');
+  });
+  document.getElementById('screen' + name.charAt(0).toUpperCase() + name.slice(1)).classList.add('active');
+  const btn = document.getElementById('nav' + name.charAt(0).toUpperCase() + name.slice(1));
+  if (btn) btn.classList.add('active');
+  document.getElementById('topbarTitle').textContent = { dashboard: 'Dashboard', users: 'User Management', leads: 'Contact Leads' }[name] || name;
+  if (name === 'dashboard') loadDashboard();
+  if (name === 'users')     loadUsers();
+  if (name === 'leads')     loadLeads();
+}
+function loadCurrentScreen() { showScreen(currentScreen); }
+
+async function loadDashboard() {
+  try {
+    const res = await fetch('/api/admin/stats', { credentials: 'same-origin' });
+    const d   = await res.json();
+    ['Total','Active','Online','Uploads'].forEach(k => {
+      const el = document.getElementById('st' + k);
+      if (el) el.textContent = d[k.toLowerCase()] ?? '—';
     });
-
-    // ── Helpers ───────────────────────────────────────
-    function fmt(n) { return Number(n).toLocaleString('en-IN'); }
-    function fmtRupee(n) { return '₹' + Number(n).toLocaleString('en-IN'); }
-    function planBadge(plan) {
-      if (plan === 'business')      return `<span class="badge badge-biz">Business</span>`;
-      if (plan === 'professional')  return `<span class="badge badge-pro">Professional</span>`;
-      return                                `<span class="badge badge-free">Starter</span>`;
-    }
-    function statusBadge(status) {
-      if (status === 'active')   return `<span class="badge badge-active">Active</span>`;
-      if (status === 'inactive') return `<span class="badge badge-inactive">Inactive</span>`;
-      return `<span class="badge badge-inactive">${esc(status)}</span>`;
-    }
-    function payStatusBadge(status) {
-      if (status === 'success') return `<span class="badge badge-success">Success</span>`;
-      if (status === 'failed')  return `<span class="badge badge-failed">Failed</span>`;
-      return                           `<span class="badge badge-pending">Pending</span>`;
-    }
-    function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-    function fmtDate(d) {
-      const dt = new Date(d);
-      return dt.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
-    }
-
-    // ── Load data ────────────────────────────────────
-    let allUsers    = [];
-    let allPayments = [];
-
-    document.getElementById('refreshTime').textContent = 'Last refreshed: ' + new Date().toLocaleTimeString('en-IN');
-
-    Promise.all([
-      fetch('/api/admin/stats').then(r => r.json()),
-      fetch('/api/admin/users').then(r => r.json()),
-      fetch('/api/admin/payments').then(r => r.json()),
-    ]).then(([stats, users, payments]) => {
-      allUsers    = users;
-      allPayments = payments;
-      renderStats(stats);
-      renderPlanDist(stats.planDistribution, stats.totalUsers);
-      renderRecentActivity(users, payments);
-      renderRecentUsers(users.slice(0, 8));
-      renderUsersTable(users);
-      renderPaymentsTable(payments);
-      renderRevSummary(payments);
-    }).catch(err => {
-      console.error('Admin data error:', err);
-    });
-
-    // ── Stats ────────────────────────────────────────
-    function renderStats(stats) {
-      document.getElementById('statUsers').textContent       = fmt(stats.totalUsers);
-      document.getElementById('statUsersNew').textContent    = `+${stats.newUsersThisMonth} this month`;
-      document.getElementById('statSubs').textContent        = fmt(stats.activeSubscriptions);
-      document.getElementById('statSubsPct').textContent     = `${Math.round(stats.activeSubscriptions/stats.totalUsers*100)}% of total users`;
-      document.getElementById('statRevenue').textContent     = fmtRupee(stats.monthlyRevenue);
-      document.getElementById('statRevenueGrowth').textContent = `+${stats.revenueGrowth}% vs last month`;
-      document.getElementById('statUploads').textContent     = fmt(stats.totalUploads);
-      document.getElementById('statUploadsMonth').textContent= `${fmt(stats.monthlyUploads)} this month`;
-    }
-
-    // ── Plan distribution ─────────────────────────────
-    function renderPlanDist(dist, total) {
-      const freeP  = Math.round(dist.free / total * 100);
-      const proP   = Math.round(dist.professional / total * 100);
-      const bizP   = Math.round(dist.business / total * 100);
-      document.getElementById('planDist').innerHTML = `
-        <div class="dist-row">
-          <div class="dist-label"><span class="dist-name">Starter (Free)</span><span class="dist-count">${dist.free} users &nbsp;·&nbsp; ${freeP}%</span></div>
-          <div class="dist-bar-bg"><div class="dist-bar free" style="width:${freeP}%"></div></div>
+    const act = document.getElementById('recentActivity');
+    if (!d.recent?.length) { act.innerHTML = '<p style="color:var(--muted);font-size:12px;">No recent logins.</p>'; return; }
+    act.innerHTML = d.recent.map(u => `
+      <div class="activity-item">
+        <div class="activity-dot"></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(u.name || u.email)}</div>
+          <div style="font-size:11px;color:var(--muted);">${esc(u.email)}</div>
         </div>
-        <div class="dist-row">
-          <div class="dist-label"><span class="dist-name">Professional</span><span class="dist-count">${dist.professional} users &nbsp;·&nbsp; ${proP}%</span></div>
-          <div class="dist-bar-bg"><div class="dist-bar pro" style="width:${proP}%"></div></div>
+        <div style="font-size:11px;color:var(--muted);flex-shrink:0;">${fmtDate(u.lastLoginAt)}</div>
+      </div>`).join('');
+  } catch { toast('Failed to load stats', 'error'); }
+}
+
+async function loadUsers() {
+  document.getElementById('usersBody').innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted);">Loading…</td></tr>`;
+  try {
+    const res = await fetch('/api/admin/users', { credentials: 'same-origin' });
+    allUsers = await res.json();
+    renderUsers(allUsers);
+  } catch { toast('Failed to load users', 'error'); }
+}
+
+function filterUsers() {
+  const q = (document.getElementById('userSearch').value || '').toLowerCase();
+  renderUsers(q ? allUsers.filter(u => (u.name||'').toLowerCase().includes(q) || u.email.toLowerCase().includes(q)) : allUsers);
+}
+
+function renderUsers(list) {
+  const tbody = document.getElementById('usersBody');
+  if (!list.length) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted);">No users found.</td></tr>`; return; }
+  tbody.innerHTML = list.map(u => {
+    const isOnline  = !!u.sessionToken;
+    const isAdmin   = u.role === 'admin';
+    const isSelf    = u._id === me?._id;
+    const statusBadge = u.active
+      ? `<span class="badge active">${isOnline ? '🟢 Online' : '✓ Active'}</span>`
+      : `<span class="badge disabled">⛔ Disabled</span>`;
+    return `<tr${isSelf ? ' style="background:#fefce8;"' : ''}>
+      <td>
+        <div style="font-weight:600;">${esc(u.name||'—')}</div>
+        <div style="font-size:11px;color:var(--muted);">${esc(u.email)}</div>
+        ${u.notes ? `<div style="font-size:10px;color:var(--amber);margin-top:1px;">📝 ${esc(u.notes)}</div>` : ''}
+      </td>
+      <td><span class="badge ${u.role}">${u.role}</span></td>
+      <td>${statusBadge}</td>
+      <td>${u.uploadCount||0}</td>
+      <td style="font-size:12px;color:var(--muted);">${u.lastLoginAt?fmtDate(u.lastLoginAt):'—'}</td>
+      <td>
+        <div class="tbl-actions">
+          <button class="tbl-btn blue" onclick='openEditUser(${JSON.stringify(u)})'>Edit</button>
+          ${!isAdmin?`<button class="tbl-btn amber" onclick="impersonateUser('${u._id}')">Login As</button>`:''}
+          ${isOnline&&!isSelf?`<button class="tbl-btn amber" onclick="doForceLogout('${u._id}','${esc(u.name||u.email)}')">Kick</button>`:''}
+          ${!isAdmin&&!isSelf?`
+            <button class="tbl-btn ${u.active?'red':'green'}" onclick="toggleUser('${u._id}','${esc(u.name||u.email)}',${u.active})">
+              ${u.active?'Disable':'Enable'}</button>
+            <button class="tbl-btn red" onclick="confirmDelete('${u._id}','${esc(u.name||u.email)}')">Delete</button>
+          `:''}
         </div>
-        <div class="dist-row">
-          <div class="dist-label"><span class="dist-name">Business</span><span class="dist-count">${dist.business} users &nbsp;·&nbsp; ${bizP}%</span></div>
-          <div class="dist-bar-bg"><div class="dist-bar biz" style="width:${bizP}%"></div></div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function openAddUser() {
+  ['editUserId','fName','fEmail','fPassword','fNotes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('modalTitle').textContent = 'Add New Customer';
+  document.getElementById('pwdLabel').innerHTML = 'Password <span style="color:var(--red)">*</span>';
+  document.getElementById('fEmail').disabled = false;
+  document.getElementById('modalErr').textContent = '';
+  document.getElementById('userModal').classList.add('open');
+  setTimeout(() => document.getElementById('fName').focus(), 60);
+}
+
+function openEditUser(u) {
+  document.getElementById('editUserId').value = u._id;
+  document.getElementById('fName').value    = u.name || '';
+  document.getElementById('fEmail').value   = u.email;
+  document.getElementById('fPassword').value = '';
+  document.getElementById('fNotes').value   = u.notes || '';
+  document.getElementById('modalTitle').textContent = 'Edit User';
+  document.getElementById('pwdLabel').innerHTML = 'New Password <span style="color:var(--muted);font-weight:400;">(leave blank to keep)</span>';
+  document.getElementById('fEmail').disabled = false;
+  document.getElementById('modalErr').textContent = '';
+  document.getElementById('userModal').classList.add('open');
+  setTimeout(() => document.getElementById('fName').focus(), 60);
+}
+
+function closeModal() { document.getElementById('userModal').classList.remove('open'); }
+
+async function saveUser() {
+  const id   = document.getElementById('editUserId').value;
+  const name = document.getElementById('fName').value.trim();
+  const email= document.getElementById('fEmail').value.trim();
+  const pwd  = document.getElementById('fPassword').value;
+  const notes= document.getElementById('fNotes').value.trim();
+  const errEl= document.getElementById('modalErr');
+  errEl.textContent = '';
+
+  if (!id && !email)    { errEl.textContent = 'Email is required.'; return; }
+  if (!id && !pwd)      { errEl.textContent = 'Password is required for new users.'; return; }
+  if (email && !email.includes('@')) { errEl.textContent = 'Enter a valid email.'; return; }
+  if (!id && pwd.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
+
+  const btn = document.getElementById('modalSaveBtn');
+  btn.disabled = true; btn.innerHTML = '<div class="spin"></div> Saving…';
+
+  try {
+    const body = { name, notes };
+    if (email) body.email    = email;
+    if (pwd)   body.password = pwd;
+    const url = id ? `/api/admin/users/${id}` : '/api/admin/users';
+    const method = id ? 'PATCH' : 'POST';
+    if (!id) { body.email = email; body.password = pwd; }
+    const res  = await fetch(url, { method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(body), credentials: 'same-origin' });
+    const data = await res.json();
+    if (!res.ok) { errEl.textContent = data.error || 'Failed.'; return; }
+    closeModal(); toast(id ? 'User updated ✓' : 'User created ✓', 'success'); loadUsers();
+  } catch { errEl.textContent = 'Network error.'; }
+  finally { btn.disabled = false; btn.textContent = 'Save User'; }
+}
+
+async function toggleUser(id, name, active) {
+  if (!confirm(`${active?'Disable':'Enable'} account for "${name}"?`)) return;
+  const res  = await fetch(`/api/admin/users/${id}/toggle`, { method: 'POST', credentials: 'same-origin' });
+  const data = await res.json();
+  if (!res.ok) { toast(data.error||'Failed','error'); return; }
+  toast(`User ${data.active?'enabled':'disabled'} ✓`, 'success'); loadUsers();
+}
+
+function confirmDelete(id, name) {
+  document.getElementById('confirmMsg').textContent = `Delete "${name}"? This cannot be undone.`;
+  document.getElementById('confirmOkBtn').onclick = async () => {
+    closeConfirm();
+    const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE', credentials: 'same-origin' });
+    const d   = await res.json();
+    if (!res.ok) { toast(d.error||'Failed','error'); return; }
+    toast('User deleted ✓','success'); loadUsers();
+  };
+  document.getElementById('confirmModal').classList.add('open');
+}
+function closeConfirm() { document.getElementById('confirmModal').classList.remove('open'); }
+
+async function doForceLogout(id, name) {
+  if (!confirm(`Force logout "${name}"?`)) return;
+  const res = await fetch(`/api/admin/users/${id}/force-logout`, { method: 'POST', credentials: 'same-origin' });
+  if (res.ok) { toast('Session ended ✓','success'); loadUsers(); }
+  else toast('Failed','error');
+}
+
+async function impersonateUser(id) {
+  if (!confirm('Open the tool as this user? Your admin session will resume when you exit.')) return;
+  const res  = await fetch(`/api/auth/impersonate/${id}`, { method: 'POST', credentials: 'same-origin' });
+  const data = await res.json();
+  if (!res.ok) { toast(data.error||'Failed','error'); return; }
+  window.location.href = data.redirect || '/tool';
+}
+
+async function exitImpersonate() {
+  const res  = await fetch('/api/auth/exit-impersonate', { method: 'POST', credentials: 'same-origin' });
+  const data = await res.json();
+  if (res.ok) window.location.href = data.redirect || '/admin';
+  else toast(data.error||'Failed','error');
+}
+
+async function doLogout() {
+  await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
+  window.location.href = '/login';
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtDate(iso) { if (!iso) return '—'; try { return new Date(iso).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}); } catch { return iso; } }
+
+let _tt;
+function toast(msg, type='') {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = `show${type?' '+type:''}`;
+  clearTimeout(_tt); _tt = setTimeout(() => el.className='', 3500);
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeConfirm(); closeLeadDetail(); } });
+
+// ── Leads ─────────────────────────────────────────────────────────────────────
+let allLeads = [], currentLead = null;
+
+async function loadLeads() {
+  document.getElementById('leadsBody').innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted);">Loading…</td></tr>`;
+  try {
+    const res  = await fetch('/api/admin/leads', { credentials: 'same-origin' });
+    allLeads   = await res.json();
+    renderLeads(allLeads);
+    // Badge: count new leads
+    const newCount = allLeads.filter(l => l.status === 'new').length;
+    const badge    = document.getElementById('leadsBadge');
+    if (newCount > 0) { badge.textContent = newCount; badge.style.display = ''; }
+    else badge.style.display = 'none';
+  } catch { toast('Failed to load leads', 'error'); }
+}
+
+function filterLeads() {
+  const v = document.getElementById('leadFilter').value;
+  renderLeads(v === 'all' ? allLeads : allLeads.filter(l => l.status === v));
+}
+
+const STATUS_LABELS = { new: '🟡 New', contacted: '🟢 Contacted', closed: '⚫ Closed' };
+const STATUS_COLORS = { new: 'color:#d97706;', contacted: 'color:#059669;', closed: 'color:#475569;' };
+
+function renderLeads(list) {
+  const tbody = document.getElementById('leadsBody');
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted);">No leads found.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(l => `
+    <tr style="cursor:pointer;" onclick='openLeadDetail(${JSON.stringify(l)})'>
+      <td><strong>${esc(l.name)}</strong></td>
+      <td style="font-size:12px;">${esc(l.email)}</td>
+      <td style="font-size:12px;color:var(--muted);">${esc(l.biz||'—')}</td>
+      <td style="font-size:12px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted);">${esc(l.message)}</td>
+      <td style="font-size:11px;color:var(--muted);white-space:nowrap;">${fmtDate(l.createdAt)}</td>
+      <td><span style="font-size:12px;font-weight:600;${STATUS_COLORS[l.status]||''}">${STATUS_LABELS[l.status]||l.status}</span></td>
+      <td>
+        <div class="tbl-actions">
+          <button class="tbl-btn blue" onclick='event.stopPropagation();openLeadDetail(${JSON.stringify(l)})'>View</button>
+          <button class="tbl-btn red"  onclick='event.stopPropagation();deleteLeadById("${l._id}")'>Delete</button>
         </div>
-        <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);font-size:13px;color:var(--text-2);">
-          <strong>Total MRR:</strong> ${fmtRupee(dist.professional * 999 + dist.business * 2999)}
-        </div>`;
-    }
+      </td>
+    </tr>`).join('');
+}
 
-    // ── Recent activity ───────────────────────────────
-    function renderRecentActivity(users, payments) {
-      const events = [];
-      users.slice(0,4).forEach(u => {
-        events.push({ type:'signup', text:`<strong>${esc(u.name)}</strong> signed up on ${planBadge(u.plan)}`, time: u.joined, dot:'dot-blue' });
-      });
-      payments.slice(0,4).forEach(p => {
-        if (p.status === 'success') {
-          events.push({ type:'payment', text:`<strong>${esc(p.user)}</strong> paid ${fmtRupee(p.amount)} for ${esc(p.plan)}`, time: p.date, dot:'dot-green' });
-        }
-      });
-      events.sort((a,b) => new Date(b.time) - new Date(a.time));
-      document.getElementById('recentActivity').innerHTML = events.slice(0,8).map(e => `
-        <div class="activity-item">
-          <div class="activity-dot ${e.dot}"></div>
-          <div class="activity-text">${e.text}</div>
-          <div class="activity-time">${fmtDate(e.time)}</div>
-        </div>`).join('');
-    }
+function openLeadDetail(l) {
+  currentLead = l;
+  document.getElementById('ldName').textContent    = l.name;
+  document.getElementById('ldEmail').textContent   = l.email;
+  document.getElementById('ldBiz').textContent     = l.biz || '—';
+  document.getElementById('ldMsg').textContent     = l.message;
+  document.getElementById('ldStatus').value        = l.status || 'new';
+  document.getElementById('ldNotes').value         = l.notes  || '';
+  const detail = document.getElementById('leadDetail');
+  detail.style.display = 'block';
+  detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
 
-    // ── Recent users (overview tab) ───────────────────
-    function renderRecentUsers(users) {
-      document.getElementById('recentUsersTbody').innerHTML = users.map(u => `
-        <tr>
-          <td class="td-main">${esc(u.name)}</td>
-          <td>${esc(u.email)}</td>
-          <td>${planBadge(u.plan)}</td>
-          <td>${fmtDate(u.joined)}</td>
-          <td>${statusBadge(u.status)}</td>
-        </tr>`).join('');
-    }
+function closeLeadDetail() {
+  document.getElementById('leadDetail').style.display = 'none';
+  currentLead = null;
+}
 
-    // ── Users table ───────────────────────────────────
-    function renderUsersTable(users) {
-      document.getElementById('userCount').textContent = `${users.length} users`;
-      document.getElementById('usersTbody').innerHTML = users.map((u,i) => `
-        <tr>
-          <td style="color:var(--muted)">${i+1}</td>
-          <td class="td-main">${esc(u.name)}</td>
-          <td>${esc(u.email)}</td>
-          <td>${planBadge(u.plan)}</td>
-          <td>${fmtDate(u.joined)}</td>
-          <td>${fmtDate(u.lastActive)}</td>
-          <td style="font-weight:600;color:var(--text)">${fmt(u.uploads)}</td>
-          <td>${statusBadge(u.status)}</td>
-        </tr>`).join('');
-    }
+async function saveLead() {
+  if (!currentLead) return;
+  const status = document.getElementById('ldStatus').value;
+  const notes  = document.getElementById('ldNotes').value.trim();
+  const res    = await fetch(`/api/admin/leads/${currentLead._id}`, {
+    method: 'PATCH', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ status, notes }), credentials: 'same-origin',
+  });
+  if (res.ok) { toast('Lead updated ✓', 'success'); closeLeadDetail(); loadLeads(); }
+  else toast('Failed to update lead', 'error');
+}
 
-    // ── Payments table ────────────────────────────────
-    function renderPaymentsTable(payments) {
-      document.getElementById('payCount').textContent = `${payments.length} transactions`;
-      document.getElementById('paymentsTbody').innerHTML = payments.map(p => `
-        <tr>
-          <td style="font-family:monospace;font-size:12px;color:var(--muted)">${esc(p.id)}</td>
-          <td class="td-main">${esc(p.user)}</td>
-          <td>${esc(p.email)}</td>
-          <td>${planBadge(p.plan.toLowerCase())}</td>
-          <td style="font-weight:600;color:var(--text)">${fmtRupee(p.amount)}</td>
-          <td>${fmtDate(p.date)}</td>
-          <td>${payStatusBadge(p.status)}</td>
-        </tr>`).join('');
-    }
+async function deleteLead() {
+  if (!currentLead) return;
+  if (!confirm(`Delete lead from "${currentLead.name}"?`)) return;
+  await deleteLeadById(currentLead._id);
+  closeLeadDetail();
+}
 
-    // ── Revenue summary ───────────────────────────────
-    function renderRevSummary(payments) {
-      const success = payments.filter(p => p.status === 'success');
-      const total   = success.reduce((s,p) => s + p.amount, 0);
-      const thisMonth = success.filter(p => p.date.startsWith('2025-05')).reduce((s,p) => s + p.amount, 0);
-      const successRate = Math.round(success.length / payments.length * 100);
-      document.getElementById('revTotal').textContent   = fmtRupee(total);
-      document.getElementById('revMonth').textContent   = fmtRupee(thisMonth);
-      document.getElementById('revSuccess').textContent = successRate + '%';
-    }
-
-    // ── Search & filter ───────────────────────────────
-    document.getElementById('userSearch').addEventListener('input', filterUsers);
-    document.getElementById('userPlanFilter').addEventListener('change', filterUsers);
-    document.getElementById('userStatusFilter').addEventListener('change', filterUsers);
-
-    function filterUsers() {
-      const q      = document.getElementById('userSearch').value.toLowerCase();
-      const plan   = document.getElementById('userPlanFilter').value;
-      const status = document.getElementById('userStatusFilter').value;
-      const filtered = allUsers.filter(u => {
-        const matchQ = !q || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
-        const matchP = !plan || u.plan === plan;
-        const matchS = !status || u.status === status;
-        return matchQ && matchP && matchS;
-      });
-      renderUsersTable(filtered);
-    }
-
-    document.getElementById('paySearch').addEventListener('input', filterPayments);
-    document.getElementById('payStatusFilter').addEventListener('change', filterPayments);
-
-    function filterPayments() {
-      const q      = document.getElementById('paySearch').value.toLowerCase();
-      const status = document.getElementById('payStatusFilter').value;
-      const filtered = allPayments.filter(p => {
-        const matchQ = !q || p.user.toLowerCase().includes(q) || p.id.toLowerCase().includes(q) || p.email.toLowerCase().includes(q);
-        const matchS = !status || p.status === status;
-        return matchQ && matchS;
-      });
-      renderPaymentsTable(filtered);
-      document.getElementById('payCount').textContent = `${filtered.length} transactions`;
-    }
-  </script>
+async function deleteLeadById(id) {
+  if (!confirm('Delete this lead?')) return;
+  const res = await fetch(`/api/admin/leads/${id}`, { method: 'DELETE', credentials: 'same-origin' });
+  if (res.ok) { toast('Lead deleted ✓', 'success'); loadLeads(); }
+  else toast('Failed to delete', 'error');
+}
+</script>
 </body>
 </html>
