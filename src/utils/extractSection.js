@@ -206,15 +206,23 @@ function extractQty(productDetailsText) {
 function extractOrderNo(text) {
   if (!text || typeof text !== 'string') return '';
 
-  // Explicit label: Order No / Order ID / Order # / Order Number
-  const m1 = /\bOrder\s*(?:No\.?|ID|Number|#)\s*[:\-]?\s*([A-Z0-9][A-Z0-9\-\/]{4,19})/i.exec(text);
+  // ── Strategy 1: Meesho 18-digit order number with suborder suffix ─────────
+  // Format: 14-20 digits + underscore + digit(s) e.g. 287885513376041792_1
+  // No \b — PDF text sometimes merges tokens (e.g. "Brown287885513376041792_1").
+  const m0 = /(\d{14,20}_\d+)/.exec(text);
+  if (m0) return m0[1].trim();
+
+  // ── Strategy 2: Explicit "Purchase Order No." or "Order No." label ────────
+  // Handles TAX INVOICE format: "Purchase Order No. 289919749289315136"
+  // Uses a stricter char class to avoid grabbing nearby column headers.
+  const m1 = /\bOrder\s*(?:No\.?|ID|Number|#)\s*[:\-]?\s*(\d{6,20})\b/i.exec(text);
   if (m1) return m1[1].trim();
 
-  // Sub Order label
+  // ── Strategy 3: Sub Order label ──────────────────────────────────────────
   const m2 = /\bSub[\s\-]*Order\s*(?:No\.?|ID|#)?\s*[:\-]?\s*([A-Z0-9][A-Z0-9\-\/]{4,19})/i.exec(text);
   if (m2) return m2[1].trim();
 
-  // Meesho 12-digit order numbers (start with 4)
+  // ── Strategy 4: Meesho 12-digit order numbers (start with 4) ─────────────
   const m3 = /\b(4\d{11})\b/.exec(text);
   if (m3) return m3[1];
 
@@ -259,50 +267,109 @@ function extractAWB(text) {
   const labeled = /\b(?:AWB|Tracking|Track)\s*(?:No\.?|Number|ID|#)?\s*[:\-]?\s*([A-Z0-9][A-Z0-9\-]{7,24})/i.exec(text);
   if (labeled) return labeled[1].trim();
 
-  // Shadowfax pattern: SF + digits + FPL (e.g. SF3423634993FPL)
-  const sf = /\b(SF[0-9A-Z]{8,18}FPL)\b/i.exec(text);
+  // Shadowfax: SF + digits + known suffix (FPL for regular, MEO for exchange orders)
+  const sf = /\b(SF[0-9A-Z]{8,18}(?:FPL|MEO))\b/i.exec(text);
   if (sf) return sf[1].trim();
+
+  // Valmo: VL + digits (e.g. VL0084379313674)
+  const valmo = /\b(VL[0-9]{10,16})\b/i.exec(text);
+  if (valmo) return valmo[1].trim();
 
   // Common alphanumeric tracking: 2-4 uppercase letters + 8-16 digits + optional 0-3 letters
   const generic = /\b([A-Z]{2,4}[0-9]{8,16}[A-Z]{0,3})\b/.exec(text);
   if (generic) return generic[1].trim();
 
+  // Pure-numeric tracking (Delhivery): 13-17 digit number that follows "Return Code" context
+  const delhivery = /Return\s*Code[\s\S]{1,60}\n\s*(\d{13,17})\s*(?:\n|$)/i.exec(text);
+  if (delhivery) return delhivery[1].trim();
+
   return '';
 }
 
 /**
- * Extracts SKU / product variant from the product details section.
- * Handles: explicit "SKU:" label, table header "SKU" column, or first short code.
+ * Extracts SKU from the product details section.
  *
- * @param {string} productDetailsText - Product details section text
- * @param {string} fullPageText - Full page text fallback
+ * PDF text extraction merges all table cells without spaces:
+ *   "646_Brown&GreyM1Brown287885513376041792_1"
+ *   "646 black brownS1Black289919749289315136_1"
+ *   "646_Brown&Grey30A1Brown286362706780018560_1"
+ *
+ * Row structure (right to left):
+ *   [SKU][Size][Qty 1-2 digits][Color word][OrderNo 14-20digits_N]
+ *
+ * Strategy: anchor on the order number, then strip [Color][Qty][Size] from the
+ * right side — whatever remains is the SKU.
+ *
+ * @param {string} productDetailsText
+ * @param {string} fullPageText
  * @returns {string}
+ */
+// Known Meesho size codes, longest first so we match "XXL" before "L".
+const MEESHO_SIZES = [
+  'XXXXL','XXXL','4XL','3XL','2XL','XXL','XL','XS',
+  '40D','40C','40B','40A','38D','38C','38B','38A',
+  '36D','36C','36B','36A','34D','34C','34B','34A',
+  '32D','32C','32B','32A','30D','30C','30B','30A',
+  '28D','28C','28B','28A','26D','26C','26B','26A',
+  '46','44','42','40','38','36','34','32','30','28','26',
+  '16','14','12','10','8','6','4','2',
+  'L','M','S',
+];
+
+/**
+ * Extracts SKU from the product details section.
+ *
+ * PDF text extraction concatenates table cells without spaces:
+ *   "646_Brown&GreyM1Brown287885513376041792_1"
+ *   "646 black brownS1Black289919749289315136_1"
+ *   "646_Brown&Grey30A1Brown286362706780018560_1"
+ *
+ * Row structure (right-to-left):
+ *   [SKU][Size][Qty 1-2 digits][Color pure-letters][OrderNo 14-20digits_N]
+ *
+ * We strip each field off the right side in order.
  */
 function extractSKU(productDetailsText, fullPageText) {
   const src = productDetailsText || fullPageText || '';
   if (!src) return '';
 
-  // Explicit label: "SKU: 646 black brown" or "SKU 646BLK"
-  const labelMatch = /\bSKU\s*[:\-]?\s*([A-Z0-9][^\n,;|]{1,40})/i.exec(src);
-  if (labelMatch) {
-    return labelMatch[1].trim().slice(0, 50);
+  // ── Strategy 1: anchor on order number, peel off fields right-to-left ───
+  const lines = src.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+
+  for (const line of lines) {
+    const orderNoIdx = line.search(/\d{14,20}_\d+/);
+    if (orderNoIdx === -1) continue;
+
+    // Everything before the order number: [SKU][Size][Qty][Color]
+    let s = line.slice(0, orderNoIdx).trimEnd();
+
+    // 1. Strip color — trailing sequence of only letters (stops at digit/special char)
+    s = s.replace(/[A-Za-z]+$/, '').trimEnd();
+
+    // 2. Strip qty — trailing 1-2 digits
+    s = s.replace(/\d{1,2}$/, '').trimEnd();
+
+    // 3. Strip size — match against known size list (longest first to avoid
+    //    accidentally matching a single letter that's part of the SKU name)
+    const sUpper = s.toUpperCase();
+    for (const size of MEESHO_SIZES) {
+      if (sUpper.endsWith(size)) {
+        const candidate = s.slice(0, s.length - size.length).trimEnd();
+        if (candidate.length >= 2) { s = candidate; break; }
+      }
+    }
+
+    // 4. Strip merged header prefix if present
+    //    "SKUSizeQtyColorOrder No.646_Brown&Grey" → "646_Brown&Grey"
+    s = s.replace(/^[\s\S]*?Order\s*No\.?\s*/i, '').trim();
+    s = s.replace(/^SKU\s*/i, '').trim();
+
+    if (s) return s.slice(0, 60);
   }
 
-  // Table header: "SKU" on a header row, value on next data row at same column position
-  const lines = src.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-  const hIdx  = lines.findIndex(l => /\bSKU\b/i.test(l));
-  if (hIdx !== -1 && hIdx + 1 < lines.length) {
-    const headerTokens = lines[hIdx].split(/\s+/);
-    const dataTokens   = lines[hIdx + 1].split(/\s+/);
-    const col = headerTokens.findIndex(t => /^SKU$/i.test(t));
-    if (col !== -1 && col < dataTokens.length) {
-      return dataTokens[col].trim();
-    }
-    // If data row exists, return first non-trivial token as likely SKU code
-    if (dataTokens.length > 0 && dataTokens[0].length >= 2) {
-      return dataTokens[0].trim().slice(0, 50);
-    }
-  }
+  // ── Strategy 2: explicit "SKU:" label ────────────────────────────────────
+  const labelMatch = /\bSKU\s*[:\-]\s*([^\n,;|]{1,40})/i.exec(src);
+  if (labelMatch) return labelMatch[1].trim().slice(0, 50);
 
   return '';
 }

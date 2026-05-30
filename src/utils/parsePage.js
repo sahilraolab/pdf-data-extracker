@@ -18,12 +18,15 @@ function parsePage(pageText, pageNumber) {
   }
 
   // Extract "Customer Address" section
-  // Ends at "If undelivered" or related variants
-  const customerAddress = extractSection(
+  // Ends at "If undelivered" or related variants.
+  // For exchange orders the word "Exchange" can appear as a section header between
+  // the address and "If undelivered" — strip it from the end if present.
+  const customerAddressRaw = extractSection(
     pageText,
     ['Customer Address', 'Customer  Address', 'CUSTOMER ADDRESS'],
     ['If undelivered', 'If Un-delivered', 'If  undelivered', 'BILL TO', 'Bill To']
   );
+  const customerAddress = customerAddressRaw.replace(/\n?Exchange\s*$/i, '').trim();
 
   // Extract "BILL TO / SHIP TO" section
   // Ends at "Sold by" or related variants

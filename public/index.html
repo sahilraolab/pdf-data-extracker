@@ -615,6 +615,15 @@
   let downloadBuckets = { keyword: [], qty: [], exchange: [], unmatched: [] };
   let batchId         = null;
 
+  // ── Session persistence ────────────────────────────────────────────────────
+  const SESSION_KEY = 'pdfsuite_last_analysis';
+  function saveSession(data) {
+    try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(data)); } catch (_) {}
+  }
+  function loadSession() {
+    try { const r = sessionStorage.getItem(SESSION_KEY); return r ? JSON.parse(r) : null; } catch { return null; }
+  }
+
   const dropZone        = document.getElementById('dropZone');
   const fileInput       = document.getElementById('fileInput');
   const fileChip        = document.getElementById('fileChip');
@@ -714,6 +723,7 @@
     setLoading(true); hideError();
     resultsSection.classList.remove('visible');
     downloadSection.classList.remove('visible');
+    try { sessionStorage.removeItem(SESSION_KEY); } catch (_) {}
 
     const formData = new FormData();
     formData.append('file', file);
@@ -745,9 +755,33 @@
     exchange: downloadExchangeBtn, unmatched: downloadUnmatchedBtn,
   };
 
+  // Returns page numbers for a bucket filtered by the active delivery partner
+  function getDownloadPages(mode) {
+    const bucket = new Set(downloadBuckets[mode] || []);
+    if (activePartner === 'all') return [...bucket];
+    return allResults
+      .filter(r => bucket.has(r.pageNumber) && (r.deliveryPartner || '') === activePartner)
+      .map(r => r.pageNumber);
+  }
+
+  // Update the download button counts/disabled state based on current partner filter
+  function updateDownloadCounts() {
+    const modes = ['keyword', 'qty', 'exchange', 'unmatched'];
+    const countEls = { keyword: downloadKeywordCount, qty: downloadQtyCount, exchange: downloadExchangeCount, unmatched: downloadUnmatchedCount };
+    const btns     = { keyword: downloadKeywordBtn,   qty: downloadQtyBtn,   exchange: downloadExchangeBtn,   unmatched: downloadUnmatchedBtn };
+    modes.forEach(mode => {
+      const pages = getDownloadPages(mode);
+      countEls[mode].textContent = `${pages.length} page${pages.length !== 1 ? 's' : ''}${activePartner !== 'all' ? ' · ' + activePartner : ''}`;
+      btns[mode].disabled = pages.length === 0;
+    });
+  }
+
   async function generateAndDownload(mode) {
-    const pageNumbers = downloadBuckets[mode] || [];
-    if (pageNumbers.length === 0) { showError('No pages in this category.'); return; }
+    const pageNumbers = getDownloadPages(mode);
+    if (pageNumbers.length === 0) {
+      showError(`No pages in this category${activePartner !== 'all' ? ' for ' + activePartner : ''}.`);
+      return;
+    }
     if (!uploadId) { showError('Session expired — please re-upload and analyse the PDF again.'); return; }
 
     const btn      = BTN_MAP[mode];
@@ -796,7 +830,7 @@
     });
   }
 
-  function renderResults(data) {
+  function renderResults(data, { scroll = true } = {}) {
     allResults     = data.results || [];
     appliedFilters = data.filtersApplied || { text: false, qty: false, exchange: false };
     activeFilter   = 'all';
@@ -806,13 +840,16 @@
     batchId         = data.batchId  || null;
     downloadBuckets = data.downloadBuckets || { keyword: [], qty: [], exchange: [], unmatched: [] };
 
+    // Persist so results survive navigation
+    saveSession(data);
+
     document.querySelectorAll('.tab').forEach(t => t.className = 'tab');
     document.querySelector('[data-filter="all"]').classList.add('active-all');
 
-    const textCount  = (downloadBuckets.keyword  || []).length;
-    const qtyCount   = (downloadBuckets.qty      || []).length;
-    const exchCount  = (downloadBuckets.exchange  || []).length;
     const unmCount   = (downloadBuckets.unmatched || []).length;
+    const textCount  = (downloadBuckets.keyword   || []).length;
+    const qtyCount   = (downloadBuckets.qty       || []).length;
+    const exchCount  = (downloadBuckets.exchange   || []).length;
 
     let statsHtml = `
       <div class="stat-card s-total"><div class="stat-num">${data.totalPages}</div><div class="stat-label">Total Pages</div></div>
@@ -823,15 +860,7 @@
     if (appliedFilters.exchange) statsHtml += `<div class="stat-card s-exch"><div class="stat-num">${exchCount}</div><div class="stat-label">Exchange</div></div>`;
     statsRow.innerHTML = statsHtml;
 
-    downloadKeywordCount.textContent  = `${textCount} page${textCount !== 1 ? 's' : ''}`;
-    downloadQtyCount.textContent      = `${qtyCount} page${qtyCount !== 1 ? 's' : ''}`;
-    downloadExchangeCount.textContent = `${exchCount} page${exchCount !== 1 ? 's' : ''}`;
-    downloadUnmatchedCount.textContent= `${unmCount} page${unmCount !== 1 ? 's' : ''}`;
-
-    downloadKeywordBtn.disabled   = textCount === 0;
-    downloadQtyBtn.disabled       = qtyCount === 0;
-    downloadExchangeBtn.disabled  = exchCount === 0;
-    downloadUnmatchedBtn.disabled = unmCount === 0;
+    updateDownloadCounts();
     downloadActionsCard.style.display = 'block';
 
     // Unmatched notice
@@ -854,6 +883,7 @@
           activePartner = btn.dataset.partner;
           partnerFilterRow.querySelectorAll('.partner-btn').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
+          updateDownloadCounts();
           renderList();
         });
       });
@@ -861,16 +891,13 @@
       partnerFilterWrap.style.display = 'none';
     }
 
-    // Batch saved notice
     if (batchId) {
-      const ts = data.batchSavedAt ? new Date(data.batchSavedAt).toLocaleString() : '';
-      const scanLink = `/scan`;
-      console.log(`Batch saved: ${batchId} at ${ts}`);
+      console.log(`Batch saved: ${batchId} at ${data.batchSavedAt ? new Date(data.batchSavedAt).toLocaleString() : ''}`);
     }
 
     resultsSection.classList.add('visible');
     renderList();
-    resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (scroll) resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function renderList() {
@@ -997,6 +1024,14 @@
   function firstLine(s)   { return (s||'').split('\n')[0].trim() || '—'; }
   function esc(s)         { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   function sleep(ms)      { return new Promise(r => setTimeout(r, ms)); }
+
+  // ── Restore previous session on load ──────────────────────────────────────
+  (function restoreSession() {
+    const saved = loadSession();
+    if (saved && Array.isArray(saved.results) && saved.results.length > 0) {
+      renderResults(saved, { scroll: false });
+    }
+  })();
 </script>
 </body>
 </html>
