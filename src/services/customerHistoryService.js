@@ -117,17 +117,22 @@ function annotateAndPersistHistory(results) {
 
     const cust = customers[customerKey];
     if (cust) {
-      // Avoid duplicate order numbers
-      const isDuplicate = page.orderNo &&
-        cust.orders.some(o => o.orderNo && o.orderNo === page.orderNo);
+      const isDuplicate = cust.orders.some(o => {
+        if (page.orderNo && o.orderNo) return o.orderNo === page.orderNo;
+        if (!page.orderNo && !o.orderNo) return o.pageNumber === page.pageNumber;
+        return false;
+      });
       if (!isDuplicate) {
         cust.orders.push(orderEntry);
       }
     }
 
     // Also push to the flat orders log for daily-view queries
-    const isDuplicateFlat = page.orderNo &&
-      orders.some(o => o.orderNo === page.orderNo && o.customerKey === customerKey);
+    const isDuplicateFlat = orders.some(o => {
+      if (page.orderNo && o.orderNo) return o.orderNo === page.orderNo;
+      if (!page.orderNo && !o.orderNo) return o.customerKey === customerKey && o.pageNumber === page.pageNumber;
+      return false;
+    });
     if (!isDuplicateFlat) {
       orders.push({
         orderNo:         page.orderNo || '',
