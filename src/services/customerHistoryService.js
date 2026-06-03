@@ -2,22 +2,30 @@ const fs = require('fs');
 const path = require('path');
 const logger = require('../utils/logger');
 
-const historyDir  = path.join(__dirname, '../../data');
-const historyPath = path.join(historyDir, 'customer-history.json');
+const historyDir = path.join(__dirname, '../../data');
+
+function safeUid(userId) {
+  return String(userId || 'default').replace(/[^a-zA-Z0-9_-]/g, '_');
+}
+
+function historyPath(userId) {
+  return path.join(historyDir, `customer-history-${safeUid(userId)}.json`);
+}
 
 // ─── File I/O ──────────────────────────────────────────────────────────────────
 
-function ensureHistoryFile() {
+function ensureHistoryFile(userId) {
   if (!fs.existsSync(historyDir)) fs.mkdirSync(historyDir, { recursive: true });
-  if (!fs.existsSync(historyPath)) {
-    fs.writeFileSync(historyPath, JSON.stringify({ customers: {}, orders: [] }, null, 2), 'utf8');
+  const p = historyPath(userId);
+  if (!fs.existsSync(p)) {
+    fs.writeFileSync(p, JSON.stringify({ customers: {}, orders: [] }, null, 2), 'utf8');
   }
 }
 
-function loadStore() {
+function loadStore(userId) {
   try {
-    ensureHistoryFile();
-    const raw = fs.readFileSync(historyPath, 'utf8');
+    ensureHistoryFile(userId);
+    const raw = fs.readFileSync(historyPath(userId), 'utf8');
     const data = raw ? JSON.parse(raw) : {};
     return {
       customers: data.customers || {},
@@ -29,10 +37,10 @@ function loadStore() {
   }
 }
 
-function saveStore(store) {
+function saveStore(store, userId) {
   try {
-    ensureHistoryFile();
-    fs.writeFileSync(historyPath, JSON.stringify(store, null, 2), 'utf8');
+    ensureHistoryFile(userId);
+    fs.writeFileSync(historyPath(userId), JSON.stringify(store, null, 2), 'utf8');
   } catch (err) {
     logger.error(`Could not save customer history: ${err.message}`);
   }
@@ -62,8 +70,8 @@ function deriveCustomerKey(page) {
 
 // ─── Core: annotate results and persist ───────────────────────────────────────
 
-function annotateAndPersistHistory(results) {
-  const store = loadStore();
+function annotateAndPersistHistory(results, userId) {
+  const store = loadStore(userId);
   const { customers, orders } = store;
   const now = new Date().toISOString();
 
@@ -149,7 +157,7 @@ function annotateAndPersistHistory(results) {
     }
   }
 
-  saveStore({ customers, orders });
+  saveStore({ customers, orders }, userId);
   return buildCustomerHistorySummary(customers);
 }
 
@@ -167,21 +175,21 @@ function buildCustomerHistorySummary(customersMap) {
   };
 }
 
-function getCustomerHistory() {
-  const { customers } = loadStore();
+function getCustomerHistory(userId) {
+  const { customers } = loadStore(userId);
   return buildCustomerHistorySummary(customers);
 }
 
-function getOrdersByDate(date) {
-  const { orders } = loadStore();
+function getOrdersByDate(date, userId) {
+  const { orders } = loadStore(userId);
   if (!date) return orders.slice().sort((a, b) => new Date(b.processedAt) - new Date(a.processedAt));
   return orders
     .filter(o => o.processedAt && o.processedAt.startsWith(date))
     .sort((a, b) => new Date(b.processedAt) - new Date(a.processedAt));
 }
 
-function getAllOrders() {
-  const { orders } = loadStore();
+function getAllOrders(userId) {
+  const { orders } = loadStore(userId);
   return orders.slice().sort((a, b) => new Date(b.processedAt) - new Date(a.processedAt));
 }
 

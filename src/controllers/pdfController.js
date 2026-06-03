@@ -56,7 +56,8 @@ async function uploadAndProcess(req, res) {
       results,
     } = processPages(pageTexts, { filterText, qtyFilter, exchangeFilter });
 
-    annotateAndPersistHistory(results);
+    const userId = req.sessionUser?._id;
+    annotateAndPersistHistory(results, userId);
 
     // Derive unique delivery partners from results
     const deliveryPartners = [...new Set(
@@ -68,6 +69,7 @@ async function uploadAndProcess(req, res) {
       filename:         req.file.originalname,
       results,
       deliveryPartners,
+      userId,
     });
 
     // Cache file so download buttons work without re-uploading
@@ -175,9 +177,9 @@ async function downloadFilteredPdf(req, res) {
 
 // ─── GET /customer-history ─────────────────────────────────────────────────────
 
-async function getCustomerHistoryRoute(_req, res) {
+async function getCustomerHistoryRoute(req, res) {
   try {
-    return res.status(200).json(getCustomerHistory());
+    return res.status(200).json(getCustomerHistory(req.sessionUser?._id));
   } catch (err) {
     logger.error(`Customer history error: ${err.message}`);
     return res.status(500).json({ error: 'Unable to load customer history.' });

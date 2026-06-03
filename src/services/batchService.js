@@ -3,22 +3,30 @@ const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const logger = require('../utils/logger');
 
-const DATA_DIR   = path.join(__dirname, '../../data');
-const STORE_PATH = path.join(DATA_DIR, 'scan-batches.json');
+const DATA_DIR = path.join(__dirname, '../../data');
+
+function safeUid(userId) {
+  return String(userId || 'default').replace(/[^a-zA-Z0-9_-]/g, '_');
+}
+
+function storePath(userId) {
+  return path.join(DATA_DIR, `scan-batches-${safeUid(userId)}.json`);
+}
 
 // ── File I/O ──────────────────────────────────────────────────────────────────
 
-function ensureStore() {
+function ensureStore(userId) {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-  if (!fs.existsSync(STORE_PATH)) {
-    fs.writeFileSync(STORE_PATH, JSON.stringify({ batches: [] }, null, 2), 'utf8');
+  const p = storePath(userId);
+  if (!fs.existsSync(p)) {
+    fs.writeFileSync(p, JSON.stringify({ batches: [] }, null, 2), 'utf8');
   }
 }
 
-function loadStore() {
+function loadStore(userId) {
   try {
-    ensureStore();
-    const raw  = fs.readFileSync(STORE_PATH, 'utf8');
+    ensureStore(userId);
+    const raw  = fs.readFileSync(storePath(userId), 'utf8');
     const data = raw ? JSON.parse(raw) : {};
     return { batches: Array.isArray(data.batches) ? data.batches : [] };
   } catch (err) {
@@ -27,10 +35,10 @@ function loadStore() {
   }
 }
 
-function saveStore(store) {
+function saveStore(store, userId) {
   try {
-    ensureStore();
-    fs.writeFileSync(STORE_PATH, JSON.stringify(store, null, 2), 'utf8');
+    ensureStore(userId);
+    fs.writeFileSync(storePath(userId), JSON.stringify(store, null, 2), 'utf8');
   } catch (err) {
     logger.error(`batchService saveStore: ${err.message}`);
   }
@@ -48,8 +56,8 @@ function saveStore(store) {
  * @param {string[]} opts.deliveryPartners - Unique delivery partners found in the PDF
  * @returns {{ batchId: string, savedAt: string }}
  */
-function saveBatch({ filename, results, deliveryPartners }) {
-  const store   = loadStore();
+function saveBatch({ filename, results, deliveryPartners, userId }) {
+  const store   = loadStore(userId);
   const batchId = uuidv4();
   const savedAt = new Date().toISOString();
   const dateKey = savedAt.split('T')[0]; // YYYY-MM-DD
@@ -79,7 +87,7 @@ function saveBatch({ filename, results, deliveryPartners }) {
     orders,
   });
 
-  saveStore(store);
+  saveStore(store, userId);
   logger.info(`Batch saved: ${batchId} (${results.length} orders, ${filename})`);
   return { batchId, savedAt };
 }
@@ -93,9 +101,9 @@ function saveBatch({ filename, results, deliveryPartners }) {
  * @param {string} code - AWB number or order number from barcode scan
  * @returns {{ batchId, order, alreadyPacked } | null}
  */
-function markPacked(code) {
+function markPacked(code, userId) {
   if (!code) return null;
-  const store   = loadStore();
+  const store   = loadStore(userId);
   const today   = new Date().toISOString().split('T')[0];
 
   // Search today's batches first, then fall back to all batches
@@ -113,7 +121,7 @@ function markPacked(code) {
       const alreadyPacked = order.packedStatus === 1;
       order.packedStatus  = 1;
       order.packedAt      = new Date().toISOString();
-      saveStore(store);
+      saveStore(store, userId);
       return { batchId: batch.batchId, order: { ...order }, alreadyPacked };
     }
   }
@@ -128,9 +136,9 @@ function markPacked(code) {
  *
  * @param {string} date - YYYY-MM-DD
  */
-function getScanStats(date) {
+function getScanStats(date, userId) {
   const d     = date || new Date().toISOString().split('T')[0];
-  const store = loadStore();
+  const store = loadStore(userId);
   const batches = store.batches.filter(b => b.dateKey === d);
 
   let total = 0, packed = 0;
@@ -162,9 +170,9 @@ function getScanStats(date) {
  *
  * @param {string} date - YYYY-MM-DD
  */
-function listBatches(date) {
+function listBatches(date, userId) {
   const d     = date || new Date().toISOString().split('T')[0];
-  const store = loadStore();
+  const store = loadStore(userId);
   return store.batches
     .filter(b => b.dateKey === d)
     .map(b => ({
@@ -184,8 +192,8 @@ function listBatches(date) {
  *
  * @param {string} batchId
  */
-function getBatch(batchId) {
-  const store = loadStore();
+function getBatch(batchId, userId) {
+  const store = loadStore(userId);
   return store.batches.find(b => b.batchId === batchId) || null;
 }
 

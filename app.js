@@ -35,6 +35,10 @@ const pub  = p => path.join(__dirname, 'public', p);
 
 // ── Middleware ─────────────────────────────────────────────────────────────────
 
+// Trust the nginx reverse proxy so req.protocol returns 'https' correctly.
+// Without this, download URLs are generated as http:// causing mixed-content errors.
+app.set('trust proxy', 1);
+
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -140,9 +144,10 @@ app.delete('/api/admin/leads/:id', requireAuth, requireAdmin, async (req, res) =
 
 app.get('/api/orders', requireAuth, (req, res) => {
   try {
-    if (req.query.all === 'true') return res.json(getAllOrders());
+    const uid = req.sessionUser._id;
+    if (req.query.all === 'true') return res.json(getAllOrders(uid));
     const date = req.query.date || new Date().toISOString().split('T')[0];
-    return res.json(getOrdersByDate(date));
+    return res.json(getOrdersByDate(date, uid));
   } catch (err) {
     logger.error(`Orders API error: ${err.message}`);
     return res.status(500).json({ error: 'Unable to load orders.' });
@@ -154,7 +159,7 @@ app.get('/api/orders', requireAuth, (req, res) => {
 app.get('/api/scan/stats', requireAuth, (req, res) => {
   try {
     const date = req.query.date || new Date().toISOString().split('T')[0];
-    return res.json(getScanStats(date));
+    return res.json(getScanStats(date, req.sessionUser._id));
   } catch (err) {
     logger.error(`Scan stats error: ${err.message}`);
     return res.status(500).json({ error: 'Unable to load scan stats.' });
@@ -164,7 +169,7 @@ app.get('/api/scan/stats', requireAuth, (req, res) => {
 app.get('/api/scan/batches', requireAuth, (req, res) => {
   try {
     const date = req.query.date || new Date().toISOString().split('T')[0];
-    return res.json(listBatches(date));
+    return res.json(listBatches(date, req.sessionUser._id));
   } catch (err) {
     logger.error(`List batches error: ${err.message}`);
     return res.status(500).json({ error: 'Unable to list batches.' });
@@ -173,7 +178,7 @@ app.get('/api/scan/batches', requireAuth, (req, res) => {
 
 app.get('/api/scan/batch/:batchId', requireAuth, (req, res) => {
   try {
-    const batch = getBatch(req.params.batchId);
+    const batch = getBatch(req.params.batchId, req.sessionUser._id);
     if (!batch) return res.status(404).json({ error: 'Batch not found.' });
     return res.json(batch);
   } catch (err) {
@@ -187,7 +192,7 @@ app.post('/api/scan/mark-packed', requireAuth, (req, res) => {
   if (!code || typeof code !== 'string' || code.trim().length < 3) {
     return res.status(400).json({ error: 'code (AWB or order number) is required.' });
   }
-  const result = markPacked(code.trim());
+  const result = markPacked(code.trim(), req.sessionUser._id);
   if (!result) return res.json({ found: false, code: code.trim() });
   return res.json({ found: true, ...result });
 });
